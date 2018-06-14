@@ -15,23 +15,23 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api.rest;
 
-public class Status {
+import io.smilo.api.rest.models.Block;
+import org.springframework.web.bind.annotation.*;
 
-    private final String status;
-    private final Integer height;
+@RestController
+public class BlockController {
 
-    public Status(Integer height, String status) {
-        this.height = height;
-        this.status = status;
+    @GetMapping("/block")
+    @ResponseBody
+    public Block respondAllBlocks() {
+        return new Block(1, "All blocks!");
     }
 
-    public Integer getHeight() {
-        return height;
-    }
-
-    public String getStatus() {
-        return status;
+    @RequestMapping(path = "/block/{block}")
+    @ResponseBody
+    public Block respondBlock(@PathVariable("block") String block) {
+        return new Block(1, block);
     }
 }

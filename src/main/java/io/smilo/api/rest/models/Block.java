@@ -17,17 +17,17 @@
 
 package io.smilo.api.rest.models;
 
-public class Status {
+public class Block {
 
     private final String status;
-    private final Integer height;
+    private final int height;
 
-    public Status(Integer height, String status) {
+    public Block(int height, String status) {
         this.height = height;
         this.status = status;
     }
 
-    public Integer getHeight() {
+    public int getHeight() {
         return height;
     }
 

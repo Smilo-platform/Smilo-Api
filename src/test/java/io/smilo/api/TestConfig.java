@@ -15,23 +15,13 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api;
 
-public class Status {
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-    private final String status;
-    private final Integer height;
+@Configuration
+@Profile("test")
+public class TestConfig {
 
-    public Status(Integer height, String status) {
-        this.height = height;
-        this.status = status;
-    }
-
-    public Integer getHeight() {
-        return height;
-    }
-
-    public String getStatus() {
-        return status;
-    }
 }
