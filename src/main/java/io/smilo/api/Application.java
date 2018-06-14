@@ -26,7 +26,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
-@ComponentScan
+@ComponentScan(basePackageClasses = Application.class)
 public class Application {
 
     private final SmiloApi smiloApi;

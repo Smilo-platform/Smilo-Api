@@ -39,7 +39,7 @@ public class SmiloApi {
         // Todo: Implementation of Websocket & rest server for block explorer and wallets
 
         /*
-          * Start the core loop.
+          * Start the Api loop.
           * - Create Peer connection (as a client) to the Smilo nodes
           * - Receive blockHeight of nodes
           * - Retrieve missing blocks
