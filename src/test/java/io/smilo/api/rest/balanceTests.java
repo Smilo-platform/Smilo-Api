@@ -24,20 +24,22 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class priceTests extends SmiloApiTests {
+public class balanceTests extends SmiloApiTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
     @Test
-    public void shouldReturn200WhenSendingRequestToPriceController() throws Exception {
+    public void shouldReturn200WhenSendingRequestToBalanceController() throws Exception {
         @SuppressWarnings("rawtypes")
-        ResponseEntity<List> entity = this.testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/price", List.class);
+        ResponseEntity<Map> entity = this.testRestTemplate.getForEntity(
+                "http://localhost:" + port + "/balance/test", Map.class);
 
         then(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

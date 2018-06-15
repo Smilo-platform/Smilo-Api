@@ -50,7 +50,7 @@ public class PriceServicesImpl implements PriceServices {
         prices.add(new Price("XSM","USD",0.25));
         prices.add(new Price("XSM","ETH",0.05));
         prices.add(new Price("XSM","BTC",0.005));
-        prices.add(new Price("XSP","XSP",0.2));
+        prices.add(new Price("XSP","XSM",0.2));
         return prices;
     }
 
