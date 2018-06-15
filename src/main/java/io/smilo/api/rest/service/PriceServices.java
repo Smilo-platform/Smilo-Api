@@ -15,23 +15,15 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api.rest.service;
 
-public class Status {
+import io.smilo.api.rest.models.Price;
 
-    private final String serverStatus;
-    private final Integer height;
+import java.util.List;
 
-    public Status(Integer height, String serverStatus) {
-        this.height = height;
-        this.serverStatus = serverStatus;
-    }
+public interface PriceServices {
 
-    public Integer getHeight() {
-        return height;
-    }
+    Price findByCurrencyFrom(String currencyTo);
 
-    public String getStatus() {
-        return serverStatus;
-    }
+    List<Price> findAllPrices();
 }

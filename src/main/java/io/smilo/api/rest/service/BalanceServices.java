@@ -15,23 +15,12 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api.rest.service;
 
-public class Status {
+import io.smilo.api.rest.models.Balance;
 
-    private final String serverStatus;
-    private final Integer height;
+public interface BalanceServices {
 
-    public Status(Integer height, String serverStatus) {
-        this.height = height;
-        this.serverStatus = serverStatus;
-    }
+    Balance findByPublicKey(String publicKey);
 
-    public Integer getHeight() {
-        return height;
-    }
-
-    public String getStatus() {
-        return serverStatus;
-    }
 }

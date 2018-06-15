@@ -17,24 +17,25 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.rest.models.Block;
+import io.smilo.api.rest.models.Balance;
+import io.smilo.api.rest.service.BalanceServices;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BlockController {
+public class BalanceController {
 
-    @GetMapping("/block")
-    @ResponseBody
-    public Block respondAllBlocks() {
-        return new Block(1, "All blocks!");
-    }
+    @Autowired
+    BalanceServices balanceServices;
 
-    @GetMapping("/block/{block}")
-    @ResponseBody
-    public Block respondBlock(@PathVariable("block") String block) {
-        return new Block(1, block);
+    /*
+        Retrieve balances of publicKey
+     */
+
+    @GetMapping("/balance/{address}")
+    public Balance listBalance(@PathVariable("address") String address) {
+        return balanceServices.findByPublicKey(address);
     }
 }

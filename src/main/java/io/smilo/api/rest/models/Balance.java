@@ -17,21 +17,24 @@
 
 package io.smilo.api.rest.models;
 
-public class Status {
+import java.util.List;
 
-    private final String serverStatus;
-    private final Integer height;
+public class Balance {
 
-    public Status(Integer height, String serverStatus) {
-        this.height = height;
-        this.serverStatus = serverStatus;
+    private final String publicKey;
+    private final List<StoredCoin> storedCoins;
+
+    public Balance(String publicKey, List<StoredCoin> storedCoins) {
+        this.publicKey = publicKey;
+        this.storedCoins = storedCoins;
     }
 
-    public Integer getHeight() {
-        return height;
+    public String getPublicKey() {
+        return publicKey;
     }
 
-    public String getStatus() {
-        return serverStatus;
+    public List<StoredCoin> getStoredCoins() {
+        return storedCoins;
     }
+
 }

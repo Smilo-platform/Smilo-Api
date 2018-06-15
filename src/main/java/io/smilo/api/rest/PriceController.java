@@ -17,24 +17,32 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.rest.models.Block;
+import io.smilo.api.rest.models.Price;
+import io.smilo.api.rest.service.PriceServices;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
-public class BlockController {
+public class PriceController {
 
-    @GetMapping("/block")
-    @ResponseBody
-    public Block respondAllBlocks() {
-        return new Block(1, "All blocks!");
-    }
+    @Autowired
+    PriceServices priceServices;
 
-    @GetMapping("/block/{block}")
-    @ResponseBody
-    public Block respondBlock(@PathVariable("block") String block) {
-        return new Block(1, block);
+    /*
+        Retrieve price index
+     */
+
+    @GetMapping("/price")
+    public ResponseEntity<List<Price>> listAllUsers() {
+        List<Price> price = priceServices.findAllPrices();
+        if (price.isEmpty()) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(price, HttpStatus.OK);
     }
 }

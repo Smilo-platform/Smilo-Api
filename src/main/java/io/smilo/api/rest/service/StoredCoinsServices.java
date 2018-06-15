@@ -15,23 +15,14 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api.rest.service;
 
-public class Status {
+import io.smilo.api.rest.models.StoredCoin;
 
-    private final String serverStatus;
-    private final Integer height;
+import java.util.List;
 
-    public Status(Integer height, String serverStatus) {
-        this.height = height;
-        this.serverStatus = serverStatus;
-    }
+public interface StoredCoinsServices {
 
-    public Integer getHeight() {
-        return height;
-    }
+    List<StoredCoin> findByPublicKey(String publicKey);
 
-    public String getStatus() {
-        return serverStatus;
-    }
 }

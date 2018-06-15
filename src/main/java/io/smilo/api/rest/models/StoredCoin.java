@@ -17,21 +17,22 @@
 
 package io.smilo.api.rest.models;
 
-public class Status {
+public class StoredCoin {
 
-    private final String serverStatus;
-    private final Integer height;
+    private final String currency;
+    private final Double amount;
 
-    public Status(Integer height, String serverStatus) {
-        this.height = height;
-        this.serverStatus = serverStatus;
+    public StoredCoin(String currency, Double amount) {
+        this.currency = currency;
+        this.amount = amount;
     }
 
-    public Integer getHeight() {
-        return height;
+    public String getCurrency() {
+        return currency;
     }
 
-    public String getStatus() {
-        return serverStatus;
+    public Double getAmount() {
+        return amount;
     }
+
 }
