@@ -31,15 +31,11 @@ public class BalanceServicesImpl implements BalanceServices {
     @Autowired
     StoredCoinsServices storedCoinsServices;
 
-    private static String publicKey;
-    private static List<Balance> balances;
-
     @Override
     public Balance findByPublicKey(String publicKey) {
-        List<StoredCoin> storedCoins = new ArrayList<>();
+        List<StoredCoin> storedCoins;
 
         storedCoins = storedCoinsServices.findByPublicKey(publicKey);
-        Balance balances = new Balance(publicKey, (ArrayList<StoredCoin>) storedCoins);
-        return balances;
+        return new Balance(publicKey, (ArrayList<StoredCoin>) storedCoins);
     }
 }

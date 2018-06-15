@@ -17,7 +17,6 @@
 
 package io.smilo.api.rest.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Balance {
@@ -25,7 +24,7 @@ public class Balance {
     private final String publicKey;
     private final List<StoredCoin> storedCoins;
 
-    public Balance(String publicKey, ArrayList<StoredCoin> storedCoins) {
+    public Balance(String publicKey, List<StoredCoin> storedCoins) {
         this.publicKey = publicKey;
         this.storedCoins = storedCoins;
     }

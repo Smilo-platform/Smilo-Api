@@ -17,32 +17,30 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.rest.models.Price;
-import io.smilo.api.rest.service.PriceServices;
+import io.smilo.api.SmiloApiTests;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-@RestController
-public class PriceController {
+import static org.assertj.core.api.BDDAssertions.then;
+
+public class balanceTests extends SmiloApiTests {
 
     @Autowired
-    PriceServices priceServices;
+    private TestRestTemplate testRestTemplate;
 
-    /*
-        Retrieve price index
-     */
+    @Test
+    public void shouldReturn200WhenSendingRequestToBalanceController() throws Exception {
+        @SuppressWarnings("rawtypes")
+        ResponseEntity<Map> entity = this.testRestTemplate.getForEntity(
+                "http://localhost:" + port + "/balance/test", Map.class);
 
-    @GetMapping("/price")
-    public ResponseEntity<List<Price>> listAllUsers() {
-        List<Price> price = priceServices.findAllPrices();
-        if (price.isEmpty()) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(price, HttpStatus.OK);
+        then(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }
