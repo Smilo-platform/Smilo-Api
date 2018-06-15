@@ -28,7 +28,7 @@ public class StoredCoinsServicesImpl implements StoredCoinsServices {
 
     @Override
     public List<StoredCoin> findByPublicKey(String publicKey) {
-        List<StoredCoin> storedCoins = new ArrayList<StoredCoin>();
+        List<StoredCoin> storedCoins = new ArrayList<>();
 
         if (publicKey.equals("ETm9QUJLVdJkTqRojTNqswmeAQGaofojJJ")){
             storedCoins.add(new StoredCoin("XSM", 5712.00));

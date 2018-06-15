@@ -19,8 +19,6 @@ package io.smilo.api.rest.service;
 
 import io.smilo.api.rest.models.Balance;
 
-import java.util.List;
-
 public interface BalanceServices {
 
     Balance findByPublicKey(String publicKey);

@@ -43,6 +43,6 @@ public class PriceController {
         if (price.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<List<Price>>(price, HttpStatus.OK);
+        return new ResponseEntity<>(price, HttpStatus.OK);
     }
 }

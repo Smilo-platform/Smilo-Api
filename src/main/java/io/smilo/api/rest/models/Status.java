@@ -19,12 +19,12 @@ package io.smilo.api.rest.models;
 
 public class Status {
 
-    private final String status;
+    private final String serverStatus;
     private final Integer height;
 
-    public Status(Integer height, String status) {
+    public Status(Integer height, String serverStatus) {
         this.height = height;
-        this.status = status;
+        this.serverStatus = serverStatus;
     }
 
     public Integer getHeight() {
@@ -32,6 +32,6 @@ public class Status {
     }
 
     public String getStatus() {
-        return status;
+        return serverStatus;
     }
 }

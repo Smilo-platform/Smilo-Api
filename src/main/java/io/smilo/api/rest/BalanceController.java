@@ -36,7 +36,6 @@ public class BalanceController {
 
     @GetMapping("/balance/{address}")
     public Balance listBalance(@PathVariable("address") String address) {
-        Balance balance = balanceServices.findByPublicKey(address);
-        return balance;
+        return balanceServices.findByPublicKey(address);
     }
 }
