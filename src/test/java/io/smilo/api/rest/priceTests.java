@@ -18,6 +18,8 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.SmiloApiTests;
+import io.smilo.api.rest.models.Price;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
 public class priceTests extends SmiloApiTests {
@@ -36,9 +39,19 @@ public class priceTests extends SmiloApiTests {
     @Test
     public void shouldReturn200WhenSendingRequestToPriceController() throws Exception {
         @SuppressWarnings("rawtypes")
-        ResponseEntity<List> entity = this.testRestTemplate.getForEntity(
+        ResponseEntity<List> response = this.testRestTemplate.getForEntity(
                 "http://localhost:" + port + "/price", List.class);
 
-        then(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        then(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void shouldReturnValueWhenSendingRequestToPriceController() throws Exception {
+        @SuppressWarnings("rawtypes")
+        ResponseEntity<List> response = this.testRestTemplate.getForEntity(
+                "http://localhost:" + port + "/price", List.class);
+
+        List body = response.getBody();
+        Assert.assertEquals("Test failed!",body.get(0).toString(), "{currencyFrom=XSM, currencyTo=USD, value=0.25}");
     }
 }
