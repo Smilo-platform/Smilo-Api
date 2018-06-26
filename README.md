@@ -189,7 +189,7 @@ Returns block {block}
 "blockHash": "<blockHash>",
 "blockHeight": 100000,
 "blockTransactions": 3,
-"fee": 0.003
+"fee": 0.003,
 "transactions": [
     {
     "timestamp": "<timestamp>",
