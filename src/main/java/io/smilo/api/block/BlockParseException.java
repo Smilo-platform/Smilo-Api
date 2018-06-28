@@ -15,29 +15,29 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.block;
 
-import java.nio.ByteBuffer;
-import java.util.List;
+public class BlockParseException extends Exception {
 
-public interface Store {
+    private final String rawBlock;
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    public BlockParseException(String rawBlock, String message) {
+        super(message);
+        this.rawBlock = rawBlock;
+    }
 
-    byte[] get(String collection, ByteBuffer key);
+    public BlockParseException(String rawBlock, String message, Throwable cause) {
+        super(message, cause);
+        this.rawBlock = rawBlock;
+    }
 
-    List<String> getAll(String collection);
+    public BlockParseException(String rawBlock, Throwable cause) {
+        super(cause);
+        this.rawBlock = rawBlock;
+    }
 
-    void delete(String collection, ByteBuffer key);
-
-    void startTransaction();
-
-    void commitTransaction();
-
-    void rollback();
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
+    public String getRawBlock() {
+        return rawBlock;
+    }
 
 }

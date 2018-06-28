@@ -15,29 +15,16 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer.payloadhandler;
 
-import java.nio.ByteBuffer;
-import java.util.List;
+public enum PayloadType {
 
-public interface Store {
-
-    void put(String collection, ByteBuffer key, ByteBuffer value);
-
-    byte[] get(String collection, ByteBuffer key);
-
-    List<String> getAll(String collection);
-
-    void delete(String collection, ByteBuffer key);
-
-    void startTransaction();
-
-    void commitTransaction();
-
-    void rollback();
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
+    NETWORK_STATE,
+    REQUEST_NET_STATE,
+    BLOCK,
+    TRANSACTION,
+    MESSAGE,
+    PEER,
+    GET_PEER,
+    GET_BLOCK;
 }

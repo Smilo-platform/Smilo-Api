@@ -17,6 +17,7 @@
 
 package io.smilo.api;
 
+import io.smilo.api.peer.PeerReceiver;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -25,16 +26,20 @@ import org.springframework.stereotype.Component;
 public class SmiloApi {
 
     private static final Logger LOGGER = Logger.getLogger(SmiloApi.class);
+    private final PeerReceiver peerReceiver;
     private final String version;
+    public Boolean quit = false;
 
-    public SmiloApi(@Value("${VERSION:prototype}") String version) {
+    public SmiloApi(@Value("${VERSION:prototype}") String version, PeerReceiver peerReceiver) {
         this.version = version;
+        this.peerReceiver = peerReceiver;
     }
 
     /**
      * Runs the main loop of the Smilo Api.
      */
     public void run() {
+        this.quit = false;
         LOGGER.info("Starting Smilo Platform Api " + version);
 
         // Todo: Implementation of Websocket & rest server for block explorer and wallets
@@ -49,12 +54,17 @@ public class SmiloApi {
           *
          */
         while (true) {
+            peerReceiver.run();
             try {
                 Thread.sleep(200);
             } catch (Exception e) {
                 LOGGER.error(e);
             }
 
+            // Quit?
+            if (quit){
+                break;
+            }
         }
     }
 

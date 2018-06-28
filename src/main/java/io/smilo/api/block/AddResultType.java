@@ -15,29 +15,20 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.block;
 
-import java.nio.ByteBuffer;
-import java.util.List;
+public enum AddResultType {
 
-public interface Store {
+    ADDED(true), QUEUED(true), DUPLICATE(false), VALIDATION_ERROR(false), FORK_ERROR(false), UNKNOWN(false);
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    private final boolean success;
 
-    byte[] get(String collection, ByteBuffer key);
+    private AddResultType(boolean success) {
+        this.success = success;
+    }
 
-    List<String> getAll(String collection);
-
-    void delete(String collection, ByteBuffer key);
-
-    void startTransaction();
-
-    void commitTransaction();
-
-    void rollback();
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
+    public boolean isSuccess() {
+        return success;
+    }
 
 }

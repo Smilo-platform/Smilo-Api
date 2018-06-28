@@ -15,29 +15,17 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.block.data;
 
-import java.nio.ByteBuffer;
-import java.util.List;
+public interface Parser<T> {
 
-public interface Store {
+    boolean isValid(T data);
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    void hash(T data);
 
-    byte[] get(String collection, ByteBuffer key);
+    T deserialize(byte[] data);
 
-    List<String> getAll(String collection);
+    byte[] serialize(T data);
 
-    void delete(String collection, ByteBuffer key);
-
-    void startTransaction();
-
-    void commitTransaction();
-
-    void rollback();
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
+    boolean supports(Class<?> clazz);
 }

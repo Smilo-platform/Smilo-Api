@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2018 Smilo Platform B.V.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package io.smilo.api.peer.payloadhandler;
+
+import io.smilo.api.block.Block;
+import io.smilo.api.block.BlockParser;
+import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.peer.Peer;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class BlockHandler implements PayloadHandler {
+
+    private PendingBlockDataPool pendingBlockDataPool;
+    private BlockParser blockParser;
+
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser) {
+        this.pendingBlockDataPool = pendingBlockDataPool;
+        this.blockParser = blockParser;
+    }
+
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        byte[] byteArray = BlockDataParser.decode(parts.get(1));
+        Block block = blockParser.deserialize(byteArray);
+
+        // Todo: include block in database.
+        // smiloChainService.addBlockToSmiloChain(block);
+
+        //Remove all transactions from the pendingTransactionPool that appear in the block
+        pendingBlockDataPool.removeTransactionsInBlock(block);
+    }
+
+    @Override
+    public PayloadType supports() {
+        return PayloadType.BLOCK;
+    }
+}
+

@@ -17,16 +17,17 @@
 
 package io.smilo.api.db;
 
-import org.lmdbjava.Dbi;
-import org.lmdbjava.DbiFlags;
-import org.lmdbjava.Env;
-import org.lmdbjava.Txn;
+import org.lmdbjava.*;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.lmdbjava.Env.create;
 
 public class LMDBStore implements Store {
@@ -48,7 +49,7 @@ public class LMDBStore implements Store {
         // TODO: review env settings
         this.env = create()
                 // LMDB also needs to know how large our DB might be. Over-estimating is OK.
-                .setMapSize(10_485_760)
+                .setMapSize(1_048_576 * 1_024L * 1_024L) // 1 TB?
                 // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
                 .setMaxDbs(5)
                 // Now let's open the Env. The same path can be concurrently opened and
@@ -60,6 +61,14 @@ public class LMDBStore implements Store {
 
     public void initializeCollection(String collectionName) {
         getDatabase(collectionName);
+    }
+
+    @Override
+    public void clear(String collectionName) {
+        try (Txn<ByteBuffer> txn = env.txnWrite()) {
+            getDatabase(collectionName).drop(txn);
+            txn.commit();
+        }
     }
 
     private Dbi<ByteBuffer> getDatabase(String collectionName) {
@@ -102,6 +111,41 @@ public class LMDBStore implements Store {
             bytes[i] = fetchedVal.get(i);
         }
         return bytes;
+    }
+
+    @Override
+    public List<String> getAll(String collection) {
+        // TODO refactor to iterator https://github.com/lmdbjava/lmdbjava/pull/93
+        if (transaction.get() != null) {
+            List<String> result = new ArrayList<>();
+
+            Cursor<ByteBuffer> cursor = getDatabase(collection).openCursor(transaction.get());
+            cursor.seek(SeekOp.MDB_FIRST);
+            while(cursor.next()) {
+                result.add(new String(cursor.val().array(), Charset.forName(UTF_8)));
+            }
+
+            return result;
+        } else {
+            try (Txn<ByteBuffer> txn = env.txnRead()) {
+                List<String> result = new ArrayList<>();
+
+                Cursor<ByteBuffer> cursor = getDatabase(collection).openCursor(txn);
+                cursor.seek(SeekOp.MDB_FIRST);
+                if (cursor.val().remaining() > 0) {
+                    do {
+                        byte[] bytes = new byte[cursor.val().remaining()];
+                        for (int i = 0; i < cursor.val().remaining(); i++) {
+                            bytes[i] = cursor.val().get(i);
+                        }
+                        result.add(new String(bytes, Charset.forName(UTF_8)));
+                    } while (cursor.next());
+                }
+                cursor.close();
+
+                return result;
+            }
+        }
     }
 
     @Override
