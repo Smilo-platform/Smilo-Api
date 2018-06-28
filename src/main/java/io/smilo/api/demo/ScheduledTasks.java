@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Component
@@ -17,12 +19,36 @@ public class ScheduledTasks {
 
     @Autowired
     private Websocket websocket;
-
     private static final Logger LOGGER = Logger.getLogger(ScheduledTasks.class);
+    private Block lastBlock;
+    private static List<Transaction> txPool = new ArrayList<>(); // Todo solve this
 
-    @Scheduled(fixedRate = 16000)
+    //@Scheduled(fixedRate = 16000) // TODO enable/fix blocks
     public void sendBlock(){
-        //sendMsg("New block");
+
+        Block block;
+        if(lastBlock == null){
+            // Genesis block
+            block = new Block(createHash(), 0, "0000000000000000000000000000000000000000000000000000000000000000", System.currentTimeMillis(), getTxFromPool());
+        }else{
+            block = new Block(createHash(), lastBlock.getBlocknum()+1, lastBlock.getBlockHash(), System.currentTimeMillis(), getTxFromPool());
+        }
+
+        try{
+            JSONObject blockObject = new JSONObject();
+            blockObject.put("blockHash", block.getBlockHash());
+            blockObject.put("blocknum", block.getBlocknum());
+            blockObject.put("prevBlockHash", block.getPrevBlockHash());
+            blockObject.put("timestamp", block.getTimestamp());
+            blockObject.put("transactions", block.getTransactions());
+
+            // Set currentBlock as lastBlock
+            lastBlock = block;
+
+            sendMsg(blockObject, "msgBlock");
+        }catch (Exception ex){
+            LOGGER.error("Failed generating block object");
+        }
     }
 
     @Scheduled(fixedRate = 4500)
@@ -33,8 +59,16 @@ public class ScheduledTasks {
         int assetId = 1;
 
         Transaction tx = new Transaction(System.currentTimeMillis(), assetId, getRandomAddress(), inputAmount, fee, createHash());
-        tx.setTxOutput(addTxOutputData(tx.getInputAmount()));
+        tx.setTxOutput(addTxOutputData(tx.getInputAmount())); // TODO solve this
 
+        // Add transaction to pool
+        txPool.add(tx);
+
+        // Send transaction
+        sendMsg(getTxObject(tx), "msgTx");
+    }
+
+    public JSONObject getTxObject(Transaction tx){
         try {
             JSONObject txObject = new JSONObject();
             txObject.put("timestamp", tx.getTimestamp());
@@ -44,14 +78,15 @@ public class ScheduledTasks {
             txObject.put("txOutputArray", tx.getTxOutput());
             txObject.put("txFee", tx.getFee());
             txObject.put("hash", tx.getHash());
-            txObject.put("signatureData", "signatureData"); // Todo fix
-            txObject.put("signatureIndex", 0); // Todo fix
+            txObject.put("signatureData", "signatureData"); // Todo add signatureData
+            txObject.put("signatureIndex", 0); // Todo add signatureIndex
             txObject.put("txStatus","pending"); // Todo Remove?
 
-            sendMsg(txObject);
+            return txObject;
         }catch(Exception ex){
             LOGGER.error("Failed generating transaction object");
         }
+        return null;
     }
 
     public String getRandomAddress() {
@@ -77,7 +112,6 @@ public class ScheduledTasks {
     }
 
     public JSONArray addTxOutputData(int inputAmount){
-
         try {
             JSONArray txOutputs = new JSONArray();
             Random rand = new Random();
@@ -102,7 +136,8 @@ public class ScheduledTasks {
                     txOutputObject.put("value", newOutputAmount);
                     txOutputs.add(txOutputObject);
                 }
-                            }
+            }
+
             return txOutputs;
         }catch(Exception ex){
             LOGGER.error("Generating test transactions failed");
@@ -110,13 +145,33 @@ public class ScheduledTasks {
         return null;
     }
 
-    public void sendMsg(JSONObject message){
+    public JSONArray getTxFromPool(){
+        try{
+            JSONArray txArray = new JSONArray();
+
+            int i = 0;
+            for(Transaction tx : txPool){
+                JSONObject transactions  = new JSONObject();
+                transactions.put(i, getTxObject(tx));
+                i++;
+            }
+            // Empty transaction pool
+            txPool = null;
+
+            return txArray;
+        }catch (Exception ex){
+            LOGGER.error("Reading transaction pool failed");
+        }
+        return null;
+    }
+
+    public void sendMsg(JSONObject message, String type){
         try {
             JSONObject obj = new JSONObject();
             obj.remove("type");
             obj.remove("data");
             obj.put("data", message);
-            obj.put("type", "msgTx");
+            obj.put("type", type);
 
             LOGGER.info(obj);
             websocket.sendMessage(obj.toString());
