@@ -45,7 +45,7 @@ public class Block {
     private String nodeSignature;
     private long nodeSignatureIndex;
     // TODO: user's default public key
-    private String redeemAddress = "S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR";
+    private String redeemAddress;
 
     public Block() {}
 
@@ -87,18 +87,6 @@ public class Block {
     }
 
     /**
-     * Sets the blockhash based on transactions, timestamp, blocknum, previous block hash, redeem address and ledger hash.
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    public void hashBlock() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String transactionsString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
-        String blockData = "{" + timestamp + ":" + blockNum + ":" + previousBlockHash + ":" + redeemAddress + "},{" + ledgerHash + "},{" + transactionsString + "}";
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        this.blockHash = DatatypeConverter.printHexBinary(md.digest(blockData.getBytes("UTF-8")));
-    }
-
-    /**
      * Scans the block for any transactions that involve the provided address. Returns ArrayList<String> containing "simplified" transactions, in the format of sender:amount:asset:receiver Each of
      * these "simplified" transaction formats don't necessarily express an entire transaction, but rather only portions of a transaction which involve either the target address sending or receiving
      * coins.
@@ -127,29 +115,6 @@ public class Block {
             }
         }
         return relevantTransactionParts;
-    }
-
-    /**
-     * Returns the raw String representation of the block, useful when saving the block or sending it to a peer.
-     *
-     * @return String The raw block
-     */
-    public String getRawBlock() {
-        String rawBlock =  "{" + timestamp + ":" + blockNum + ":" + previousBlockHash + ":" + redeemAddress + "},{" + ledgerHash + "},{";
-        String transactionString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
-        rawBlock += transactionString + "},{" + blockHash + "},{" + nodeSignature + "},{" + nodeSignatureIndex + "}";
-        return rawBlock;
-    }
-
-    public String getHashableData() {
-        String data = getTimestamp() + ":" + getBlockNum() + ":" + getPreviousBlockHash() + ":" + getBlockHash() + ":" + getLedgerHash() + ":" + getRedeemAddress();
-
-        for (Transaction transaction : getTransactions()) {
-            data += ":" + transaction.getHashableData();
-        }
-
-        //TODO: Messages too?
-        return data;
     }
 
     public long getTimestamp() {
@@ -226,10 +191,6 @@ public class Block {
 
     public void setRedeemAddress(String redeemAddress) {
         this.redeemAddress = redeemAddress;
-    }
-
-    public String getPrintableString() {
-        return getRawBlock().substring(0, 30) + "...";
     }
 
     @Override

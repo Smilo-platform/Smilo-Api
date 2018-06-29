@@ -14,13 +14,11 @@
  * limitations under the License.
  *
  */
-
 package io.smilo.api.peer;
 
-import io.smilo.api.block.BlockStore;
+import io.smilo.api.block.*;
 import io.smilo.api.peer.payloadhandler.PayloadHandlerProvider;
 import io.smilo.api.peer.payloadhandler.PayloadType;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -33,19 +31,16 @@ import java.util.List;
 public class PeerReceiver {
 
     private static final Logger LOGGER = Logger.getLogger(PeerReceiver.class);
-
-    private final PendingBlockDataPool pendingBlockDataPool;
+    
     private final BlockStore blockStore;
     private final PeerClient peerClient;
     private final PayloadHandlerProvider payloadHandlerProvider;
     private final NetworkState networkState;
 
-    public PeerReceiver(PendingBlockDataPool pendingBlockDataPool,
-                        BlockStore blockStore,
+    public PeerReceiver(BlockStore blockStore,
                         PeerClient peerClient,
                         PayloadHandlerProvider payloadHandlerProvider, NetworkState networkState) {
         this.blockStore = blockStore;
-        this.pendingBlockDataPool = pendingBlockDataPool;
         this.peerClient = peerClient;
         this.payloadHandlerProvider = payloadHandlerProvider;
         this.networkState = networkState;
@@ -96,14 +91,22 @@ public class PeerReceiver {
                 //Sleep for a bit, wait for responses before requesting more data.
                 Thread.sleep(300);
                 //Broadcast request for new block(s)
-                for (int i = blockStore.getBlockchainLength(); i < networkState.getTopBlock(); i++) {
-                    LOGGER.info("Requesting block " + i + "...");
-                    peerClient.broadcast("GET_BLOCK " + i);
-                }
+                Integer blockNum =  blockStore.getLatestBlockHeight() + 1;
+                LOGGER.info("Requesting block " + blockNum + "...");
+                peerClient.broadcast("GET_BLOCK " + blockNum);
             } catch (InterruptedException e) {
                 //If this throws an error, something's terribly off.
                 LOGGER.error("P2pNetwork has mental illness.");
             }
+        }
+    }
+
+    /**
+     * Broadcast a new block request if catchupMode is true
+     */
+    public void broadcastNewNetStateRequest() {
+        if(networkState.getCachupMode() && (blockStore.getLatestBlockHeight() > networkState.getTopBlock())) {
+            peerClient.broadcast("REQUEST_NET_STATE");
         }
     }
 
@@ -116,8 +119,7 @@ public class PeerReceiver {
      * Update the data from the peer network
      */
     public void run() {
-
-        // Todo: Make sure getNewData is triggered after enough peers are connected.
+        broadcastNewNetStateRequest();
         getNewData();
         broadcastNewBlockRequest();
     }

@@ -33,9 +33,11 @@ public class DefaultPeerInitializer implements PeerInitializer {
     @Override
     public Peer initializePeer(String hostname, int port) {
         try {
+            LOGGER.info("Connecting to " + hostname + ":" + port);
             return new Peer(hostname, port);
         } catch (IOException e) {
             LOGGER.error("Unable to connect to " + hostname + ":" + port);
+            // TODO: remove peer from database?
             return null;
         }
     }

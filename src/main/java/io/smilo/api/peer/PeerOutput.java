@@ -66,7 +66,7 @@ public class PeerOutput implements Runnable {
                     if (copy.get(i).length() > 20) {
                         LOGGER.info("Sending " + copy.get(i).substring(0, 20) + " to " + socket.getInetAddress());
                     } else {
-                        LOGGER.info("Sending " + copy.get(i) + " to " + socket.getInetAddress());
+                        LOGGER.info("Sending " + copy.get(i) + " to " + socket.getInetAddress() + ":" + socket.getPort());
                     }
                     out.println(copy.get(i));
                 }

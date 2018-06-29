@@ -21,8 +21,6 @@ public interface Parser<T> {
 
     boolean isValid(T data);
 
-    void hash(T data);
-
     T deserialize(byte[] data);
 
     byte[] serialize(T data);

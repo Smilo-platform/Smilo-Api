@@ -42,11 +42,7 @@ public class Peer implements Runnable {
     public Peer(Socket socket) {
         this.socket = socket;
         this.initialized = false;
-        String remoteHost = socket.getInetAddress() + "";
-        // save the IP address,
-        remoteHost = remoteHost.split("/")[0];
-        remoteHost = remoteHost.replace("\\", "");
-        this.remoteHost = remoteHost;
+        this.remoteHost = socket.getInetAddress().getHostAddress();
         this.remotePort = socket.getPort();
     }
 
@@ -63,12 +59,13 @@ public class Peer implements Runnable {
      */
     @Override
     public void run() {
-        LOGGER.info("Got connection from " + socket.getInetAddress() + ".");
+        LOGGER.info("Got connection from " + getIdentifier() + ".");
         peerInput = new PeerInput(socket);
         peerInput.start();
         peerOutput = new PeerOutput(socket);
-        peerOutput.run();
         initialized = true;
+        LOGGER.info("Initialized connection " + getIdentifier());
+        peerOutput.run();
     }
 
     public boolean isInitialized() {
@@ -113,11 +110,11 @@ public class Peer implements Runnable {
     }
 
     public String getRawPeer() {
-        return remoteHost + ":" + remotePort;
+        return remoteHost + " " + remotePort;
     }
 
     public String getIdentifier() {
-        return remoteHost + ":" + remotePort;
+        return remoteHost + " " + remotePort;
     }
-
+    
 }

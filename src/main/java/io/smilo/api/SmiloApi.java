@@ -17,6 +17,8 @@
 
 package io.smilo.api;
 
+import io.smilo.api.block.BlockStore;
+import io.smilo.api.peer.PeerClient;
 import io.smilo.api.peer.PeerReceiver;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +29,16 @@ public class SmiloApi {
 
     private static final Logger LOGGER = Logger.getLogger(SmiloApi.class);
     private final PeerReceiver peerReceiver;
+    private final PeerClient peerClient;
+    private final BlockStore blockStore;
     private final String version;
     public Boolean quit = false;
 
-    public SmiloApi(@Value("${VERSION:prototype}") String version, PeerReceiver peerReceiver) {
+    public SmiloApi(@Value("${VERSION:prototype}") String version, PeerReceiver peerReceiver, PeerClient peerClient, BlockStore blockStore) {
         this.version = version;
         this.peerReceiver = peerReceiver;
+        this.peerClient = peerClient;
+        this.blockStore = blockStore;
     }
 
     /**
@@ -42,7 +48,10 @@ public class SmiloApi {
         this.quit = false;
         LOGGER.info("Starting Smilo Platform Api " + version);
 
+        blockStore.initialiseLatestBlock();
+
         // Todo: Implementation of Websocket & rest server for block explorer and wallets
+
 
         /*
           * Start the Api loop.
@@ -54,12 +63,24 @@ public class SmiloApi {
           *
          */
         while (true) {
-            peerReceiver.run();
-            try {
-                Thread.sleep(200);
-            } catch (Exception e) {
-                LOGGER.error(e);
+            if (peerClient.getPeers().size() > 0){
+                peerReceiver.run();
+                try {
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    LOGGER.error(e);
+                }
+            } else {
+                // connect to more peers!!
+                LOGGER.warn(peerClient.getPeers().size() + " connections are not enough! Try to reconnect to more!");
+                peerReceiver.run();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    LOGGER.error(e);
+                }
             }
+
 
             // Quit?
             if (quit){

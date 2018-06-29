@@ -28,12 +28,12 @@ public class NetworkState {
 
     private boolean catchupMode = true;
     private int topBlock = 0;
+    private String topHash = null;
 
     private BlockStore blockStore;
 
     public NetworkState(BlockStore blockStore) {
         this.blockStore = blockStore;
-        updateCatchupMode();
     }
 
     /**
@@ -46,9 +46,10 @@ public class NetworkState {
          * So we need to catch up!
          *
          */
-        if (topBlock > blockStore.getBlockchainLength()) {
-            LOGGER.info("currentChainHeight: " + blockStore.getBlockchainLength());
-            LOGGER.info("topBlock: " + topBlock);
+        if (topBlock > blockStore.getLatestBlockHeight()+1) {
+            LOGGER.debug("latestBlockHeight: " + blockStore.getLatestBlockHeight());
+            LOGGER.debug("topBlock: " + topBlock);
+            LOGGER.debug("topHash: " + topHash);
             catchupMode = true;
         } else {
             if (catchupMode) {
@@ -66,8 +67,16 @@ public class NetworkState {
         return topBlock;
     }
 
+    public String getTopHash() {
+        return topHash;
+    }
+
     public void setTopBlock(int topBlock) {
         this.topBlock = topBlock;
         updateCatchupMode();
+    }
+
+    public void setTopHash(String hash) {
+        this.topHash = hash;
     }
 }

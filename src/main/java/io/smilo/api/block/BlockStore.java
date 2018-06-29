@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.nio.ByteBuffer.allocateDirect;
 
@@ -40,6 +39,9 @@ public class BlockStore {
     private static final String COLLECTION_NAME = "block";
     private final ObjectMapper dataMapper;
 
+    private int latestBlockHeight = -1;
+    private String latestBlockHash = "0000000000000000000000000000000000000000000000000000000000000000";
+
     public BlockStore(Store store,  ObjectMapper dataMapper) {
         this.chains = new ArrayList<>();
         this.store = store;
@@ -47,31 +49,57 @@ public class BlockStore {
         store.initializeCollection(COLLECTION_NAME);
     }
 
-//    /**
-//     * Retrieves the block at blockNum (starting from 0) from the longest chain.
-//     *
-//     * @param blockNum The block number to retrieve
-//     *
-//     * @return Block Block at blockNum in longest chain
-//     */
-//    public Block getBlock(int blockNum) {
-//        return getLargestChain().getBlockByIndex(blockNum);
-//    }
+    /**
+     * Initialises the height of the latest block
+     *
+     * @return Boolean
+     */
+    public void initialiseLatestBlock() {
 
-    // TODO: return optional instead of null
-    public SmiloChain getLargestChain() {
-        return chains.stream()
-                .max((a, b) -> Integer.compare(a.getLength(), b.getLength()))
-                .orElse(new SmiloChain());
+        // When there is a block in the BlockStore, load the latest.
+        // When there is a balance, do nothing, else set 200M Smilo on balance
+        if (blockInBlockStoreAvailable()) {
+            LOGGER.info("Loading block from DB...");
+            Block latestBlock = getLatestBlockFromStore();
+            latestBlockHeight = latestBlock.getBlockNum();
+            latestBlockHash = latestBlock.getBlockHash();
+        } else {
+            // Todo
+        }
     }
 
     /**
-     * Returns the length of the tallest tree
+     * Returns the height of the latest block
      *
-     * @return int Length of longest tree in smiloChain
+     * @return int height of latest block
      */
-    public int getBlockchainLength() {
-        return getLargestChain().getLength();
+    public int getLatestBlockHeight() {
+        return latestBlockHeight;
+    }
+
+
+    /**
+     * Returns the hash of the latest block
+     *
+     * @return String hash the latests added block
+     */
+    public String getLatestBlockHash() {
+        return latestBlockHash;
+    }
+
+    /**
+     * Set the height of the latest block
+     */
+    public void setLatestBlockHeight(int blockHeight) {
+        latestBlockHeight = blockHeight;
+    }
+
+
+    /**
+     * Set the hash of the latest block
+     */
+    public void setLatestBlockHash(String hash) {
+        latestBlockHash = hash;
     }
 
     /**
@@ -80,14 +108,14 @@ public class BlockStore {
      * @param block to write
      */
     public void writeBlockToFile(Block block) {
-        final ByteBuffer key = allocateDirect(10000);
+        final ByteBuffer key = allocateDirect(64);
         final ByteBuffer val = allocateDirect(10000);
 
         try {
             BlockDTO dto = BlockDTO.toDTO(block);
             byte[] bytes = dataMapper.writeValueAsBytes(dto);
 
-            key.put(Byte.parseByte(String.valueOf(block.getBlockNum()))).flip();
+            key.putLong(block.getBlockNum()).flip();
             val.put(bytes).flip();
             store.put(COLLECTION_NAME, key, val);
         } catch (JsonProcessingException e) {
@@ -96,67 +124,10 @@ public class BlockStore {
     }
 
     /**
-     * Saves entire smiloChain to a file, useful to save the state of the smiloChain so it doesn't have to be redownloaded later. Blockchain is stored to a file called SMILOCHAIN_DATA inside the
-     * provided dbFolder.
-     *
-     *
-     * @return boolean Whether saving to file was successful.
+     * Get specific block from DB
+     * @Integer blockNum
+     * @return Block
      */
-    public void saveToFile() {
-        this.chains.forEach(chain -> {
-            chain.getBlocks().forEach(this::writeBlockToFile);
-        });
-    }
-
-    /**
-     * Calls getTransactionsInvolvingAddress() on all Block objects in the current Blockchain to get all relevant transactions.
-     *
-     * @param addressToFind Address to search through all block transaction pools for
-     *
-     * @return ArrayList<String> All transactions in simplified form blocknum:sender:amount:asset:receiver of
-     */
-    //TODO: refactor
-    public ArrayList<String> getAllTransactionsInvolvingAddress(String addressToFind) {
-        SmiloChain longestChain = getLargestChain();
-
-        ArrayList<String> allTransactions = new ArrayList<>();
-
-        for (int i = 0; i < longestChain.getLength(); i++) {
-            ArrayList<String> transactionsFromBlock = longestChain.getBlockByIndex(i).getTransactionsInvolvingAddress(addressToFind);
-            for (int j = 0; j < transactionsFromBlock.size(); j++) {
-                allTransactions.add(longestChain.getBlockByIndex(i).getBlockNum() + ":" + transactionsFromBlock.get(j));
-            }
-        }
-        return allTransactions;
-    }
-
-    /**
-     * Returns the last block of the largest chain
-     *
-     * @return the last block of the largest chain
-     */
-    public Block getLastBlock() {
-        SmiloChain chain = getLargestChain();
-        return chain.getLastBlock().orElse(null);
-    }
-
-    public List<SmiloChain> getAll() {
-        return this.chains;
-    }
-
-    public boolean containsHash(String blockHash) {
-        return chains.stream()
-                .anyMatch(chain -> chain.containsHash(blockHash));
-    }
-
-    public void cleanUpChains() {
-        chains = chains.stream().filter(c -> c.getLength() > getBlockchainLength() - 10).collect(Collectors.toList());
-    }
-
-    public void addSmiloChain(SmiloChain initial) {
-        chains.add(initial);
-    }
-
     public Block getBlock(int blockNum) {
         final ByteBuffer key = allocateDirect(100000);
         key.put(Byte.parseByte(String.valueOf(blockNum))).flip();
@@ -170,4 +141,25 @@ public class BlockStore {
         }
         return BlockDTO.toBlock(result);
     }
+
+        public Block getLatestBlockFromStore() {
+            byte[] raw = store.last(COLLECTION_NAME);
+            BlockDTO result = null;
+            try {
+                result = dataMapper.readValue(raw, BlockDTO.class);
+            } catch (IOException e) {
+                LOGGER.error("Unable to convert byte array to block" + e);
+            }
+            return BlockDTO.toBlock(result);
+        }
+
+        public Boolean blockInBlockStoreAvailable(){
+            if(store.getEntries(COLLECTION_NAME) > 0L){
+                LOGGER.debug("Block has an entry");
+                return true;
+            } else {
+                LOGGER.debug("Block has no entries");
+                return false;
+            }
+        }
 }

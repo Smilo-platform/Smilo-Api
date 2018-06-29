@@ -12,14 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.smilo.core.peer.payloadhandler;
+package io.smilo.api.peer.payloadhandler;
 
-import io.smilo.core.block.BlockStore;
-import io.smilo.core.block.data.transaction.Transaction;
-import io.smilo.core.peer.Peer;
-import io.smilo.core.pendingpool.PendingBlockDataPool;
+import io.smilo.api.block.BlockStore;
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.peer.Peer;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -40,8 +41,9 @@ public class RequestNetStateHandler implements PayloadHandler {
 
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
-        LOGGER.debug("Data: NETWORK_STATE, BlockchainLength: " + blockStore.getBlockchainLength() + ", LatestBlock: " + blockStore.getLastBlock().getBlockHash());
-        peer.write("NETWORK_STATE " + blockStore.getBlockchainLength() + " " + blockStore.getLastBlock().getBlockHash());
+        Integer networkHeight = blockStore.getLatestBlockHeight() + 1;
+        LOGGER.debug("Data: NETWORK_STATE, BlockchainLength: " + networkHeight + ", LatestBlock: " + blockStore.getLatestBlockHash());
+        peer.write("NETWORK_STATE " + networkHeight + " " + blockStore.getLatestBlockHash());
         pendingBlockDataPool.getPendingData(Transaction.class).stream()
                 .forEach(t -> {
                     peer.write("TRANSACTION " + t);

@@ -29,9 +29,9 @@ import java.util.Random;
 
 @Component
 public class PeerClient {
-
+    
     private static final Logger LOGGER = Logger.getLogger(PeerClient.class);
-    private static final int DEFAULT_PORT = 8020;
+    private static final int DEFAULT_PORT = 8030;
 
     private final List<String> nodes;
 
@@ -40,6 +40,7 @@ public class PeerClient {
 
     // TODO: check if it's random enough
     private final Random random = new Random();
+    private TaskExecutor taskExecutor;
     private PeerInitializer peerInitializer;
     private PeerStore peerStore;
 
@@ -47,14 +48,15 @@ public class PeerClient {
                       TaskExecutor taskExecutor,
                       PeerInitializer peerInitializer,
                       PeerStore peerStore) {
+        this.taskExecutor = taskExecutor;
         this.peerInitializer = peerInitializer;
         this.peerStore = peerStore;
         this.listenPort = DEFAULT_PORT;
         this.nodes = nodes;
         initializePeers();
-        listenToSocket(taskExecutor);
+        listenToSocket();
     }
-
+    
     /**
      * Pauses listening to the peer network
      */
@@ -71,7 +73,7 @@ public class PeerClient {
 
     void initializePeers() {
         if (peerStore.getPeers().isEmpty()) {
-            LOGGER.info("PeerStore does not exist.. Creating...");
+            LOGGER.info("Peer list does not exist.. Writing to database..");
             /*
              * In future networks, these will route to servers running the daemon. For now, it's just the above nodes.
              */
@@ -86,14 +88,13 @@ public class PeerClient {
         }
     }
 
-    private void listenToSocket(TaskExecutor taskExecutor) {
+    private void listenToSocket() {
         taskExecutor.execute(() -> {
             try (ServerSocket listenSocket = new ServerSocket(listenPort)) {
                 while (shouldRun) //Doesn't actually quit right when shouldRun is changed, as while loop is pending.
                 {
                     Peer peer = peerInitializer.initializePeer(listenSocket.accept());
-                    peerStore.save(peer);
-                    peer.run();
+                    connectToPeer(peer);
                 }
 
             } catch(java.net.BindException e) {
@@ -104,7 +105,7 @@ public class PeerClient {
             }
         });
     }
-
+    
     /**
      * Attempts a connection to an external peer
      *
@@ -113,12 +114,15 @@ public class PeerClient {
     public void connectToPeer(Peer peer) {
         try {
             peerStore.save(peer);
-            peer.run();
+            taskExecutor.execute(() -> {
+                peer.run();
+            });
+            LOGGER.debug("Connected to " + peer.getIdentifier());
         } catch (Exception e) {
             LOGGER.warn("Unable to connect to " + peer.getRemoteHost() + ":" + peer.getRemotePort());
         }
     }
-
+    
     /**
      * Announces the same message to all peers simultaneously. Useful when re-broadcasting messages.
      *
@@ -143,7 +147,7 @@ public class PeerClient {
                 .forEach(peer -> {
                     LOGGER.info("Sent:: " + toBroadcast);
                     peer.write(toBroadcast);
-                });
+        });
     }
 
     /*

@@ -18,7 +18,7 @@
 package io.smilo.api.db;
 
 import java.nio.ByteBuffer;
-import java.util.List;
+import java.util.Map;
 
 public interface Store {
 
@@ -26,18 +26,14 @@ public interface Store {
 
     byte[] get(String collection, ByteBuffer key);
 
-    List<String> getAll(String collection);
+    Map<String,String> getAll(String collection);
 
-    void delete(String collection, ByteBuffer key);
-
-    void startTransaction();
-
-    void commitTransaction();
-
-    void rollback();
+    byte[] last(String collection);
 
     void initializeCollection(String collectionName);
 
     void clear(String collectionName);
+
+    Long getEntries(String collectionName);
 
 }

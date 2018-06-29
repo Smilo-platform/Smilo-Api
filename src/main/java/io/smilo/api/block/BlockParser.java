@@ -27,11 +27,9 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * https://smilo-platform.atlassian.net/wiki/spaces/SP/pages/96305164/Blocks TODO: refactor
@@ -54,71 +52,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         String transactionString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
         block += transactionString + "}";
         return block;
-    }
-
-    /**
-     * See above for a lot of information. This constructor accepts the raw block format instead of all the arguments separately!
-     *
-     * @param rawBlock String representing the raw data of a block
-     * @return parsed block
-     * @throws io.smilo.api.block.BlockParseException thrown when we failed to parse your block
-     */
-    //TODO: remove this when genesis block is rewritten in DatabaseManager
-    public Block parseRawBlock(String rawBlock) throws BlockParseException {
-        /*
-         * Using a workaround for the unknown number of transactions, which would each be split into multiple parts as they
-         * contain a comma as part of the signature. As such, all part up to and including the list of transactions are parsed
-         * manually. Then, the remainder can be separated using the split command.
-         */
-        String[] parts = new String[7];
-        parts[0] = rawBlock.substring(0, rawBlock.indexOf("}") + 1); // {timestamp:blocknum:prevBlockHash:nodeAddress}
-        rawBlock = rawBlock.substring(rawBlock.indexOf("}") + 2); //Account for comma
-        parts[1] = rawBlock.substring(0, rawBlock.indexOf("}") + 1); // {ledgerHash}
-        rawBlock = rawBlock.substring(rawBlock.indexOf("}") + 2); //Account for comma, again
-        parts[2] = rawBlock.substring(0, rawBlock.indexOf("}") + 1); // {transactions}
-        rawBlock = rawBlock.substring(rawBlock.indexOf("}") + 2); //Account for comma a third time
-        String[] partsInitial = rawBlock.split(",");
-        for (int i = 3; i < 7; i++) {
-            parts[i] = partsInitial[i - 3];
-        }
-        LOGGER.info("Block parts: " + parts.length);
-        for (int i = 0; i < parts.length; i++) {
-            String toPrint = parts[i];
-            if (parts[i].length() > 40) {
-                toPrint = parts[i].substring(0, 20) + "..." + parts[i].substring(parts[i].length() - 20);
-            }
-            LOGGER.info("     " + i + ": " + toPrint);
-        }
-        String firstPart = parts[0].replace("{", "");
-        firstPart = firstPart.replace("}", "");
-        String[] firstPartParts = firstPart.split(":"); //Great name, huh?
-        try {
-            long timestamp = Long.parseLong(firstPartParts[0]);
-            int blockNum = Integer.parseInt(firstPartParts[1]);
-            String previousBlockHash = firstPartParts[2];
-            String redeemAddress = firstPartParts[3];
-            String ledgerHash = parts[1].replace("{", "").replace("}", "");
-            String transactionsString = parts[2].replace("{", "").replace("}", "");
-            List<Transaction> transactions = new ArrayList<>();
-            String[] rawTransactions = transactionsString.split("\\*"); //Transactions are separated by an asterisk, as the colon, double-colon, and comma are all used in other places, and would be a pain to use here.
-            for (String rawTransaction : rawTransactions) {
-                if (isEmpty(rawTransaction)) {
-                    LOGGER.info("No transactions found for block!");
-                } else {
-                    //TODO:fix this
-//                    transactions.add(transactionParser.build(rawTransaction));
-                }
-            }
-            //parts[3] is a block hash
-            String nodeSignature = parts[4].replace("{", "") + "," + parts[5].replace("}", "");
-            int nodeSignatureIndex = Integer.parseInt(parts[6].replace("{", "").replace("}", ""));
-
-            Block block =  new Block(timestamp, blockNum, previousBlockHash, redeemAddress, ledgerHash, transactions, nodeSignature, nodeSignatureIndex);
-            block.hashBlock();
-            return block;
-        } catch (Exception e) {
-            throw new BlockParseException(rawBlock, "Something went wrong when parsing a block!", e);
-        }
     }
 
     @Override
@@ -161,15 +94,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         } catch (Exception e) {
             LOGGER.error("Oops " + e);
             return false;
-        }
-    }
-
-    @Override
-    public void hash(Block block) {
-        try {
-            block.setBlockHash(generateDataHash(block.getHashableData().getBytes()));
-        } catch (Exception ex) {
-            LOGGER.error("Unable to create data hash for block", ex);
         }
     }
 
