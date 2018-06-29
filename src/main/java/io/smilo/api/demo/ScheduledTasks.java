@@ -21,11 +21,10 @@ public class ScheduledTasks {
     private Websocket websocket;
     private static final Logger LOGGER = Logger.getLogger(ScheduledTasks.class);
     private Block lastBlock;
-    private static List<Transaction> txPool = new ArrayList<>(); // Todo solve this
+    private static List<Transaction> txPool = new ArrayList<>();
 
-    //@Scheduled(fixedRate = 16000) // TODO enable/fix blocks
+    @Scheduled(fixedRate = 16000)
     public void sendBlock(){
-
         Block block;
         if(lastBlock == null){
             // Genesis block
@@ -51,7 +50,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = 4500)
+    //@Scheduled(fixedRate = 4500)
     public void generateTransaction(){
         Random rand = new Random();
         int inputAmount = rand.nextInt(5000) + 1;
@@ -59,7 +58,7 @@ public class ScheduledTasks {
         int assetId = 1;
 
         Transaction tx = new Transaction(System.currentTimeMillis(), assetId, getRandomAddress(), inputAmount, fee, createHash());
-        tx.setTxOutput(addTxOutputData(tx.getInputAmount())); // TODO solve this
+        tx.setTxOutput(addTxOutputData(tx.getInputAmount()));
 
         // Add transaction to pool
         txPool.add(tx);
@@ -151,18 +150,18 @@ public class ScheduledTasks {
 
             int i = 0;
             for(Transaction tx : txPool){
-                JSONObject transactions  = new JSONObject();
-                transactions.put(i, getTxObject(tx));
+                txArray.add(i, getTxObject(tx));
                 i++;
             }
+
             // Empty transaction pool
-            txPool = null;
+            txPool = new ArrayList<>();
 
             return txArray;
         }catch (Exception ex){
             LOGGER.error("Reading transaction pool failed");
         }
-        return null;
+        return new JSONArray();
     }
 
     public void sendMsg(JSONObject message, String type){
@@ -179,5 +178,4 @@ public class ScheduledTasks {
             LOGGER.error("Sending message failed");
         }
     }
-
 }
