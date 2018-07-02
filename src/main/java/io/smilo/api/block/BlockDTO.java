@@ -27,7 +27,7 @@ public class BlockDTO {
     private static final int VERSION = 1;
 
     private long timestamp;
-    private int blockNum;
+    private long blockNum;
     private String previousBlockHash;
     private String ledgerHash;
     private List<TransactionDTO> transactions;
@@ -52,11 +52,11 @@ public class BlockDTO {
         this.timestamp = timestamp;
     }
 
-    public int getBlockNum() {
+    public long getBlockNum() {
         return blockNum;
     }
 
-    public void setBlockNum(int blockNum) {
+    public void setBlockNum(long blockNum) {
         this.blockNum = blockNum;
     }
 

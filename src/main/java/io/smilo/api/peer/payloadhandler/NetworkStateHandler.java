@@ -38,7 +38,7 @@ public class NetworkStateHandler implements PayloadHandler {
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
         if ((blockStore.getLatestBlockHeight() + 1) < Integer.parseInt(parts.get(1))) {
-            networkState.setTopBlock(Integer.parseInt(parts.get(1)));
+            networkState.setTopBlock(Long.parseLong(parts.get(1)));
             networkState.setTopHash(String.valueOf(parts.get(2)));
         }
     }

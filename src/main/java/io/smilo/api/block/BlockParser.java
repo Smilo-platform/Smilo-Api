@@ -74,12 +74,12 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         // Todo: make this number flexible. should be decided by the amount of nodes available
         try {
             //Recalculate block hash
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            //Prevent empty transaction sets from tripping with a negative substring index
-            String blockData = generateBlockData(block.getTimestamp(), block.getBlockNum(), block.getPreviousBlockHash(), block.getRedeemAddress(), block.getLedgerHash(), block.getTransactions());
-            String blockHash = DatatypeConverter.printHexBinary(md.digest(blockData.getBytes("UTF-8")));
-            //This is the message signed by the block creating node
-            String fullBlock = blockData + ",{" + blockHash + "}";
+//            MessageDigest md = MessageDigest.getInstance("SHA-256");
+//            //Prevent empty transaction sets from tripping with a negative substring index
+//            String blockData = generateBlockData(block.getTimestamp(), block.getBlockNum(), block.getPreviousBlockHash(), block.getRedeemAddress(), block.getLedgerHash(), block.getTransactions());
+//            String blockHash = DatatypeConverter.printHexBinary(md.digest(blockData.getBytes("UTF-8")));
+//            //This is the message signed by the block creating node
+//            String fullBlock = blockData + ",{" + blockHash + "}";
 //            if (!addressUtility.verifyMerkleSignature(fullBlock, block.getNodeSignature(), block.getRedeemAddress(), block.getNodeSignatureIndex())) {
 //                LOGGER.info("Block didn't verify for " + block.getRedeemAddress() + " with index " + block.getNodeSignatureIndex());
 //                LOGGER.info("Signature mismatch error");

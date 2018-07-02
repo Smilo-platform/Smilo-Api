@@ -41,7 +41,7 @@ public class RequestNetStateHandler implements PayloadHandler {
 
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
-        Integer networkHeight = blockStore.getLatestBlockHeight() + 1;
+        Long networkHeight = blockStore.getLatestBlockHeight() + 1;
         LOGGER.debug("Data: NETWORK_STATE, BlockchainLength: " + networkHeight + ", LatestBlock: " + blockStore.getLatestBlockHash());
         peer.write("NETWORK_STATE " + networkHeight + " " + blockStore.getLatestBlockHash());
         pendingBlockDataPool.getPendingData(Transaction.class).stream()

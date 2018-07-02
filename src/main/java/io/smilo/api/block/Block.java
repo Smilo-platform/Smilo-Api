@@ -20,15 +20,9 @@ package io.smilo.api.block;
 
 import io.smilo.api.block.data.transaction.Transaction;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * This class provides all functionality related to block verification and usage. A block contains: - Timestamp (Unix Epoch) - Block number - Previous block hash - ledgerHash - Transaction list
@@ -37,7 +31,7 @@ import static java.util.stream.Collectors.joining;
 public class Block {
 
     private long timestamp;
-    private int blockNum;
+    private Long blockNum;
     private String previousBlockHash;
     private String ledgerHash;
     private List<Transaction> transactions;
@@ -75,7 +69,7 @@ public class Block {
      * @param nodeSignature Node's signature of the block
      * @param nodeSignatureIndex Node's signature index used when generating nodeSignature
      */
-    public Block(long timestamp, int blockNum, String previousBlockHash, String redeemAddress, String ledgerHash, List<Transaction> transactions, String nodeSignature, int nodeSignatureIndex) {
+    public Block(long timestamp, Long blockNum, String previousBlockHash, String redeemAddress, String ledgerHash, List<Transaction> transactions, String nodeSignature, int nodeSignatureIndex) {
         this.timestamp = timestamp;
         this.blockNum = blockNum;
         this.previousBlockHash = previousBlockHash;
@@ -121,7 +115,7 @@ public class Block {
         return timestamp;
     }
 
-    public int getBlockNum() {
+    public long getBlockNum() {
         return blockNum;
     }
 
@@ -161,7 +155,7 @@ public class Block {
         this.timestamp = timestamp;
     }
 
-    public void setBlockNum(int blockNum) {
+    public void setBlockNum(Long blockNum) {
         this.blockNum = blockNum;
     }
 

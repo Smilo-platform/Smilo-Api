@@ -27,7 +27,7 @@ public class NetworkState {
     private final static Logger LOGGER = Logger.getLogger(NetworkState.class);
 
     private boolean catchupMode = true;
-    private int topBlock = 0;
+    private long topBlock = 0;
     private String topHash = null;
 
     private BlockStore blockStore;
@@ -63,7 +63,7 @@ public class NetworkState {
         return catchupMode;
     }
 
-    public int getTopBlock() {
+    public long getTopBlock() {
         return topBlock;
     }
 
@@ -71,7 +71,7 @@ public class NetworkState {
         return topHash;
     }
 
-    public void setTopBlock(int topBlock) {
+    public void setTopBlock(Long topBlock) {
         this.topBlock = topBlock;
         updateCatchupMode();
     }

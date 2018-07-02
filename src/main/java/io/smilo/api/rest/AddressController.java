@@ -17,26 +17,25 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.block.Block;
-import io.smilo.api.block.BlockStore;
+import io.smilo.api.address.Address;
+import io.smilo.api.address.AddressManager;
+import io.smilo.api.address.AddressStore;
+import io.smilo.api.address.AddressUtility;
+import io.smilo.api.rest.models.Balance;
+import io.smilo.api.rest.service.BalanceServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BlockController {
+public class AddressController {
 
     @Autowired
-    BlockStore blockStore;
+    AddressStore addressStore;
 
-    @GetMapping("/block")
-    public Block respondAllBlocks() {
-        return blockStore.getLatestBlockFromStore();
-    }
-
-    @GetMapping("/block/{block}")
-    public Block respondBlock(@PathVariable("block") Long blockHeight) {
-        return blockStore.getBlock(blockHeight);
+    @GetMapping("/address/{address}")
+    public Address listAddress(@PathVariable("address") String address) {
+        return addressStore.findOrCreate(address);
     }
 }

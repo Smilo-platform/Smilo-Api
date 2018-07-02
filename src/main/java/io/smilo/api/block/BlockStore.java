@@ -19,6 +19,7 @@ package io.smilo.api.block;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smilo.api.address.AddressManager;
 import io.smilo.api.db.Store;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.nio.ByteBuffer.allocateDirect;
 
@@ -38,11 +40,13 @@ public class BlockStore {
     private List<SmiloChain> chains;
     private static final String COLLECTION_NAME = "block";
     private final ObjectMapper dataMapper;
+    private final AddressManager addressManager;
 
-    private int latestBlockHeight = -1;
+    private long latestBlockHeight = -1;
     private String latestBlockHash = "0000000000000000000000000000000000000000000000000000000000000000";
 
-    public BlockStore(Store store,  ObjectMapper dataMapper) {
+    public BlockStore(Store store, ObjectMapper dataMapper, AddressManager addressManager) {
+        this.addressManager = addressManager;
         this.chains = new ArrayList<>();
         this.store = store;
         this.dataMapper = dataMapper;
@@ -64,6 +68,7 @@ public class BlockStore {
             latestBlockHeight = latestBlock.getBlockNum();
             latestBlockHash = latestBlock.getBlockHash();
         } else {
+            addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
             // Todo
         }
     }
@@ -73,7 +78,7 @@ public class BlockStore {
      *
      * @return int height of latest block
      */
-    public int getLatestBlockHeight() {
+    public long getLatestBlockHeight() {
         return latestBlockHeight;
     }
 
@@ -90,7 +95,7 @@ public class BlockStore {
     /**
      * Set the height of the latest block
      */
-    public void setLatestBlockHeight(int blockHeight) {
+    public void setLatestBlockHeight(Long blockHeight) {
         latestBlockHeight = blockHeight;
     }
 
@@ -128,11 +133,25 @@ public class BlockStore {
      * @Integer blockNum
      * @return Block
      */
-    public Block getBlock(int blockNum) {
-        final ByteBuffer key = allocateDirect(100000);
-        key.put(Byte.parseByte(String.valueOf(blockNum))).flip();
+    public Block getBlock(long blockNum) {
+        final ByteBuffer key = allocateDirect(64);
+        key.putLong(Byte.parseByte(String.valueOf(blockNum))).flip();
 
         byte raw[] = store.get(COLLECTION_NAME, key);
+        BlockDTO result = null;
+        try {
+            result = dataMapper.readValue(raw, BlockDTO.class);
+        } catch (IOException e) {
+            LOGGER.error("Unable to convert byte array to block" + e);
+        }
+        if(result == null) {
+            return null;
+        }
+        return BlockDTO.toBlock(result);
+    }
+
+    public Block getLatestBlockFromStore() {
+        byte[] raw = store.last(COLLECTION_NAME);
         BlockDTO result = null;
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);
@@ -142,24 +161,13 @@ public class BlockStore {
         return BlockDTO.toBlock(result);
     }
 
-        public Block getLatestBlockFromStore() {
-            byte[] raw = store.last(COLLECTION_NAME);
-            BlockDTO result = null;
-            try {
-                result = dataMapper.readValue(raw, BlockDTO.class);
-            } catch (IOException e) {
-                LOGGER.error("Unable to convert byte array to block" + e);
-            }
-            return BlockDTO.toBlock(result);
+    public Boolean blockInBlockStoreAvailable(){
+        if(store.getEntries(COLLECTION_NAME) > 0L){
+            LOGGER.debug("Block has an entry");
+            return true;
+        } else {
+            LOGGER.debug("Block has no entries");
+            return false;
         }
-
-        public Boolean blockInBlockStoreAvailable(){
-            if(store.getEntries(COLLECTION_NAME) > 0L){
-                LOGGER.debug("Block has an entry");
-                return true;
-            } else {
-                LOGGER.debug("Block has no entries");
-                return false;
-            }
-        }
+    }
 }

@@ -91,7 +91,7 @@ public class PeerReceiver {
                 //Sleep for a bit, wait for responses before requesting more data.
                 Thread.sleep(300);
                 //Broadcast request for new block(s)
-                Integer blockNum =  blockStore.getLatestBlockHeight() + 1;
+                Long blockNum =  blockStore.getLatestBlockHeight() + 1;
                 LOGGER.info("Requesting block " + blockNum + "...");
                 peerClient.broadcast("GET_BLOCK " + blockNum);
             } catch (InterruptedException e) {
