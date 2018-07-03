@@ -15,25 +15,29 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer.payloadhandler;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import io.smilo.api.peer.Peer;
+import org.springframework.stereotype.Component;
 
-public interface Store {
+import java.util.List;
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+@Component
+public class CommitHandler implements PayloadHandler {
 
-    byte[] get(String collection, ByteBuffer key);
+    private final BlockHandler blockhandler;
 
-    Map<String,String> getAll(String collection);
+    public CommitHandler(BlockHandler blockhandler) {
+        this.blockhandler = blockhandler;
+    }
 
-    byte[] last(String collection);
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        blockhandler.handlePeerPayload(parts, peer);
+    }
 
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    @Override
+    public PayloadType supports() {
+        return PayloadType.COMMIT;
+    }
 }

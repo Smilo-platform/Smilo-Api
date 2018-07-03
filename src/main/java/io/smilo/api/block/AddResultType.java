@@ -15,23 +15,20 @@
  *
  */
 
-package io.smilo.api.rest.models;
+package io.smilo.api.block;
 
-public class Block {
+public enum AddResultType {
 
-    private final String status;
-    private final int height;
+    ADDED(true), QUEUED(true), DUPLICATE(false), VALIDATION_ERROR(false), FORK_ERROR(false), UNKNOWN(false);
 
-    public Block(int height, String status) {
-        this.height = height;
-        this.status = status;
+    private final boolean success;
+
+    private AddResultType(boolean success) {
+        this.success = success;
     }
 
-    public int getHeight() {
-        return height;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public String getStatus() {
-        return status;
-    }
 }

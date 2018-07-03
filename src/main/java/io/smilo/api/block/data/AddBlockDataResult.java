@@ -15,25 +15,30 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.block.data;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import io.smilo.api.block.AddResultType;
 
-public interface Store {
+public class AddBlockDataResult {
+    private final AddResultType type;
+    private final BlockData blockData;
+    private final String message;
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    public AddBlockDataResult(BlockData blockData, AddResultType type, String message) {
+        this.type = type;
+        this.message = message;
+        this.blockData = blockData;
+    }
 
-    byte[] get(String collection, ByteBuffer key);
+    public AddResultType getType() {
+        return type;
+    }
 
-    Map<String,String> getAll(String collection);
+    public BlockData getBlockData() {
+        return blockData;
+    }
 
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    public String getMessage() {
+        return message;
+    }
 }

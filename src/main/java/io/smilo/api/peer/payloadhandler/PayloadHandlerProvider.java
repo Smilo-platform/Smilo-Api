@@ -15,25 +15,23 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer.payloadhandler;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public interface Store {
+import java.util.List;
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+@Component
+public class PayloadHandlerProvider {
 
-    byte[] get(String collection, ByteBuffer key);
+    @Autowired
+    private List<PayloadHandler> handlers;
 
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    public PayloadHandler getPayloadHandler(PayloadType payloadType) {
+        return handlers.stream()
+                .filter(h -> h.supports().equals(payloadType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Could not find handler for " + payloadType));
+    }
 }

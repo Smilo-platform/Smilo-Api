@@ -15,25 +15,15 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer.payloadhandler;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import io.smilo.api.peer.Peer;
 
-public interface Store {
+import java.util.List;
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+public interface PayloadHandler {
 
-    byte[] get(String collection, ByteBuffer key);
-
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
+    void handlePeerPayload(List<String> parts, Peer peer);
+    PayloadType supports();
 
 }

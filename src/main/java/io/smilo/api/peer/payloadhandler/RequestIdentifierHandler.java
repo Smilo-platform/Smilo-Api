@@ -14,26 +14,26 @@
  * limitations under the License.
  *
  */
+package io.smilo.api.peer.payloadhandler;
 
-package io.smilo.api.db;
+import io.smilo.api.peer.Peer;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.List;
 
-public interface Store {
+@Component
+public class RequestIdentifierHandler implements PayloadHandler {
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    private final static Logger LOGGER = Logger.getLogger(RequestIdentifierHandler.class);
 
-    byte[] get(String collection, ByteBuffer key);
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        peer.write(PayloadType.RESPOND_IDENTIFIER.name() + " SMILOAPI");
+    }
 
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    @Override
+    public PayloadType supports() {
+        return PayloadType.REQUEST_IDENTIFIER;
+    }
 }

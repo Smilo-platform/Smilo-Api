@@ -1,0 +1,3 @@
+[submodule "Smilo-Core"]
+	path = Smilo-Core
+	url = git@github.com:Smilo-platform/Smilo-Core.git

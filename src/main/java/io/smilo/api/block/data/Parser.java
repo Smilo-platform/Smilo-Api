@@ -15,25 +15,15 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.block.data;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+public interface Parser<T> {
 
-public interface Store {
+    boolean isValid(T data);
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    T deserialize(byte[] data);
 
-    byte[] get(String collection, ByteBuffer key);
+    byte[] serialize(T data);
 
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    boolean supports(Class<?> clazz);
 }

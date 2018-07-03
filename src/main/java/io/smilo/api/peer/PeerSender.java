@@ -15,25 +15,21 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.springframework.stereotype.Component;
 
-public interface Store {
+@Component
+public class PeerSender {
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    private final PeerClient peerClient;
 
-    byte[] get(String collection, ByteBuffer key);
+    public PeerSender(PeerClient peerClient) {
+        this.peerClient = peerClient;
+    }
 
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    //TODO: fix type
+    public void broadcast(String type, String data) {
+        peerClient.broadcast(type + " " + data);
+    }
 }

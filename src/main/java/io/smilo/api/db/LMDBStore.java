@@ -17,21 +17,17 @@
 
 package io.smilo.api.db;
 
-import org.lmdbjava.Dbi;
-import org.lmdbjava.DbiFlags;
-import org.lmdbjava.Env;
-import org.lmdbjava.Txn;
+import org.lmdbjava.*;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.lmdbjava.Env.create;
 
 public class LMDBStore implements Store {
-
-    private final ThreadLocal<Txn<ByteBuffer>> transaction = new ThreadLocal<>();
 
     private final Map<String, Dbi<ByteBuffer>> dbs = new HashMap<>();
     private final Env<ByteBuffer> env;
@@ -48,9 +44,10 @@ public class LMDBStore implements Store {
         // TODO: review env settings
         this.env = create()
                 // LMDB also needs to know how large our DB might be. Over-estimating is OK.
-                .setMapSize(10_485_760)
+                .setMapSize(1_048_576 * 1_024L * 1_024L) // 1 TB?
                 // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
                 .setMaxDbs(5)
+                .setMaxReaders(100)
                 // Now let's open the Env. The same path can be concurrently opened and
                 // used in different processes, but do not open the same path twice in
                 // the same process at the same time.
@@ -58,8 +55,19 @@ public class LMDBStore implements Store {
 
     }
 
-    public void initializeCollection(String collectionName) {
-        getDatabase(collectionName);
+    @Override
+    public void clear(String collectionName) {
+        try (Txn<ByteBuffer> txn = env.txnWrite()) {
+            getDatabase(collectionName).drop(txn);
+            txn.commit();
+        }
+    }
+
+    @Override
+    public Long getEntries(String collectionName) {
+        try (Txn<ByteBuffer> txn = env.txnRead()) {
+            return getDatabase(collectionName).stat(txn).entries;
+        }
     }
 
     private Dbi<ByteBuffer> getDatabase(String collectionName) {
@@ -75,29 +83,41 @@ public class LMDBStore implements Store {
 
     @Override
     public void put(String collection, ByteBuffer key, ByteBuffer value) {
-        if (transaction.get() != null) {
-            getDatabase(collection).put(transaction.get(), key, value);
-        } else {
-            getDatabase(collection).put(key, value);
+        try (Txn<ByteBuffer> txn = env.txnWrite()) {
+            getDatabase(collection).put(txn, key, value);
+            txn.commit();
         }
     }
 
     @Override
-    // TODO: refactor
     public byte[] get(String collection, ByteBuffer key) {
         final ByteBuffer fetchedVal;
-        if (transaction.get() != null) {
-            getDatabase(collection).get(transaction.get(), key);
-            fetchedVal = transaction.get().val();
-        } else {
-            try (Txn<ByteBuffer> txn = env.txnRead()) {
-                getDatabase(collection).get(txn, key);
-                fetchedVal = txn.val();
-            }
+        try (Txn<ByteBuffer> txn = env.txnRead()) {
+            getDatabase(collection).get(txn, key);
+            fetchedVal = txn.val();
         }
-        //TODO: Make this beautiful
+        if(fetchedVal == null) return null;
         byte[] bytes = new byte[fetchedVal.remaining()];
 
+        fetchedVal.get(bytes);
+        return bytes;
+    }
+
+    @Override
+    public byte[] last(String collection) {
+        final ByteBuffer fetchedVal;
+        try (Txn<ByteBuffer> txn = env.txnRead()) {
+
+            final Cursor<ByteBuffer> cursor = getDatabase(collection).openCursor(txn);
+            cursor.seek(SeekOp.MDB_LAST);
+            try {
+                getDatabase(collection).get(txn, cursor.key());
+                fetchedVal = txn.val();
+            } catch(Exception e) {
+                return null;
+            }
+        }
+        byte[] bytes = new byte[fetchedVal.remaining()];
         for (int i = 0; i < fetchedVal.remaining(); i++) {
             bytes[i] = fetchedVal.get(i);
         }
@@ -105,35 +125,20 @@ public class LMDBStore implements Store {
     }
 
     @Override
-    public void delete(String collection, ByteBuffer key) {
-        if (transaction.get() != null) {
-            getDatabase(collection).delete(transaction.get(), key);
-        } else {
-            getDatabase(collection).delete(key);
+    public Map<String,String> getAll(String collection) {
+        try (Txn<ByteBuffer> txn = env.txnRead();
+             CursorIterator<ByteBuffer> cursor = getDatabase(collection).iterate(txn)) {
+
+            Map<String, String> result = new HashMap<>();
+            cursor.forEachRemaining(x -> { result.put(StandardCharsets.UTF_8.decode(x.key()).toString(), StandardCharsets.UTF_8.decode(x.val()).toString()); });
+
+            return result;
         }
     }
 
     @Override
-    public void startTransaction() {
-        if (transaction.get() == null) {
-            transaction.set(env.txnWrite());
-        } else {
-            throw new IllegalStateException("Transaction already active on this thread!");
-        }
-    }
-
-    @Override
-    public void commitTransaction() {
-        transaction.get().commit();
-        transaction.get().close();
-        transaction.remove();
-    }
-
-    @Override
-    public void rollback() {
-        transaction.get().abort();
-        transaction.get().close();
-        transaction.remove();
+    public void initializeCollection(String collectionName) {
+        getDatabase(collectionName);
     }
 
 }

@@ -15,25 +15,13 @@
  *
  */
 
-package io.smilo.api.db;
+package io.smilo.api.peer;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+import java.net.Socket;
 
-public interface Store {
+public interface PeerInitializer {
 
-    void put(String collection, ByteBuffer key, ByteBuffer value);
+    Peer initializePeer(String hostname, int port);
 
-    byte[] get(String collection, ByteBuffer key);
-
-    Map<String,String> getAll(String collection);
-
-    byte[] last(String collection);
-
-    void initializeCollection(String collectionName);
-
-    void clear(String collectionName);
-
-    Long getEntries(String collectionName);
-
+    Peer initializePeer(Socket socket);
 }
