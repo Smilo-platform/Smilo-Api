@@ -111,8 +111,12 @@ public class PeerReceiver {
     }
 
     private void handlePayload(List<String> parts, Peer peer) {
-        PayloadType type = PayloadType.valueOf(StringUtils.upperCase(parts.get(0)));
-        payloadHandlerProvider.getPayloadHandler(type).handlePeerPayload(parts, peer);
+        try {
+            PayloadType type = PayloadType.valueOf(StringUtils.upperCase(parts.get(0)));
+            payloadHandlerProvider.getPayloadHandler(type).handlePeerPayload(parts, peer);
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown payload: " + StringUtils.upperCase(parts.get(0)) + ", do nothing.");
+        }
     }
 
     /**

@@ -14,20 +14,26 @@
  * limitations under the License.
  *
  */
-
 package io.smilo.api.peer.payloadhandler;
 
-public enum PayloadType {
+import io.smilo.api.peer.Peer;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
-    NETWORK_STATE,
-    REQUEST_NET_STATE,
-    RESPOND_IDENTIFIER,
-    REQUEST_IDENTIFIER,
-    BLOCK,
-    COMMIT,
-    TRANSACTION,
-    MESSAGE,
-    PEER,
-    GET_PEER,
-    GET_BLOCK;
+import java.util.List;
+
+@Component
+public class RequestIdentifierHandler implements PayloadHandler {
+
+    private final static Logger LOGGER = Logger.getLogger(RequestIdentifierHandler.class);
+
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        peer.write(PayloadType.RESPOND_IDENTIFIER.name() + " SMILOAPI");
+    }
+
+    @Override
+    public PayloadType supports() {
+        return PayloadType.REQUEST_IDENTIFIER;
+    }
 }

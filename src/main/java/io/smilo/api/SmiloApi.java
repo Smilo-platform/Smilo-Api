@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
+
 @Component
 public class SmiloApi {
 
@@ -32,7 +34,6 @@ public class SmiloApi {
     private final PeerClient peerClient;
     private final BlockStore blockStore;
     private final String version;
-    public Boolean quit = false;
 
     public SmiloApi(@Value("${VERSION:prototype}") String version, PeerReceiver peerReceiver, PeerClient peerClient, BlockStore blockStore) {
         this.version = version;
@@ -45,7 +46,6 @@ public class SmiloApi {
      * Runs the main loop of the Smilo Api.
      */
     public void run() {
-        this.quit = false;
         LOGGER.info("Starting Smilo Platform Api " + version);
 
         blockStore.initialiseLatestBlock();
@@ -54,16 +54,16 @@ public class SmiloApi {
 
 
         /*
-          * Start the Api loop.
-          * - Create Peer connection (as a client) to the Smilo nodes
-          * - Receive blockHeight of nodes
-          * - Retrieve missing blocks
-          *     - All recieved blocks are valid blocks (APPROVED by the chain), no check is currently needed.
-          * - Parse blocks into NoSQL DB (LMDB)
-          *
+         * Start the Api loop.
+         * - Create Peer connection (as a client) to the Smilo nodes
+         * - Receive blockHeight of nodes
+         * - Retrieve missing blocks
+         *     - All recieved blocks are valid blocks (APPROVED by the chain), no check is currently needed.
+         * - Parse blocks into NoSQL DB (LMDB)
+         *
          */
         while (true) {
-            if (peerClient.getPeers().size() > 0){
+            if (peerClient.getPeers().size() > 0) {
                 peerReceiver.run();
                 try {
                     Thread.sleep(200);
@@ -80,13 +80,12 @@ public class SmiloApi {
                     LOGGER.error(e);
                 }
             }
-
-
-            // Quit?
-            if (quit){
-                break;
-            }
         }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        // Shutdown gracefully
     }
 
 }

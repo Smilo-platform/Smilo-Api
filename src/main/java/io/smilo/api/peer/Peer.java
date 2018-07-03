@@ -19,8 +19,10 @@ package io.smilo.api.peer;
 
 import org.apache.log4j.Logger;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,11 @@ public class Peer implements Runnable {
         this.initialized = false;
         this.remoteHost = socket.getInetAddress().getHostAddress();
         this.remotePort = socket.getPort();
+        try {
+            this.socket.setKeepAlive(true);
+        } catch (SocketException e) {
+            LOGGER.error("Could not set keep-Alive on socket" + e);
+        }
     }
 
     public Peer(String host, int port) throws IOException {
@@ -116,5 +123,14 @@ public class Peer implements Runnable {
     public String getIdentifier() {
         return remoteHost + " " + remotePort;
     }
-    
+
+    @PreDestroy
+    public void closePeer() {
+        LOGGER.warn("Closing peer...");
+        try {
+            socket.close();
+        } catch (IOException e) {
+            LOGGER.debug("Nothing to close");
+        }
+    }
 }

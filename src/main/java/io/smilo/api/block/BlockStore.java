@@ -135,16 +135,14 @@ public class BlockStore {
      */
     public Block getBlock(long blockNum) {
         final ByteBuffer key = allocateDirect(64);
-        key.putLong(Byte.parseByte(String.valueOf(blockNum))).flip();
+        key.putLong(blockNum).flip();
 
         byte raw[] = store.get(COLLECTION_NAME, key);
-        BlockDTO result = null;
+        BlockDTO result;
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);
         } catch (IOException e) {
             LOGGER.error("Unable to convert byte array to block" + e);
-        }
-        if(result == null) {
             return null;
         }
         return BlockDTO.toBlock(result);

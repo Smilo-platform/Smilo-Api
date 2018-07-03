@@ -17,17 +17,27 @@
 
 package io.smilo.api.peer.payloadhandler;
 
-public enum PayloadType {
+import io.smilo.api.peer.Peer;
+import org.springframework.stereotype.Component;
 
-    NETWORK_STATE,
-    REQUEST_NET_STATE,
-    RESPOND_IDENTIFIER,
-    REQUEST_IDENTIFIER,
-    BLOCK,
-    COMMIT,
-    TRANSACTION,
-    MESSAGE,
-    PEER,
-    GET_PEER,
-    GET_BLOCK;
+import java.util.List;
+
+@Component
+public class CommitHandler implements PayloadHandler {
+
+    private final BlockHandler blockhandler;
+
+    public CommitHandler(BlockHandler blockhandler) {
+        this.blockhandler = blockhandler;
+    }
+
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        blockhandler.handlePeerPayload(parts, peer);
+    }
+
+    @Override
+    public PayloadType supports() {
+        return PayloadType.COMMIT;
+    }
 }
