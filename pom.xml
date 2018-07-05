@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.smilo</groupId>
-    <artifactId>smilo-api</artifactId>
+    <artifactId>api</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>api</name>
+    <name>Smilo-api</name>
     <description>Smilo Smart Platform API</description>
 
     <properties>

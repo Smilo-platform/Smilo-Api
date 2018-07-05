@@ -40,7 +40,6 @@ public class PendingBlockDataPool {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBlockDataPool.class);
 
-    private final Set<BlockData> allBroadcastBlockData = new HashSet<>();
     private Set<BlockData> pendingBlockData;
 
     private final PeerSender peerSender;
@@ -63,7 +62,7 @@ public class PendingBlockDataPool {
     public void addTransaction(String rawTransaction) {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
-        addBlockDataToPool(transaction);
+        addBlockData(transaction);
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {
@@ -85,32 +84,6 @@ public class PendingBlockDataPool {
             LOGGER.error("An exception has occurred..." + e);
             return new AddBlockDataResult(blockData, AddResultType.UNKNOWN, "An exception has occurred");
         }
-    }
-
-    private boolean addBlockDataToPool(BlockData blockData) {
-        boolean added = false;
-        try {
-            Parser parser = parserProvider.getParser(blockData.getClass());
-            Boolean alreadyExists = allBroadcastBlockData.contains(blockData);
-
-            //Data was not already received
-            if (!alreadyExists) {
-
-                allBroadcastBlockData.add(blockData);
-                AddBlockDataResult result = addBlockData(blockData);
-
-                if (result.getType().isSuccess()) {
-                    LOGGER.info("New " + blockData.getClass().getSimpleName() + " on network:");
-                    peerSender.broadcast(StringUtils.upperCase(blockData.getClass().getSimpleName()), BlockDataParser.encode(parser.serialize(blockData)));
-                    added = true;
-                } else {
-                    LOGGER.error("Not a good " + blockData.getClass().getSimpleName() + "!");
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.error("Not a good " + blockData.getClass().getSimpleName() + "!");
-        }
-        return added;
     }
 
     /**
