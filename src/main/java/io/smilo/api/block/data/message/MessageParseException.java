@@ -15,26 +15,23 @@
  *
  */
 
-package io.smilo.api.block;
+package io.smilo.api.block.data.message;
 
-import io.smilo.api.block.data.Parser;
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
+public class MessageParseException extends RuntimeException {
 
-import java.util.List;
-
-@Component
-public class ParserProvider  {
-
-    private static final Logger LOGGER = Logger.getLogger(ParserProvider.class);
-
-    private final List<Parser> providers;
-
-    public ParserProvider(List<Parser> providers) {
-        this.providers = providers;
+    public MessageParseException() {
     }
 
-    public Parser getParser(Class<?> clazz) {
-        return providers.stream().filter(p -> p.supports(clazz)).findFirst().orElseThrow(() -> new IllegalArgumentException("Unable to find matching Data parser!"));
+    public MessageParseException(String message) {
+        super(message);
     }
+
+    public MessageParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MessageParseException(Throwable cause) {
+        super(cause);
+    }
+
 }

@@ -24,6 +24,7 @@ import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.BlockData;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
+import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.peer.PeerSender;
 import org.apache.log4j.Logger;
@@ -52,12 +53,11 @@ public class PendingBlockDataPool {
         pendingBlockData = new HashSet<>();
     }
 
-//    Todo: Add message processing
-//    public void addMessage(String rawMessage) {
-//        Parser parser = parserProvider.getParser(Message.class);
-//        Message message = (Message) parser.deserialize(BlockDataParser.decode(rawMessage));
-//        addBlockDataToPool(message);
-//    }
+    public void addMessage(String rawMessage) {
+        Parser parser = parserProvider.getParser(Message.class);
+        Message message = (Message) parser.deserialize(BlockDataParser.decode(rawMessage));
+        addBlockData(message);
+    }
 
     public void addTransaction(String rawTransaction) {
         Parser parser = parserProvider.getParser(Transaction.class);
@@ -78,6 +78,8 @@ public class PendingBlockDataPool {
                 LOGGER.info("Throwing out a message deemed invalid");
                 return new AddBlockDataResult(blockData, AddResultType.VALIDATION_ERROR, "Throwing out a " + blockData.getClass().getSimpleName() + " deemed invalid");
             }
+
+            // Todo: Do something!
 
             return new AddBlockDataResult(blockData, AddResultType.ADDED, "Added " + blockData.getClass().getSimpleName());
         } catch (Exception e) {

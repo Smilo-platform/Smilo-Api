@@ -15,15 +15,7 @@
  *
  */
 
-package io.smilo.api.peer.payloadhandler;
+package io.smilo.api;
 
-public enum PayloadType {
-
-    NETWORK_STATE,
-    REQUEST_NET_STATE,
-    REQUEST_IDENTIFIER,
-    RESPOND_IDENTIFIER,
-    TRANSACTION,
-    BLOCK,
-    COMMIT;
+public interface StableTests {
 }

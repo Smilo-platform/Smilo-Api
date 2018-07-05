@@ -19,12 +19,15 @@ package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class TransactionHandler implements PayloadHandler {
+
+    private static final Logger LOGGER = Logger.getLogger(TransactionHandler.class);
 
     private PendingBlockDataPool pendingBlockDataPool;
 
@@ -38,7 +41,5 @@ public class TransactionHandler implements PayloadHandler {
     }
 
     @Override
-    public PayloadType supports() {
-        return PayloadType.TRANSACTION;
-    }
+    public PayloadType supports() { return PayloadType.TRANSACTION; }
 }
