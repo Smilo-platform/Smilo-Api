@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
+import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -73,7 +74,7 @@ public class AddressUtility {
             }
             LOGGER.trace("Address has correct characterset");
             String givenEnding = address.substring(34); //Characters 34 to 37 should be all that's left. Remember we start counting at 0.
-            String correctEnding = SHA256ReturnBase32(prefix + treeRoot).substring(0, 4); //First four characters of Base32-formatted SHA256 of treeRoot
+            String correctEnding = Objects.requireNonNull(SHA256ReturnBase32(prefix + treeRoot)).substring(0, 4); //First four characters of Base32-formatted SHA256 of treeRoot
             if (!correctEnding.equals(givenEnding)) {
                 LOGGER.debug("Address has incorrect ending, should be " + correctEnding + " instead of " + givenEnding);
                 return false;

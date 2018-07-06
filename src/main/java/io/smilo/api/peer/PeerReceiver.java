@@ -97,6 +97,7 @@ public class PeerReceiver {
             } catch (InterruptedException e) {
                 //If this throws an error, something's terribly off.
                 LOGGER.error("P2pNetwork has mental illness.");
+                Thread.currentThread().interrupt();
             }
         }
     }
