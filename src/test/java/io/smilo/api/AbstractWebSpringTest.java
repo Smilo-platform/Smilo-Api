@@ -17,8 +17,6 @@
 
 package io.smilo.api;
 
-import io.smilo.api.address.AddressManager;
-import io.smilo.api.address.AddressStore;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import static java.nio.ByteBuffer.allocateDirect;
 

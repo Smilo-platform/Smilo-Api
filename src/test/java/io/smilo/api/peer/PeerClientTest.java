@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 public class PeerClientTest extends AbstractSpringTest {
 

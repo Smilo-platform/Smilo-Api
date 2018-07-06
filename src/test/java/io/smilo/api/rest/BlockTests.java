@@ -23,7 +23,6 @@ import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
 import org.apache.log4j.Logger;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
