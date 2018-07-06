@@ -28,7 +28,6 @@ import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.peer.PeerSender;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

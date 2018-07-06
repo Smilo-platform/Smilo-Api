@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 @Category({StableTests.class})
@@ -51,6 +50,50 @@ public class PayLoadHandlerTest extends AbstractSpringTest {
         PayloadHandler result = payloadHandler.getPayloadHandler(type);
 
         assertTrue(result.supports().name().equals("TRANSACTION"));
+    }
+
+    @Test
+    public void testPayloadHandlerNETWORK_STATE() {
+        PayloadType type = PayloadType.valueOf(StringUtils.upperCase("NETWORK_STATE"));
+        PayloadHandler result = payloadHandler.getPayloadHandler(type);
+
+        assertTrue(result.supports().name().equals("NETWORK_STATE"));
+    }
+
+    @Test
+    public void testPayloadHandlerREQUEST_NET_STATE() {
+        PayloadType type = PayloadType.valueOf(StringUtils.upperCase("REQUEST_NET_STATE"));
+        PayloadHandler result = payloadHandler.getPayloadHandler(type);
+
+        assertTrue(result.supports().name().equals("REQUEST_NET_STATE"));
+    }
+
+    @Test
+    public void testPayloadHandlerREQUEST_IDENTIFIER() {
+        PayloadType type = PayloadType.valueOf(StringUtils.upperCase("REQUEST_IDENTIFIER"));
+        PayloadHandler result = payloadHandler.getPayloadHandler(type);
+
+        assertTrue(result.supports().name().equals("REQUEST_IDENTIFIER"));
+    }
+
+    @Test
+    public void testPayloadHandlerRESPOND_IDENTIFIER() {
+        boolean result = false;
+        try {
+            PayloadType type = PayloadType.valueOf(StringUtils.upperCase("RESPOND_IDENTIFIER"));
+            PayloadHandler handler = payloadHandler.getPayloadHandler(type);
+        } catch (IllegalArgumentException e){
+            result = true;
+        }
+        assertTrue(result);
+    }
+
+    @Test
+    public void testPayloadHandlerBLOCK() {
+        PayloadType type = PayloadType.valueOf(StringUtils.upperCase("BLOCK"));
+        PayloadHandler result = payloadHandler.getPayloadHandler(type);
+
+        assertTrue(result.supports().name().equals("BLOCK"));
     }
 
     @Test

@@ -17,21 +17,12 @@
 
 package io.smilo.api.address;
 
-import io.smilo.api.db.Store;
 import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
 
-import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**

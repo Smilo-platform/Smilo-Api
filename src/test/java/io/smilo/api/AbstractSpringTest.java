@@ -23,6 +23,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -36,9 +38,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * - Has mocked peers, initialized in MockedPeerInitializer, providing testable p2p requests/responses
  */
 @SpringBootTest(classes = {Application.class, TestConfig.class})
-@ActiveProfiles({"test", "disableMainLoop"})
+@ActiveProfiles({"test"})
 @Category(StableTests.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 public abstract class AbstractSpringTest {
+    @Autowired
+    private TestUtility testUtility;
 
+    @After
+    public void cleanUpFiles() {
+        testUtility.cleanUp();
+    }
 }

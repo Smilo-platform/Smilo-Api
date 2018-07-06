@@ -17,41 +17,28 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.SmiloApiTests;
-import io.smilo.api.rest.models.Price;
-import org.junit.Assert;
+import io.smilo.api.AbstractWebSpringTest;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.BDDAssertions.then;
-
-public class priceTests extends SmiloApiTests {
-
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+public class priceTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToPriceController() throws Exception {
-        @SuppressWarnings("rawtypes")
-        ResponseEntity<List> response = this.testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/price", List.class);
-
-        then(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Test
-    public void shouldReturnValueWhenSendingRequestToPriceController() throws Exception {
-        @SuppressWarnings("rawtypes")
-        ResponseEntity<List> response = this.testRestTemplate.getForEntity(
-                "http://localhost:" + port + "/price", List.class);
-
-        List body = response.getBody();
-        Assert.assertEquals("Test failed!",body.get(0).toString(), "{currencyFrom=XSM, currencyTo=USD, value=0.25}");
+        this.webClient.perform(MockMvcRequestBuilders.get("/price"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].currencyFrom").value("XSM"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].currencyTo").value("USD"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].value").value(0.25))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].currencyFrom").value("XSM"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].currencyTo").value("ETH"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].value").value(0.05))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[2].currencyFrom").value("XSM"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[2].currencyTo").value("BTC"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[2].value").value(0.005))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[3].currencyFrom").value("XSP"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[3].currencyTo").value("XSM"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[3].value").value(0.2));
     }
 }
