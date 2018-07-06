@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 @Component
-@Profile("default")
+@Profile({"default"})
 public class DefaultPeerInitializer implements PeerInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DefaultPeerInitializer.class);

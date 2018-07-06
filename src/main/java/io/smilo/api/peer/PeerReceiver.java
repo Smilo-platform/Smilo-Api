@@ -16,7 +16,7 @@
  */
 package io.smilo.api.peer;
 
-import io.smilo.api.block.*;
+import io.smilo.api.block.BlockStore;
 import io.smilo.api.peer.payloadhandler.PayloadHandlerProvider;
 import io.smilo.api.peer.payloadhandler.PayloadType;
 import org.apache.commons.lang3.StringUtils;
@@ -115,7 +115,7 @@ public class PeerReceiver {
             PayloadType type = PayloadType.valueOf(StringUtils.upperCase(parts.get(0)));
             payloadHandlerProvider.getPayloadHandler(type).handlePeerPayload(parts, peer);
         } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown payload: " + StringUtils.upperCase(parts.get(0)) + ", do nothing.");
+            LOGGER.error("Unknown payload: " + StringUtils.upperCase(parts.get(0)) + ", do nothing. ");
         }
     }
 

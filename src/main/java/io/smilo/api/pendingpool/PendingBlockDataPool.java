@@ -24,10 +24,10 @@ import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.BlockData;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
+import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.peer.PeerSender;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -40,7 +40,6 @@ public class PendingBlockDataPool {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBlockDataPool.class);
 
-    private final Set<BlockData> allBroadcastBlockData = new HashSet<>();
     private Set<BlockData> pendingBlockData;
 
     private final PeerSender peerSender;
@@ -53,17 +52,16 @@ public class PendingBlockDataPool {
         pendingBlockData = new HashSet<>();
     }
 
-//    Todo: Add message processing
-//    public void addMessage(String rawMessage) {
-//        Parser parser = parserProvider.getParser(Message.class);
-//        Message message = (Message) parser.deserialize(BlockDataParser.decode(rawMessage));
-//        addBlockDataToPool(message);
-//    }
+    public void addMessage(String rawMessage) {
+        Parser parser = parserProvider.getParser(Message.class);
+        Message message = (Message) parser.deserialize(BlockDataParser.decode(rawMessage));
+        addBlockData(message);
+    }
 
     public void addTransaction(String rawTransaction) {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
-        addBlockDataToPool(transaction);
+        addBlockData(transaction);
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {
@@ -80,37 +78,13 @@ public class PendingBlockDataPool {
                 return new AddBlockDataResult(blockData, AddResultType.VALIDATION_ERROR, "Throwing out a " + blockData.getClass().getSimpleName() + " deemed invalid");
             }
 
+            // Todo: Do something!
+
             return new AddBlockDataResult(blockData, AddResultType.ADDED, "Added " + blockData.getClass().getSimpleName());
         } catch (Exception e) {
             LOGGER.error("An exception has occurred..." + e);
             return new AddBlockDataResult(blockData, AddResultType.UNKNOWN, "An exception has occurred");
         }
-    }
-
-    private boolean addBlockDataToPool(BlockData blockData) {
-        boolean added = false;
-        try {
-            Parser parser = parserProvider.getParser(blockData.getClass());
-            Boolean alreadyExists = allBroadcastBlockData.contains(blockData);
-
-            //Data was not already received
-            if (!alreadyExists) {
-
-                allBroadcastBlockData.add(blockData);
-                AddBlockDataResult result = addBlockData(blockData);
-
-                if (result.getType().isSuccess()) {
-                    LOGGER.info("New " + blockData.getClass().getSimpleName() + " on network:");
-                    peerSender.broadcast(StringUtils.upperCase(blockData.getClass().getSimpleName()), BlockDataParser.encode(parser.serialize(blockData)));
-                    added = true;
-                } else {
-                    LOGGER.error("Not a good " + blockData.getClass().getSimpleName() + "!");
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.error("Not a good " + blockData.getClass().getSimpleName() + "!");
-        }
-        return added;
     }
 
     /**

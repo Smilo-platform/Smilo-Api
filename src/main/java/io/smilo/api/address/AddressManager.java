@@ -107,7 +107,9 @@ public class AddressManager {
      * @return int Last signature index used by address
      */
     public int getAddressSignatureCount(String address) {
-        return addressStore.getByAddress(address).map(Address::getSignatureCount).orElse(-1);
+        Address result = addressStore.getByAddress(address);
+        if (result == null) return -1;
+        return result.getSignatureCount();
     }
 
     /**
@@ -155,7 +157,9 @@ public class AddressManager {
      * @return long Balance of address
      */
     public long getAddressBalance(String address) {
-        return addressStore.getByAddress(address).map(Address::getBalance).orElse(0L);
+        Address result = addressStore.getByAddress(address);
+        if (result == null) return 0L;
+        return result.getBalance();
     }
 
     /**

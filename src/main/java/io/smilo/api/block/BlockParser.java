@@ -24,9 +24,7 @@ import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -70,24 +68,8 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
             return true;
         }
 
-        // Todo: Address can not have generated a block in the last x blocks
-        // Todo: make this number flexible. should be decided by the amount of nodes available
+        // Todo: Create default
         try {
-            //Recalculate block hash
-//            MessageDigest md = MessageDigest.getInstance("SHA-256");
-//            //Prevent empty transaction sets from tripping with a negative substring index
-//            String blockData = generateBlockData(block.getTimestamp(), block.getBlockNum(), block.getPreviousBlockHash(), block.getRedeemAddress(), block.getLedgerHash(), block.getTransactions());
-//            String blockHash = DatatypeConverter.printHexBinary(md.digest(blockData.getBytes("UTF-8")));
-//            //This is the message signed by the block creating node
-//            String fullBlock = blockData + ",{" + blockHash + "}";
-//            if (!addressUtility.verifyMerkleSignature(fullBlock, block.getNodeSignature(), block.getRedeemAddress(), block.getNodeSignatureIndex())) {
-//                LOGGER.info("Block didn't verify for " + block.getRedeemAddress() + " with index " + block.getNodeSignatureIndex());
-//                LOGGER.info("Signature mismatch error");
-//                LOGGER.info("fullBlock: " + fullBlock);
-//                LOGGER.info("nodeSignature: " + block.getNodeSignature());
-//                return false; //Block mining node signature is not valid
-//            }
-
             // Return true if all transactions are valid
             // TODO: Can be removed if transactions are validated during parsing earlier in the process
             return true;

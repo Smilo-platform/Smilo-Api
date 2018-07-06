@@ -15,26 +15,29 @@
  *
  */
 
-package io.smilo.api.block;
+package io.smilo.api.peer;
 
-import io.smilo.api.block.data.Parser;
-import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.net.Socket;
 
 @Component
-public class ParserProvider  {
+@Profile("test")
+public class MockPeerInitializer implements PeerInitializer {
 
-    private static final Logger LOGGER = Logger.getLogger(ParserProvider.class);
-
-    private final List<Parser> providers;
-
-    public ParserProvider(List<Parser> providers) {
-        this.providers = providers;
+    @Override
+    public Peer initializePeer(String hostname, int port) {
+        return new MockPeer(hostname, port);
     }
 
-    public Parser getParser(Class<?> clazz) {
-        return providers.stream().filter(p -> p.supports(clazz)).findFirst().orElseThrow(() -> new IllegalArgumentException("Unable to find matching Data parser!"));
+    @Override
+    public Peer initializePeer(Socket socket) {
+        String remoteHost = socket.getInetAddress() + "";
+        remoteHost = remoteHost.split("/")[0];
+        remoteHost = remoteHost.replace("\\", "");
+        int remotePort = socket.getPort();
+
+        return new MockPeer(remoteHost, remotePort);
     }
 }

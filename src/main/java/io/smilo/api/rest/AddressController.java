@@ -18,14 +18,12 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.address.Address;
-import io.smilo.api.address.AddressManager;
 import io.smilo.api.address.AddressStore;
-import io.smilo.api.address.AddressUtility;
-import io.smilo.api.rest.models.Balance;
-import io.smilo.api.rest.service.BalanceServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,6 +34,14 @@ public class AddressController {
 
     @GetMapping("/address/{address}")
     public Address listAddress(@PathVariable("address") String address) {
-        return addressStore.findOrCreate(address);
+        Address response = addressStore.getByAddress(address);
+
+        if (response == null) throw new AddressNotFoundException();
+        return response;
+    }
+
+    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Address not found")  // 404
+    public class AddressNotFoundException extends RuntimeException {
+        // ...
     }
 }

@@ -54,11 +54,13 @@ public class AddressStore {
      * new account with 0 balance.
      */
     public Address findOrCreate(String findAddress) {
-        return getByAddress(findAddress).orElseGet(() -> {
+        Address result = getByAddress(findAddress);
+        if (result == null){
             Address address = new Address(findAddress, 0L, -1);
             writeToFile(address);
             return address;
-        });
+        }
+        return result;
     }
 
     /**
@@ -81,7 +83,7 @@ public class AddressStore {
         }
     }
 
-    Optional<Address> getByAddress(String address) {
+    public Address getByAddress(String address) {
         if(address == null) {
             return null;
         }
@@ -98,12 +100,9 @@ public class AddressStore {
         try {
             result = dataMapper.readValue(raw, AddressDTO.class);
         } catch (IOException e) {
-            LOGGER.error("Unable to convert byte array to address" + e);
-            return Optional.empty();
+            LOGGER.debug("Unable to convert byte array to address" + e);
+            return null;
         }
-        if (result == null){
-            return Optional.empty();
-        }
-        return Optional.ofNullable(AddressDTO.toAddress(result));
+        return AddressDTO.toAddress(result);
     }
 }

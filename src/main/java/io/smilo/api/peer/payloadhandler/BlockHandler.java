@@ -70,6 +70,10 @@ public class BlockHandler implements PayloadHandler {
             blockStore.setLatestBlockHeight(block.getBlockNum());
             try {
                 blockStore.writeBlockToFile(block);
+                // Todo:
+                // Write BlockData to disk/mem
+                // Update balance
+
             } catch(Exception e) {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
             }

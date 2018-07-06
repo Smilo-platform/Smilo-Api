@@ -35,7 +35,10 @@ public class SmiloApi {
     private final BlockStore blockStore;
     private final String version;
 
-    public SmiloApi(@Value("${VERSION:prototype}") String version, PeerReceiver peerReceiver, PeerClient peerClient, BlockStore blockStore) {
+    public SmiloApi(@Value("${VERSION:prototype}") String version,
+                    PeerReceiver peerReceiver,
+                    PeerClient peerClient,
+                    BlockStore blockStore) {
         this.version = version;
         this.peerReceiver = peerReceiver;
         this.peerClient = peerClient;
@@ -47,7 +50,6 @@ public class SmiloApi {
      */
     public void run() {
         LOGGER.info("Starting Smilo Platform Api " + version);
-
         blockStore.initialiseLatestBlock();
 
         // Todo: Implementation of Websocket & rest server for block explorer and wallets

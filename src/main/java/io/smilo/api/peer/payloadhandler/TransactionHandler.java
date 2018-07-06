@@ -15,26 +15,31 @@
  *
  */
 
-package io.smilo.api.block;
+package io.smilo.api.peer.payloadhandler;
 
-import io.smilo.api.block.data.Parser;
+import io.smilo.api.peer.Peer;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class ParserProvider  {
+public class TransactionHandler implements PayloadHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(ParserProvider.class);
+    private static final Logger LOGGER = Logger.getLogger(TransactionHandler.class);
 
-    private final List<Parser> providers;
+    private PendingBlockDataPool pendingBlockDataPool;
 
-    public ParserProvider(List<Parser> providers) {
-        this.providers = providers;
+    public TransactionHandler(PendingBlockDataPool pendingBlockDataPool) {
+        this.pendingBlockDataPool = pendingBlockDataPool;
     }
 
-    public Parser getParser(Class<?> clazz) {
-        return providers.stream().filter(p -> p.supports(clazz)).findFirst().orElseThrow(() -> new IllegalArgumentException("Unable to find matching Data parser!"));
+    @Override
+    public void handlePeerPayload(List<String> parts, Peer peer) {
+        pendingBlockDataPool.addTransaction(parts.get(1));
     }
+
+    @Override
+    public PayloadType supports() { return PayloadType.TRANSACTION; }
 }
