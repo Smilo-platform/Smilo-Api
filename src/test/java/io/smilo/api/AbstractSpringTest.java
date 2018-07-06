@@ -18,6 +18,7 @@
 package io.smilo.api;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public abstract class AbstractSpringTest {
     @Autowired
     private TestUtility testUtility;
 
-    @After
+    @Before
     public void cleanUpFiles() {
         testUtility.cleanUp();
     }

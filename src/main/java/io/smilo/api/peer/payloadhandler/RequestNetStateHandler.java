@@ -29,7 +29,7 @@ import java.util.List;
 @Component
 public class RequestNetStateHandler implements PayloadHandler {
 
-    private final static Logger LOGGER = Logger.getLogger(RequestNetStateHandler.class);
+    private static final Logger LOGGER = Logger.getLogger(RequestNetStateHandler.class);
 
     private BlockStore blockStore;
     private PendingBlockDataPool pendingBlockDataPool;
@@ -45,9 +45,7 @@ public class RequestNetStateHandler implements PayloadHandler {
         LOGGER.debug("Data: NETWORK_STATE, BlockchainLength: " + networkHeight + ", LatestBlock: " + blockStore.getLatestBlockHash());
         peer.write("NETWORK_STATE " + networkHeight + " " + blockStore.getLatestBlockHash());
         pendingBlockDataPool.getPendingData(Transaction.class).stream()
-                .forEach(t -> {
-                    peer.write("TRANSACTION " + t);
-                });
+                .forEach(t -> peer.write("TRANSACTION " + t));
     }
 
     @Override

@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.nio.ByteBuffer.allocateDirect;
 
@@ -37,7 +35,6 @@ public class BlockStore {
 
     private static final Logger LOGGER = Logger.getLogger(BlockStore.class);
     private final Store store;
-    private List<SmiloChain> chains;
     private static final String COLLECTION_NAME = "block";
     private final ObjectMapper dataMapper;
     private final AddressManager addressManager;
@@ -49,7 +46,6 @@ public class BlockStore {
     public BlockStore(Store store, ObjectMapper dataMapper, AddressManager addressManager, AddressStore addressStore) {
         this.addressManager = addressManager;
         this.addressStore = addressStore;
-        this.chains = new ArrayList<>();
         this.store = store;
         this.dataMapper = dataMapper;
         store.initializeCollection(COLLECTION_NAME);
@@ -140,7 +136,7 @@ public class BlockStore {
         final ByteBuffer key = allocateDirect(64);
         key.putLong(blockNum).flip();
 
-        byte raw[] = store.get(COLLECTION_NAME, key);
+        byte[] raw = store.get(COLLECTION_NAME, key);
         BlockDTO result;
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);

@@ -94,7 +94,7 @@ public class AddressStore {
             e.printStackTrace();
         }
 
-        byte raw[] = store.get(COLLECTION_NAME, key);
+        byte[] raw = store.get(COLLECTION_NAME, key);
         AddressDTO result = null;
         try {
             result = dataMapper.readValue(raw, AddressDTO.class);

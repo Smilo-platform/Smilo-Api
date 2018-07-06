@@ -34,8 +34,7 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class PeerStore {
 
-    private final static String COLLECTION_NAME = "peer";
-    private final static Logger LOGGER = Logger.getLogger(PeerStore.class);
+    private static final String COLLECTION_NAME = "peer";
 
     private final Store store;
     private final PeerInitializer peerInitializer;

@@ -26,8 +26,6 @@ import java.util.List;
 @Component
 public class ParserProvider  {
 
-    private static final Logger LOGGER = Logger.getLogger(ParserProvider.class);
-
     private final List<Parser> providers;
 
     public ParserProvider(List<Parser> providers) {

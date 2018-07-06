@@ -22,7 +22,9 @@ public class TransactionOutput {
     private String outputAddress;
     private Long outputAmount;
 
-    public TransactionOutput() {};
+    public TransactionOutput() {
+        // Make sonar happy :)
+    }
 
     public TransactionOutput(String outputAddress, Long outputAmount) {
         this.outputAddress = outputAddress;

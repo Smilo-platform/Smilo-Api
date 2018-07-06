@@ -25,8 +25,6 @@ import java.util.List;
 @Component
 public class RequestIdentifierHandler implements PayloadHandler {
 
-    private final static Logger LOGGER = Logger.getLogger(RequestIdentifierHandler.class);
-
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
         peer.write(PayloadType.RESPOND_IDENTIFIER.name() + " SMILOAPI");

@@ -24,6 +24,7 @@ public class AddressDTO {
     private int signatureCount;
 
     public AddressDTO() {
+        // Make sonar happy :)
     }
 
     public AddressDTO(String address, long balance, int signatureCount) {

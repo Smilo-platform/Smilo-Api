@@ -114,9 +114,7 @@ public class PeerClient {
     public void connectToPeer(Peer peer) {
         try {
             peerStore.save(peer);
-            taskExecutor.execute(() -> {
-                peer.run();
-            });
+            taskExecutor.execute(peer::run);
             LOGGER.debug("Connected to " + peer.getIdentifier());
         } catch (Exception e) {
             LOGGER.warn("Unable to connect to " + peer.getRemoteHost() + ":" + peer.getRemotePort());

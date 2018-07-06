@@ -45,13 +45,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         this.dataMapper = dataMapper;
     }
 
-    private String generateBlockData(long timestamp, int blockNum, String previousBlockHash, String signingAddress, String ledgerHash, List<Transaction> transactions) {
-        String block = "{" + timestamp + ":" + blockNum + ":" + previousBlockHash + ":" + signingAddress + "},{" + ledgerHash + "},{";
-        String transactionString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
-        block += transactionString + "}";
-        return block;
-    }
-
     @Override
     /**
      * Used to check a variety of conditions to ensure that a block is valid. Valid block requirements: -'Compiled' block format is signed correctly by node -Transactions are formatted correctly
@@ -71,7 +64,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         // Todo: Create default
         try {
             // Return true if all transactions are valid
-            // TODO: Can be removed if transactions are validated during parsing earlier in the process
             return true;
         } catch (Exception e) {
             LOGGER.error("Oops " + e);

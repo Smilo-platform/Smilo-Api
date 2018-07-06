@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NetworkState {
 
-    private final static Logger LOGGER = Logger.getLogger(NetworkState.class);
+    private static final Logger LOGGER = Logger.getLogger(NetworkState.class);
 
     private boolean catchupMode = true;
     private long topBlock = 0;

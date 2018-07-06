@@ -34,7 +34,9 @@ public class TransactionDTO {
     private Long signatureIndex;
     private String dataHash;
 
-    public TransactionDTO () {}
+    public TransactionDTO () {
+        // Make sonar happy :)
+    }
 
     public int getVERSION() {
         return VERSION;

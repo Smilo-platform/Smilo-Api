@@ -130,7 +130,7 @@ public class LMDBStore implements Store {
              CursorIterator<ByteBuffer> cursor = getDatabase(collection).iterate(txn)) {
 
             Map<String, String> result = new HashMap<>();
-            cursor.forEachRemaining(x -> { result.put(StandardCharsets.UTF_8.decode(x.key()).toString(), StandardCharsets.UTF_8.decode(x.val()).toString()); });
+            cursor.forEachRemaining(x -> result.put(StandardCharsets.UTF_8.decode(x.key()).toString(), StandardCharsets.UTF_8.decode(x.val()).toString()));
 
             return result;
         }

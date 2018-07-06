@@ -27,8 +27,6 @@ import java.util.List;
 @Component
 public class TransactionHandler implements PayloadHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(TransactionHandler.class);
-
     private PendingBlockDataPool pendingBlockDataPool;
 
     public TransactionHandler(PendingBlockDataPool pendingBlockDataPool) {

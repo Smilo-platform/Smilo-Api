@@ -19,7 +19,7 @@ package io.smilo.api.address;
 
 public class Address {
 
-    private String address;
+    private String publickey;
     private long balance;
     private int signatureCount;
 
@@ -27,17 +27,17 @@ public class Address {
     }
 
     public Address(String address, long balance, int signatureCount) {
-        this.address = address;
+        this.publickey = address;
         this.balance = balance;
         this.signatureCount = signatureCount;
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.publickey = address;
     }
     
     public String getAddress() {
-        return address;
+        return publickey;
     }
     
     public long getBalance() {
@@ -61,7 +61,7 @@ public class Address {
     }
     
     public String getRawAccount() {
-        return address + ":" + balance + ":" + signatureCount;
+        return publickey + ":" + balance + ":" + signatureCount;
     }
     
 }
