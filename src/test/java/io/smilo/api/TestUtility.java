@@ -30,7 +30,7 @@ public class TestUtility {
     @Value("${WALLET_FILE:wallet_test.keys}")
     private String walletFileName;
 
-    @Value("${DB_FOLDER:database_test}")
+    @Value("${DB_FOLDER:database}")
     private String databaseDirName;
 
     @Autowired

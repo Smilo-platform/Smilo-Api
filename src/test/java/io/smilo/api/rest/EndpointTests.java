@@ -18,33 +18,41 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
-import org.junit.Ignore;
+import io.smilo.api.StableTests;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class blockTests extends AbstractWebSpringTest {
+@Category(StableTests.class)
+public class EndpointTests extends AbstractWebSpringTest {
 
     @Test
-    @Ignore //Todo: add blocks
-    public void shouldReturn200WhenSendingRequestToBlockController() throws Exception {
+    public void shouldReturn200WhenSendingRequestToStatusController() throws Exception {
 
-        this.webClient.perform(MockMvcRequestBuilders.get("/block"))
+        this.webClient.perform(MockMvcRequestBuilders.get("/status"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    @Ignore //Todo: add block
-    public void shouldReturn200WhenSendingRequestForBlockToBlockController() throws Exception {
+    public void shouldReturn200WhenSendingRequestToTxController() throws Exception {
 
-        this.webClient.perform(MockMvcRequestBuilders.get("/block/1"))
+        this.webClient.perform(MockMvcRequestBuilders.get("/tx"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    public void shouldReturn404WhenRequestBlockToBlockController() throws Exception {
+    public void shouldReturn200WhenRequestTxToTxController() throws Exception {
 
-        this.webClient.perform(MockMvcRequestBuilders.get("/block/100"))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+        this.webClient.perform(MockMvcRequestBuilders.get("/tx/testtransaction"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
+    @Test
+    public void shouldReturn200WhenSendingRequestToManagementEndpoint() throws Exception {
+
+        this.webClient.perform(MockMvcRequestBuilders.get("/actuator/info"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
 }

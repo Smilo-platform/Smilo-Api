@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class balanceTests extends AbstractWebSpringTest {
+public class BalanceTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToBalanceController() throws Exception {

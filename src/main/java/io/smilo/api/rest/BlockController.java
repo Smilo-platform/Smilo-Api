@@ -34,7 +34,11 @@ public class BlockController {
 
     @GetMapping("/block")
     public Block respondAllBlocks() {
-        return blockStore.getLatestBlockFromStore();
+        Block response = blockStore.getLatestBlockFromStore();
+
+        if (response == null) throw new BlockNotFoundException();
+
+        return response;
     }
 
     @GetMapping("/block/{block}")

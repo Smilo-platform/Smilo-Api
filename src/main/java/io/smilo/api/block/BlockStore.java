@@ -20,6 +20,7 @@ package io.smilo.api.block;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smilo.api.address.AddressManager;
+import io.smilo.api.address.AddressStore;
 import io.smilo.api.db.Store;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -40,12 +41,14 @@ public class BlockStore {
     private static final String COLLECTION_NAME = "block";
     private final ObjectMapper dataMapper;
     private final AddressManager addressManager;
+    private final AddressStore addressStore;
 
     private long latestBlockHeight = -1;
     private String latestBlockHash = "0000000000000000000000000000000000000000000000000000000000000000";
 
-    public BlockStore(Store store, ObjectMapper dataMapper, AddressManager addressManager) {
+    public BlockStore(Store store, ObjectMapper dataMapper, AddressManager addressManager, AddressStore addressStore) {
         this.addressManager = addressManager;
+        this.addressStore = addressStore;
         this.chains = new ArrayList<>();
         this.store = store;
         this.dataMapper = dataMapper;
@@ -67,6 +70,7 @@ public class BlockStore {
             latestBlockHeight = latestBlock.getBlockNum();
             latestBlockHash = latestBlock.getBlockHash();
         } else {
+            addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
             addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
             // Todo
         }
@@ -152,9 +156,11 @@ public class BlockStore {
         BlockDTO result = null;
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Unable to convert byte array to block" + e);
+            return null;
         }
+        if (result == null) return null;
         return BlockDTO.toBlock(result);
     }
 

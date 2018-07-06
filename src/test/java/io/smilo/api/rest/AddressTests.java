@@ -18,11 +18,20 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
+import io.smilo.api.address.AddressManager;
+import io.smilo.api.address.AddressStore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class addressTests extends AbstractWebSpringTest {
+public class AddressTests extends AbstractWebSpringTest {
+
+    @Autowired
+    private AddressStore addressStore;
+
+    @Autowired
+    private AddressManager addressManager;
 
     @Test
     public void shouldReturn200WhenSendingRequestToAddressController() throws Exception {
@@ -36,6 +45,8 @@ public class addressTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn404WhenSendingRequestToAddressControllerIfNotExist() throws Exception {
+        this.addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
+        this.addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
         this.webClient.perform(MockMvcRequestBuilders.get("/address/ETm9QUJLVdJkTqRojTNqswmeAQGaofojJJ"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

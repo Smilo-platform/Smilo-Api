@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class priceTests extends AbstractWebSpringTest {
+public class PriceTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToPriceController() throws Exception {
