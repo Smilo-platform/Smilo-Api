@@ -19,7 +19,6 @@ package io.smilo.api.peer;
 
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;

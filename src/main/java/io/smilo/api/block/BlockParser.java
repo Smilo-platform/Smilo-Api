@@ -20,14 +20,10 @@ package io.smilo.api.block;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
-import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * https://smilo-platform.atlassian.net/wiki/spaces/SP/pages/96305164/Blocks TODO: refactor

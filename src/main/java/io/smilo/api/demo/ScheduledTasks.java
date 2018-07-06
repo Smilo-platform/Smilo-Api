@@ -92,7 +92,7 @@ public class ScheduledTasks {
         StringBuilder address = new StringBuilder();
         Random rnd = new Random();
         while (address.length() < 36) {
-            int index = (int) (rnd.nextInt() * charset.length());
+            int index = (rnd.nextInt() * charset.length());
             address.append(charset.charAt(index));
         }
         return "S1" + address.toString();

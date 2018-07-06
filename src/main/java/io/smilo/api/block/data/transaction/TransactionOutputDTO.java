@@ -22,7 +22,9 @@ public class TransactionOutputDTO {
     private String outputAddress;
     private Long outputAmount;
 
-    public TransactionOutputDTO() {}
+    public TransactionOutputDTO() {
+        // Make sonar happy.. :)
+    }
 
     public void setOutputAddress(String outputAddress) {
         this.outputAddress = outputAddress;

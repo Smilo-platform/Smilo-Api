@@ -27,7 +27,6 @@ import io.smilo.api.block.data.Parser;
 import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
-import io.smilo.api.peer.PeerSender;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 

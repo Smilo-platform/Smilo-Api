@@ -18,7 +18,6 @@
 package io.smilo.api.peer;
 
 import io.smilo.api.db.Store;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
