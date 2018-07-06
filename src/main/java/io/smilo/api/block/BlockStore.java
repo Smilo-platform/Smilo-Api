@@ -141,7 +141,7 @@ public class BlockStore {
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);
         } catch (IOException e) {
-            LOGGER.error("Unable to convert byte array to block" + e);
+            LOGGER.debug("Unable to convert byte array to block" + e);
             return null;
         }
         return BlockDTO.toBlock(result);
