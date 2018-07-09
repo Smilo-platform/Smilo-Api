@@ -63,7 +63,6 @@ public class Application {
     }
 
     @Bean
-    @Profile("default")
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
     }

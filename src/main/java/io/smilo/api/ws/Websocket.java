@@ -34,7 +34,7 @@ public class Websocket {
     public void onOpen (Session session) throws IOException {
         // Add session to the connected sessions set
         clients.add(session);
-        sendMessage("Test!!");
+        sendMessage("Welcome tot the Smilo Api!");
     }
 
     @OnClose

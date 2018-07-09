@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -34,13 +35,17 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * - The main loop will in Smilo.java will not run to prevent tests from stalling
  * - Has mocked peers, initialized in MockedPeerInitializer, providing testable p2p requests/responses
  */
-@SpringBootTest(classes = {Application.class, TestConfig.class})
-@ActiveProfiles({"test"})
+@SpringBootTest(classes = {Application.class, TestConfig.class}, webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"test", "local"})
 @Category(StableTests.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 public abstract class AbstractSpringTest {
+
     @Autowired
     private TestUtility testUtility;
+
+    @Value("${local.server.port}")
+    public int port;
 
     @Before
     public void cleanUpFiles() {
