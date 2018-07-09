@@ -127,7 +127,7 @@ public class Transaction extends BlockData {
      */
     public String getTransactionBody() {
         String[] tx = getRawTransaction().split(";");
-        return Stream.of(tx).limit(tx.length - 2).collect(joining(";"));
+        return Stream.of(tx).limit(tx.length - 2L).collect(joining(";"));
     }
 
     /**
@@ -182,43 +182,19 @@ public class Transaction extends BlockData {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final Transaction other = (Transaction) obj;
-        if (!Objects.equals(this.assetId, other.assetId)) {
-            return false;
-        }
-        if (!Objects.equals(this.getInputAddress(), other.getInputAddress())) {
-            return false;
-        }
-        if (!Objects.equals(this.getDataHash(), other.getDataHash())) {
-            return false;
-        }
-        if (!Objects.equals(this.getSignatureData(), other.getSignatureData())) {
-            return false;
-        }
-        if (!Objects.equals(this.getTimestamp(), other.getTimestamp())) {
-            return false;
-        }
-        if (!Objects.equals(this.inputAmount, other.inputAmount)) {
-            return false;
-        }
-        if (!Objects.equals(this.getFee(), other.getFee())) {
-            return false;
-        }
-        if (!Objects.equals(this.transactionOutputs, other.transactionOutputs)) {
-            return false;
-        }
-        if (!Objects.equals(this.getSignatureIndex(), other.getSignatureIndex())) {
-            return false;
-        }
+        if (!Objects.equals(this.assetId, other.assetId)) return false;
+        if (!Objects.equals(this.getInputAddress(), other.getInputAddress())) return false;
+        if (!Objects.equals(this.getDataHash(), other.getDataHash())) return false;
+        if (!Objects.equals(this.getSignatureData(), other.getSignatureData())) return false;
+        if (!Objects.equals(this.getTimestamp(), other.getTimestamp())) return false;
+        if (!Objects.equals(this.inputAmount, other.inputAmount)) return false;
+        if (!Objects.equals(this.getFee(), other.getFee())) return false;
+        if (!Objects.equals(this.transactionOutputs, other.transactionOutputs)) return false;
+        if (!Objects.equals(this.getSignatureIndex(), other.getSignatureIndex())) return false;
         return true;
     }
 

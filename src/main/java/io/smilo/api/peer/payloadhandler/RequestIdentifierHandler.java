@@ -17,15 +17,12 @@
 package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.api.peer.Peer;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class RequestIdentifierHandler implements PayloadHandler {
-
-    private final static Logger LOGGER = Logger.getLogger(RequestIdentifierHandler.class);
 
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {

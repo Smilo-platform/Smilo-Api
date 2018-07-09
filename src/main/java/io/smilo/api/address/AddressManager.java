@@ -202,28 +202,23 @@ public class AddressManager {
     private boolean checkValidity(Transaction transaction) {
         String inputAddress = transaction.getInputAddress();
         long signatureIndex = transaction.getSignatureIndex();
-        if (getAddressSignatureCount(inputAddress) + 1 != signatureIndex) {
-            return false; //The signature is valid, however it isn't using the expected signatureIndex. Blocked to ensure a compromised Lamport key from a previous transaction can't be used.
-        }
-        if (!addressUtility.isAddressFormattedCorrectly(inputAddress)) {
-            return false; //Incorrect sending address
-        }
         long inputAmount = transaction.getInputAmount();
-        if (getAddressBalance(inputAddress) < inputAmount) //inputAddress has an insufficient balance
-        {
-            return false; //Insufficient balance
-        }
+        long outputTotal = transaction.getOutputTotal();
+
+        //The signature is valid, however it isn't using the expected signatureIndex. Blocked to ensure a compromised Lamport key from a previous transaction can't be used.
+        if (getAddressSignatureCount(inputAddress) + 1 != signatureIndex) return false;
+
+        //Incorrect sending address
+        if (!addressUtility.isAddressFormattedCorrectly(inputAddress)) return false;
+
+        //inputAddress has an insufficient balance
+        if (getAddressBalance(inputAddress) < inputAmount) return false; //Insufficient balance
 
         boolean addressesAreValid = transaction.getTransactionOutputs().stream()
                 .allMatch(txOutput -> addressUtility.isAddressFormattedCorrectly(txOutput.getOutputAddress()));
-        if (!addressesAreValid) {
-            return false;
-        }
+        if (!addressesAreValid) return false;
 
-        long outputTotal = transaction.getOutputTotal();
-        if (inputAmount < outputTotal) {
-            return false;
-        }
+        if (inputAmount < outputTotal) return false;
         return true;
     }
 

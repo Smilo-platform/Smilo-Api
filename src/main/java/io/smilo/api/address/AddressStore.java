@@ -91,10 +91,10 @@ public class AddressStore {
         try {
             key.put(address.getBytes(UTF_8)).flip();
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LOGGER.error("Unsupported Encoding error." + e);
         }
 
-        byte raw[] = store.get(COLLECTION_NAME, key);
+        byte[] raw = store.get(COLLECTION_NAME, key);
         AddressDTO result = null;
         try {
             result = dataMapper.readValue(raw, AddressDTO.class);

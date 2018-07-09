@@ -54,7 +54,7 @@ public class PeerReceiver {
         LOGGER.trace("Connected with " + peerClient.getPeers().size() + " threads...");
 
         // copy the peer list to make sure we don't get any concurrency issues when adding new received peers
-        new ArrayList<>(peerClient.getPeers()).stream().filter(p -> p.isInitialized()).forEach(peer -> {
+        new ArrayList<>(peerClient.getPeers()).stream().filter(Peer::isInitialized).forEach(peer -> {
             List<String> input = peer.readData();
             if (input == null) {
                 LOGGER.error("NULL RET RETRY");
@@ -97,6 +97,7 @@ public class PeerReceiver {
             } catch (InterruptedException e) {
                 //If this throws an error, something's terribly off.
                 LOGGER.error("P2pNetwork has mental illness.");
+                Thread.currentThread().interrupt();
             }
         }
     }

@@ -26,7 +26,7 @@ import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
 import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.peer.PeerSender;
+import io.smilo.api.block.data.transaction.TransactionOutput;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -42,12 +42,9 @@ public class PendingBlockDataPool {
 
     private Set<BlockData> pendingBlockData;
 
-    private final PeerSender peerSender;
     private final ParserProvider parserProvider;
 
-    public PendingBlockDataPool(PeerSender peerSender,
-                                ParserProvider parserProvider) {
-        this.peerSender = peerSender;
+    public PendingBlockDataPool(ParserProvider parserProvider) {
         this.parserProvider = parserProvider;
         pendingBlockData = new HashSet<>();
     }
@@ -154,7 +151,7 @@ public class PendingBlockDataPool {
                     }
                     totalChange += transaction.getTransactionOutputs().stream()
                             .filter(txOutput -> txOutput.getOutputAddress().equals(address))
-                            .mapToLong(txOutput -> txOutput.getOutputAmount())
+                            .mapToLong(TransactionOutput::getOutputAmount)
                             .sum();
                 }
             } catch (Exception e) {

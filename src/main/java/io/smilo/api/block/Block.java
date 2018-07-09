@@ -89,24 +89,17 @@ public class Block {
      *
      * @return ArrayList<String> Simplified-transaction-format list of all related transactions.
      */
-    public ArrayList<String> getTransactionsInvolvingAddress(String addressToFind) {
+    public List<String> getTransactionsInvolvingAddress(String addressToFind) {
         ArrayList<String> relevantTransactionParts = new ArrayList<>();
         for (Transaction tempTransaction: transactions) {
             //Transaction format: InputAssetId;InputAddress;InputAmount;TX_Fee;ToAddress1;Output1;ToAddress2;Output2;SignatureData;SignatureIndex
             String assetid = tempTransaction.getAssetId();
             String sender = tempTransaction.getInputAddress();
-            if (sender.equalsIgnoreCase(addressToFind)) {
-                tempTransaction.getTransactionOutputs()
-                        .forEach(txOutput -> {
-                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
-                        });
-            } else {
-                tempTransaction.getTransactionOutputs().stream()
-                        .filter(txOutput -> txOutput.getOutputAddress().equals(addressToFind))
-                        .forEach(txOutput -> {
-                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
-                        });
-            }
+            if (sender.equalsIgnoreCase(addressToFind)) tempTransaction.getTransactionOutputs()
+                    .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
+            else tempTransaction.getTransactionOutputs().stream()
+                    .filter(txOutput -> txOutput.getOutputAddress().equals(addressToFind))
+                    .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
         }
         return relevantTransactionParts;
     }
@@ -148,7 +141,7 @@ public class Block {
     }
 
     public boolean hasNoExplicitTransactions() {
-        return transactions.isEmpty() || transactions.stream().allMatch(t -> t.isEmpty());
+        return transactions.isEmpty() || transactions.stream().allMatch(Transaction::isEmpty);
     }
 
     public void setTimestamp(long timestamp) {

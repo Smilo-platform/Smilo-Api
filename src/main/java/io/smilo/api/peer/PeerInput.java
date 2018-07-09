@@ -45,6 +45,7 @@ public class PeerInput extends Thread
     /**
      * Constantly reads from the input stream of the socket, and saves any received data to the ArrayList<St
      */
+    @Override
     public void run() {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

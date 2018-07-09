@@ -20,14 +20,10 @@ package io.smilo.api.block;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
-import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * https://smilo-platform.atlassian.net/wiki/spaces/SP/pages/96305164/Blocks TODO: refactor
@@ -43,13 +39,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
 
     public BlockParser(ObjectMapper dataMapper) {
         this.dataMapper = dataMapper;
-    }
-
-    private String generateBlockData(long timestamp, int blockNum, String previousBlockHash, String signingAddress, String ledgerHash, List<Transaction> transactions) {
-        String block = "{" + timestamp + ":" + blockNum + ":" + previousBlockHash + ":" + signingAddress + "},{" + ledgerHash + "},{";
-        String transactionString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
-        block += transactionString + "}";
-        return block;
     }
 
     @Override
@@ -71,7 +60,6 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         // Todo: Create default
         try {
             // Return true if all transactions are valid
-            // TODO: Can be removed if transactions are validated during parsing earlier in the process
             return true;
         } catch (Exception e) {
             LOGGER.error("Oops " + e);

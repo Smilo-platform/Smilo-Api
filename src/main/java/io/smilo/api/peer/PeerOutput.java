@@ -19,7 +19,6 @@ package io.smilo.api.peer;
 
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -85,17 +84,9 @@ public class PeerOutput implements Runnable {
      * @param data Data to write
      */
     public void write(String data) {
-        File f = new File("writebuffer");
-        try {
-            PrintWriter out = new PrintWriter(f);
-            LOGGER.info("SENDING: " + data);
-            out.close();
-        } catch (Exception e) {
-            LOGGER.error("Unable to write" + e);
-        }
         synchronized (lock) {
             outputBuffer.add(data);
-            lock.notify();
+            lock.notifyAll();
         }
     }
 

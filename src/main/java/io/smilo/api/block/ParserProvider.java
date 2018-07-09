@@ -18,15 +18,12 @@
 package io.smilo.api.block;
 
 import io.smilo.api.block.data.Parser;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class ParserProvider  {
-
-    private static final Logger LOGGER = Logger.getLogger(ParserProvider.class);
 
     private final List<Parser> providers;
 

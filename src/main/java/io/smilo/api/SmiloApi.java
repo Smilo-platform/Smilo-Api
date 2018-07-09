@@ -80,6 +80,7 @@ public class SmiloApi {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     LOGGER.error(e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }

@@ -20,7 +20,7 @@ public class ScheduledTasks {
     private Websocket websocket;
     private static final Logger LOGGER = Logger.getLogger(ScheduledTasks.class);
     private Block lastBlock;
-    private static List<Transaction> txPool = new ArrayList<>();
+    private List<Transaction> txPool = new ArrayList<>();
 
     @Scheduled(fixedRate = 16000)
     public void sendBlock(){
@@ -92,7 +92,7 @@ public class ScheduledTasks {
         StringBuilder address = new StringBuilder();
         Random rnd = new Random();
         while (address.length() < 36) {
-            int index = (int) (rnd.nextFloat() * charset.length());
+            int index = (rnd.nextInt() * charset.length());
             address.append(charset.charAt(index));
         }
         return "S1" + address.toString();
@@ -116,7 +116,7 @@ public class ScheduledTasks {
             int amountOfTx = rand.nextInt(6) + 1;
             int totalValue = inputAmount;
 
-            for (int i = 0; amountOfTx >= 0; amountOfTx--) {
+            for (int i = 0; amountOfTx >= i; amountOfTx--) {
                 JSONObject txOutputObject  = new JSONObject();
                 String newOutputAddress = getRandomAddress();
 

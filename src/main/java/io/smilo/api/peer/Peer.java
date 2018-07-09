@@ -28,7 +28,7 @@ import java.util.List;
 
 public class Peer implements Runnable {
 
-    private final static Logger LOGGER = Logger.getLogger(Peer.class);
+    private static final Logger LOGGER = Logger.getLogger(Peer.class);
     private Socket socket;
     private String remoteHost;
     private int remotePort;

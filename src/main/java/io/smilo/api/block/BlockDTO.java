@@ -37,12 +37,12 @@ public class BlockDTO {
     private String redeemAddress;
 
     public BlockDTO() {
+        // Make the sonar scanner happy!
     }
 
     public static int getVERSION() {
         return VERSION;
     }
-
 
     public long getTimestamp() {
         return timestamp;

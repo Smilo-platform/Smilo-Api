@@ -17,8 +17,6 @@
 
 package io.smilo.api;
 
-import io.smilo.api.address.AddressManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,9 +30,6 @@ public class TestUtility {
 
     @Value("${DB_FOLDER:database}")
     private String databaseDirName;
-
-    @Autowired
-    private AddressManager addressManager;
 
     /**
      * Initialize the environment. Some classes need to be reset to their original state after every test.
