@@ -22,33 +22,6 @@ public class ScheduledTasks {
     private Block lastBlock;
     private List<Transaction> txPool = new ArrayList<>();
 
-    @Scheduled(fixedRate = 16000)
-    public void sendBlock(){
-        Block block;
-        if(lastBlock == null){
-            // Genesis block
-            block = new Block(createHash(), 0, "0000000000000000000000000000000000000000000000000000000000000000", System.currentTimeMillis(), getTxFromPool());
-        }else{
-            block = new Block(createHash(), lastBlock.getBlocknum()+1, lastBlock.getBlockHash(), System.currentTimeMillis(), getTxFromPool());
-        }
-
-        try{
-            JSONObject blockObject = new JSONObject();
-            blockObject.put("blockHash", block.getBlockHash());
-            blockObject.put("blocknum", block.getBlocknum());
-            blockObject.put("prevBlockHash", block.getPrevBlockHash());
-            blockObject.put("timestamp", block.getTimestamp());
-            blockObject.put("transactions", block.getTransactions());
-
-            // Set currentBlock as lastBlock
-            lastBlock = block;
-
-            sendMsg(blockObject, "msgBlock");
-        }catch (Exception ex){
-            LOGGER.error("Failed generating block object");
-        }
-    }
-
     //@Scheduled(fixedRate = 4500)
     public void generateTransaction(){
         Random rand = new Random();

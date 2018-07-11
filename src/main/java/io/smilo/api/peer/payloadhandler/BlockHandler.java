@@ -24,6 +24,7 @@ import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
+import io.smilo.api.ws.Websocket;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -36,14 +37,16 @@ public class BlockHandler implements PayloadHandler {
     private BlockParser blockParser;
     private BlockStore blockStore;
     private NetworkState networkState;
+    private Websocket websocket;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState) {
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
+        this.websocket = websocket;
     }
 
     @Override
@@ -51,9 +54,7 @@ public class BlockHandler implements PayloadHandler {
         byte[] byteArray = BlockDataParser.decode(parts.get(1));
         Block block = blockParser.deserialize(byteArray);
 
-        // Todo: include block in database.
-        // Todo: include block in last 10 blocks list
-        // Todo: update latestBlock
+        // Todo: include block in last 25 blocks list
 
         // Topblock = 1 (From network)
         // Last block = 1
@@ -62,14 +63,16 @@ public class BlockHandler implements PayloadHandler {
                 blockStore.getLatestBlockHash().equals(block.getPreviousBlockHash())){
             // Add Block
             LOGGER.info("Previous Block Height: " + blockStore.getLatestBlockHeight());
-            LOGGER.info("Added Block " + block.getBlockNum() + " to the database.");
+            LOGGER.info("Add Block " + block.getBlockNum() + " to the database.");
             LOGGER.info("Hash: " + block.getBlockHash());
-            LOGGER.info("Current Block heigth: " + (blockStore.getLatestBlockHeight() + 1));
+            LOGGER.info("New Block heigth: " + (blockStore.getLatestBlockHeight() + 1));
 
             blockStore.setLatestBlockHash(block.getBlockHash());
             blockStore.setLatestBlockHeight(block.getBlockNum());
             try {
                 blockStore.writeBlockToFile(block);
+                websocket.addBlock(block);
+
                 // Todo:
                 // Write BlockData to disk/mem
                 // Update balance
