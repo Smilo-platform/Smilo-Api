@@ -145,7 +145,7 @@ public class ScheduledTasks {
             obj.put("type", type);
 
             LOGGER.info(obj);
-            websocket.sendMessage(obj.toString());
+            websocket.broadcastMessage(obj.toString());
         }catch (Exception e){
             LOGGER.error("Sending message failed");
         }
