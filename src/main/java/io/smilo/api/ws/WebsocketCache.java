@@ -12,7 +12,7 @@ import java.util.*;
 public class WebsocketCache {
 
     private final Map<Long, Block> blocks = new HashMap<>();
-    private final List<Transaction> transactions = null;
+    private final Map<String, Transaction> transactions = new HashMap<>();
     private static final Websocket websocket = new Websocket();
     private static final Logger LOGGER = Logger.getLogger(Websocket.class);
 
@@ -31,15 +31,14 @@ public class WebsocketCache {
     }
 
     public void addLatestTransaction(Transaction tx){
-        // TODO Check duplicated?
-        this.transactions.add(tx);
+        this.transactions.putIfAbsent(tx.getDataHash(), tx);
         while(this.transactions.size() >= 26){
             this.transactions.remove(0);
         }
     }
 
     public void sendTxCache(){
-        for(Transaction tx: transactions){
+        for(Transaction tx: transactions.values()){
             JSONObject txObject = websocket.generateTxObject(tx);
             websocket.sendObject(txObject, "msgTx");
         }
