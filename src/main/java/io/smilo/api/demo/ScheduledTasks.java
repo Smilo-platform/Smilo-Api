@@ -56,8 +56,8 @@ public class ScheduledTasks {
             return txObject;
         }catch(Exception ex){
             LOGGER.error("Failed generating transaction object");
+            return null;
         }
-        return null;
     }
 
     public String getRandomAddress() {
@@ -78,8 +78,8 @@ public class ScheduledTasks {
             return DatatypeConverter.printHexBinary(md.digest(data.getBytes()));
         } catch (Exception e){
             LOGGER.error("Oops...");
+            return null;
         }
-        return null;
     }
 
     public JSONArray addTxOutputData(int inputAmount){
@@ -132,8 +132,8 @@ public class ScheduledTasks {
             return txArray;
         }catch (Exception ex){
             LOGGER.error("Reading transaction pool failed");
+            return new JSONArray();
         }
-        return new JSONArray();
     }
 
     public void sendMsg(JSONObject message, String type){

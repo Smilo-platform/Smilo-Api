@@ -31,7 +31,7 @@ import java.util.Objects;
 public class Block {
 
     private long timestamp;
-    private Long blockNum;
+    private long blockNum;
     private String previousBlockHash;
     private String ledgerHash;
     private List<Transaction> transactions;

@@ -18,7 +18,7 @@ public class WebsocketCache {
 
     public void addLatestBlock(Block block){
         this.blocks.putIfAbsent(block.getBlockNum(), block);
-        if (this.blocks.size() >= 26){
+        while(this.blocks.size() >= 26){
             this.blocks.remove(block.getBlockNum() - 25);
         }
     }
@@ -27,6 +27,21 @@ public class WebsocketCache {
         for (Block block : blocks.values()){
             JSONObject blockObject = websocket.generateBlockObject(block);
             websocket.sendObject(blockObject, "msgBlock");
+        }
+    }
+
+    public void addLatestTransaction(Transaction tx){
+        // TODO Check duplicated?
+        this.transactions.add(tx);
+        while(this.transactions.size() >= 26){
+            this.transactions.remove(0);
+        }
+    }
+
+    public void sendTxCache(){
+        for(Transaction tx: transactions){
+            JSONObject txObject = websocket.generateTxObject(tx);
+            websocket.sendObject(txObject, "msgTx");
         }
     }
 }

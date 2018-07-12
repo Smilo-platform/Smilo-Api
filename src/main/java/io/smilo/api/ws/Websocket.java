@@ -1,6 +1,7 @@
 package io.smilo.api.ws;
 
 import io.smilo.api.block.Block;
+import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,7 @@ public class Websocket {
                 websocketCache.sendBlockCache();
                 break;
             case "GET_LAST_TRANSACTIONS":
+                websocketCache.sendTxCache();
                 break;
         }
 
@@ -78,6 +80,12 @@ public class Websocket {
         sendObject(blockObject, "msgBlock");
     }
 
+    public void addTransaction(Transaction tx){
+        websocketCache.addLatestTransaction(tx);
+        JSONObject txObject = generateTxObject(tx);
+        sendObject(txObject, "msgTx");
+    }
+
     public JSONObject generateBlockObject(Block block){
         try{
             JSONObject blockObject = new JSONObject();
@@ -90,6 +98,26 @@ public class Websocket {
             return blockObject;
         }catch (Exception ex){
             LOGGER.error("Failed generating block object");
+            return null;
+        }
+    }
+
+    public JSONObject generateTxObject(Transaction tx){
+        try {
+            JSONObject txObject = new JSONObject();
+            txObject.put("timestamp", tx.getTimestamp());
+            txObject.put("assetID", tx.getAssetId());
+            txObject.put("inputAddress", tx.getInputAddress());
+            txObject.put("inputAmount", tx.getInputAmount());
+            txObject.put("txOutputArray", tx.getTransactionOutputs());
+            txObject.put("txFee", tx.getFee());
+            txObject.put("hash", tx.getDataHash());
+            txObject.put("signatureData", tx.getSignatureData());
+            txObject.put("signatureIndex", tx.getSignatureIndex());
+
+            return txObject;
+        }catch(Exception ex){
+            LOGGER.error("Failed generating transaction object");
             return null;
         }
     }

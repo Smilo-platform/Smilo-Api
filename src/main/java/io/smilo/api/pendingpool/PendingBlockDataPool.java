@@ -29,6 +29,7 @@ import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+import io.smilo.api.ws.Websocket;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,13 +40,13 @@ import java.util.Set;
 public class PendingBlockDataPool {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBlockDataPool.class);
-
     private Set<BlockData> pendingBlockData;
-
     private final ParserProvider parserProvider;
+    private Websocket websocket;
 
-    public PendingBlockDataPool(ParserProvider parserProvider) {
+    public PendingBlockDataPool(ParserProvider parserProvider, Websocket websocket) {
         this.parserProvider = parserProvider;
+        this.websocket = websocket;
         pendingBlockData = new HashSet<>();
     }
 
@@ -59,6 +60,7 @@ public class PendingBlockDataPool {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
         addBlockData(transaction);
+        websocket.addTransaction(transaction);
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {
