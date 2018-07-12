@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 @RestController
@@ -47,7 +47,7 @@ public class NetworkController {
      **/
 
     @GetMapping("/network/{network}")
-    public Map<String, HashMap<String, Node>> listNetwork(@PathVariable("network") String network) {
+    public Map<String, ArrayList<Node>> listNetwork(@PathVariable("network") String network) {
         return networkServices.getNetwork(network);
     }
 

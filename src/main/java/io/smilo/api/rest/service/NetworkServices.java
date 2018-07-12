@@ -19,12 +19,12 @@ package io.smilo.api.rest.service;
 
 import io.smilo.api.rest.models.Node;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 public interface NetworkServices {
 
     Map<String, Object> getAll();
 
-    Map<String, HashMap<String, Node>> getNetwork(String network);
+    Map<String, ArrayList<Node>> getNetwork(String network);
 }

@@ -57,13 +57,14 @@ public class NetworkServicesImpl implements NetworkServices {
         generateNetwork();
     }
 
-    @Override
-    public Map<String, HashMap<String, Node>> getNetwork(String network) {
-        HashMap<String, Node> nodes = new HashMap<>();
-        nodes.put("test", new Node(1, "127.0.0.1", 1, "1.0.0"));
-        HashMap<String, HashMap<String, Node>> networks = new HashMap<>();
-        networks.put(network, nodes);
-        return networks;
+    public Map<String, ArrayList<Node>> getNetwork(String networkName) {
+        Map<String, ArrayList<Node>> result = new HashMap<>();
+        ArrayList<Node> nodes = new ArrayList<>();
+        if (network.containsKey(networkName)){
+            nodes.addAll(network.get(networkName));
+            result.put(networkName, nodes);
+        }
+        return result;
     }
 
     private void generateNetwork(){
@@ -126,7 +127,7 @@ public class NetworkServicesImpl implements NetworkServices {
                 } else {
                     // since this network does not exist we can create this.
                     node.setGroup(networkCounter);
-                    node.setNetworkName(SHA256Short(name));
+                    node.setNetworkName(name);
                     addNetwork = name;
                 }
                 networkCounter++;
