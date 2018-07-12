@@ -25,5 +25,7 @@ public enum PayloadType {
     RESPOND_IDENTIFIER,
     TRANSACTION,
     BLOCK,
-    COMMIT;
+    COMMIT,
+    PING,
+    PONG
 }

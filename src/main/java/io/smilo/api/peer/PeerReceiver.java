@@ -102,21 +102,12 @@ public class PeerReceiver {
         }
     }
 
-    /**
-     * Broadcast a new block request if catchupMode is true
-     */
-    public void broadcastNewNetStateRequest() {
-        if(networkState.getCachupMode() && (blockStore.getLatestBlockHeight() > networkState.getTopBlock())) {
-            peerClient.broadcast("REQUEST_NET_STATE");
-        }
-    }
-
     private void handlePayload(List<String> parts, Peer peer) {
         try {
             PayloadType type = PayloadType.valueOf(StringUtils.upperCase(parts.get(0)));
             payloadHandlerProvider.getPayloadHandler(type).handlePeerPayload(parts, peer);
         } catch (IllegalArgumentException e) {
-            LOGGER.error("Unknown payload: " + StringUtils.upperCase(parts.get(0)) + ", do nothing. ");
+            LOGGER.debug("Unknown payload: " + StringUtils.upperCase(parts.get(0)) + ", do nothing. ");
         }
     }
 
@@ -124,7 +115,6 @@ public class PeerReceiver {
      * Update the data from the peer network
      */
     public void run() {
-        broadcastNewNetStateRequest();
         getNewData();
         broadcastNewBlockRequest();
     }
