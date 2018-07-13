@@ -1,37 +1,36 @@
 /*
  * Copyright (c) 2018 Smilo Platform B.V.
  *
- * Licensed under the Apache License, Version 2.0 (the “License”);
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.smilo.api.block.data.transaction;
 
 import io.smilo.api.block.data.BlockData;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 
+//        TRANSACTION timestamp;assetID;inputAddress;inputAmount;outputAddress1;outputAmount1;outputAddress2;outputAmount2;...;...;txFee;txHash;signatureData;signatureIndex
 public class Transaction extends BlockData {
 
-    private String assetId;
-    private Long inputAmount;
+    private String assetId = "";
+    private long inputAmount;
     private List<TransactionOutput> transactionOutputs;
 
     public Transaction() {
@@ -87,34 +86,7 @@ public class Transaction extends BlockData {
     }
 
     public String getRawTransaction() {
-        List<String> values = new ArrayList<>();
-        values.addAll(asList(getTimestamp() + "",
-                assetId,
-                getInputAddress(),
-                inputAmount + ""));
-
-        transactionOutputs.forEach(txOutput -> {
-            values.add(txOutput.getOutputAddress());
-            values.add(txOutput.getOutputAmount() + "");
-        });
-
-        values.addAll(asList(getFee() + "",
-                getDataHash(),
-                getSignatureData(),
-                getSignatureIndex() + ""));
-
-        return values.stream()
-                .map(v -> replaceNullByEmptyString((v)))
-                .collect(joining(";"));
-    }
-
-    public String getHashableData() {
-        String data = getTimestamp() + ":" + getAssetId() + ":" + getInputAddress() + ":" + getInputAmount() + ":" + getFee();
-
-        for (TransactionOutput txOutput : transactionOutputs) {
-            data += ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount();
-        }
-        return data;
+        return getRawTransactionDataWithHash() + ";" + getSignatureData() + ";" + getSignatureIndex();
     }
 
     private String replaceNullByEmptyString(String input) {
@@ -127,16 +99,7 @@ public class Transaction extends BlockData {
      */
     public String getTransactionBody() {
         String[] tx = getRawTransaction().split(";");
-        return Stream.of(tx).limit(tx.length - 2L).collect(joining(";"));
-    }
-
-    /**
-     * Printable short string
-     * @return printable version of the transaction
-     */
-    public String toShortString() {
-        String s = getRawTransaction();
-        return s.substring(0, 20) + "..." + s.substring(s.length() - 20, s.length());
+        return Stream.of(tx).limit(tx.length - 2).collect(joining(";"));
     }
 
     /**
@@ -182,21 +145,56 @@ public class Transaction extends BlockData {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
         final Transaction other = (Transaction) obj;
-        if (!Objects.equals(this.assetId, other.assetId)) return false;
-        if (!Objects.equals(this.getInputAddress(), other.getInputAddress())) return false;
-        if (!Objects.equals(this.getDataHash(), other.getDataHash())) return false;
-        if (!Objects.equals(this.getSignatureData(), other.getSignatureData())) return false;
-        if (!Objects.equals(this.getTimestamp(), other.getTimestamp())) return false;
-        if (!Objects.equals(this.inputAmount, other.inputAmount)) return false;
-        if (!Objects.equals(this.getFee(), other.getFee())) return false;
-        if (!Objects.equals(this.transactionOutputs, other.transactionOutputs)) return false;
-        if (!Objects.equals(this.getSignatureIndex(), other.getSignatureIndex())) return false;
+        if (!Objects.equals(this.assetId, other.assetId)) {
+            return false;
+        }
+        if (!Objects.equals(this.getInputAddress(), other.getInputAddress())) {
+            return false;
+        }
+        if (!Objects.equals(this.getDataHash(), other.getDataHash())) {
+            return false;
+        }
+        if (!Objects.equals(this.getSignatureData(), other.getSignatureData())) {
+            return false;
+        }
+        if (!Objects.equals(this.getTimestamp(), other.getTimestamp())) {
+            return false;
+        }
+        if (!Objects.equals(this.inputAmount, other.inputAmount)) {
+            return false;
+        }
+        if (!Objects.equals(this.getFee(), other.getFee())) {
+            return false;
+        }
+        if (!Objects.equals(this.transactionOutputs, other.transactionOutputs)) {
+            return false;
+        }
+        if (!Objects.equals(this.getSignatureIndex(), other.getSignatureIndex())) {
+            return false;
+        }
         return true;
     }
+    public String getRawTransactionDataWithHash() {
+        return getRawTransactionData() + ";" + getDataHash();
+    }
 
+    public String getRawTransactionData() {
+        String data = getTimestamp() + ";" + getAssetId() + ";" + getInputAddress() + ";" + getInputAmount() + ";";
+
+        for (TransactionOutput txOutput : transactionOutputs) {
+            data += ";" + txOutput.getOutputAddress() + ";" + txOutput.getOutputAmount();
+        }
+
+        return data + ";" + getFee();
+    }
 }
-

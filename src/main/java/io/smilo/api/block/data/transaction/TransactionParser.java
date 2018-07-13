@@ -22,9 +22,15 @@ import io.smilo.api.address.AddressUtility;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
 import org.apache.log4j.Logger;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
+import org.msgpack.core.buffer.ArrayBufferInput;
+import org.msgpack.core.buffer.MessageBufferInput;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TransactionUtility simplifies a few basic tasks dealing with transaction parsing and verification.
@@ -58,10 +64,11 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 isValid = false;
             }
 
-            if (!transaction.getDataHash().equals(generateDataHash(transaction.getHashableData().getBytes()))){
-                LOGGER.error("Error validating Tx hash: " + transaction.getDataHash() + " not valid.");
-                isValid = false;
-            }
+            // Todo: Fix this
+//            if (!transaction.getDataHash().equals(generateDataHash(transaction.getHashableData().getBytes()))){
+//                LOGGER.error("Error validating Tx hash: " + transaction.getDataHash() + " not valid.");
+//                isValid = false;
+//            }
 
             if (!addressUtility.isAddressFormattedCorrectly(transaction.getInputAddress())) {
                 LOGGER.error("Error validating transaction: input address " + transaction.getInputAddress() + " is misformatted.");
@@ -105,14 +112,40 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
 
     @Override
     public Transaction deserialize(byte[] raw) {
+        if (raw.length == 0) return null;
+        MessageBufferInput data = new ArrayBufferInput(raw);
+        MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(data);
         Transaction transaction = null;
         try {
-            TransactionDTO dto = dataMapper.readValue(raw, TransactionDTO.class);
-            transaction = TransactionDTO.toTransaction(dto);
-        } catch (IOException ex) {
+            Long timestamp = msgpack.unpackLong();
+            String assetId = msgpack.unpackString();
+            String inputAddress = msgpack.unpackString();
+            Long inputAmount = msgpack.unpackLong();
+            int items = msgpack.unpackArrayHeader();
+            List<TransactionOutput> outputs = new ArrayList<>();
+            for (int i = 0; i < items; i++) {
+                int size = msgpack.unpackBinaryHeader();
+                byte[] temp = msgpack.readPayload(size);
+                outputs.add(parseOutput(temp));
+            }
+            Long fee = msgpack.unpackLong();
+            String hash = msgpack.unpackString();
+            String signature = msgpack.unpackString();
+            Long signatureIndex = msgpack.unpackLong();
+
+            transaction = new Transaction(timestamp, assetId, inputAddress, inputAmount, fee, outputs, hash, signature, signatureIndex);
+        } catch (ArrayIndexOutOfBoundsException | IOException ex) {
             LOGGER.error("Unable to deserialize transaction", ex);
         }
         return transaction;
+    }
+
+    private TransactionOutput parseOutput(byte[] raw) throws IOException {
+        MessageBufferInput data = new ArrayBufferInput(raw);
+        MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(data);
+        String outputAddress = msgpack.unpackString();
+        Long outputAmount = msgpack.unpackLong();
+        return new TransactionOutput(outputAddress,outputAmount);
     }
 
     @Override

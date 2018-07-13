@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2018 Smilo Platform B.V.
  *
- * Licensed under the Apache License, Version 2.0 (the “License”);
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.smilo.api.block;
-
 
 import io.smilo.api.block.data.transaction.Transaction;
 
@@ -24,22 +22,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * This class provides all functionality related to block verification and usage. A block contains: - Timestamp (Unix Epoch) - Block number - Previous block hash - ledgerHash - Transaction list
  * (Array) - blockHash - nodeSignature - nodeSignatureIndex
  */
-public class Block {
+public class Block extends Content {
 
     private long timestamp;
     private long blockNum;
     private String previousBlockHash;
+    private String redeemAddress;
     private String ledgerHash;
     private List<Transaction> transactions;
     private String blockHash;
     private String nodeSignature;
     private long nodeSignatureIndex;
-    // TODO: user's default public key
-    private String redeemAddress;
 
     public Block() {}
 
@@ -52,9 +51,9 @@ public class Block {
      * All blocks stack in one particular order, and each block contains the hash of the previous block, to clear any ambiguities about which chain a block belongs to during a fork.
      *
      * Blocks are hashed to create a block hash, which ensures blocks are not altered, and is used in block stacking. The data hashed is formatted as a String:
-     * {timestamp:blockNum:previousBlockHash},{ledgerHash},{transactions} Then, the full block (including the hash) is signed by the miner. So:
-     * {timestamp:blockNum:previousBlockHash},{ledgerHash},{transactions},{blockHash} will be hashed and signed by the redeemAddress, which should be held by the signing node. The final block format:
-     * {timestamp:blockNum:previousBlockHash},{ledgerHash},{transactions},{blockHash},{nodeSignature},{nodeSignatureIndex}
+     * {timestamp:blockNum:previousBlockHash:redeemAddress},{ledgerHash},{transactions} Then, the full block (including the hash) is signed by the miner. So:
+     * {timestamp:blockNum:previousBlockHash:redeemAddress},{ledgerHash},{transactions},{blockHash} will be hashed and signed by the redeemAddress, which should be held by the signing node. The final block format:
+     * {timestamp:blockNum:previousBlockHash:redeemAddress},{ledgerHash},{transactions},{blockHash},{nodeSignature},{nodeSignatureIndex}
      *
      * Explicit transactions are represented as Strings in an ArrayList<String>. Each explicit transaction follows the following format:
      * InputAssetId;InputAddress;InputAmount;TX_Fee;OutputAddress1;OutputAmount1;OutputAddress2;OutputAmount2...;SignatureData;SignatureIndex At a bare minimum, ALL transactions must have an Input
@@ -69,8 +68,8 @@ public class Block {
      * @param nodeSignature Node's signature of the block
      * @param nodeSignatureIndex Node's signature index used when generating nodeSignature
      */
-    public Block(long timestamp, Long blockNum, String previousBlockHash, String redeemAddress, String ledgerHash, List<Transaction> transactions, String nodeSignature, int nodeSignatureIndex) {
-        this.timestamp = timestamp;
+    public Block(Long timestamp, long blockNum, String previousBlockHash, String redeemAddress, String ledgerHash, List<Transaction> transactions, String nodeSignature, int nodeSignatureIndex) {
+        super(timestamp);
         this.blockNum = blockNum;
         this.previousBlockHash = previousBlockHash;
         this.ledgerHash = ledgerHash;
@@ -80,6 +79,11 @@ public class Block {
         this.redeemAddress = redeemAddress;
     }
 
+    public String getRawBlockData() {
+        String transactionsString = transactions.stream().filter(Transaction::hasContent).map(Transaction::getRawTransaction).collect(joining("*"));
+        return "{" + getTimestamp() + ":" + blockNum + ":" + previousBlockHash + ":" + redeemAddress + "},{" + ledgerHash + "},{" + transactionsString + "}";
+    }
+
     /**
      * Scans the block for any transactions that involve the provided address. Returns ArrayList<String> containing "simplified" transactions, in the format of sender:amount:asset:receiver Each of
      * these "simplified" transaction formats don't necessarily express an entire transaction, but rather only portions of a transaction which involve either the target address sending or receiving
@@ -87,7 +91,7 @@ public class Block {
      *
      * @param addressToFind Address to search through block transaction pool for
      *
-     * @return ArrayList<String> Simplified-transaction-format list of all related transactions.
+     * @return List<String> Simplified-transaction-format list of all related transactions.
      */
     public List<String> getTransactionsInvolvingAddress(String addressToFind) {
         ArrayList<String> relevantTransactionParts = new ArrayList<>();
@@ -95,17 +99,29 @@ public class Block {
             //Transaction format: InputAssetId;InputAddress;InputAmount;TX_Fee;ToAddress1;Output1;ToAddress2;Output2;SignatureData;SignatureIndex
             String assetid = tempTransaction.getAssetId();
             String sender = tempTransaction.getInputAddress();
-            if (sender.equalsIgnoreCase(addressToFind)) tempTransaction.getTransactionOutputs()
-                    .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
-            else tempTransaction.getTransactionOutputs().stream()
-                    .filter(txOutput -> txOutput.getOutputAddress().equals(addressToFind))
-                    .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
+            if (sender.equalsIgnoreCase(addressToFind)) {
+                tempTransaction.getTransactionOutputs()
+                        .forEach(txOutput -> {
+                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
+                        });
+            } else {
+                tempTransaction.getTransactionOutputs().stream()
+                        .filter(txOutput -> txOutput.getOutputAddress().equals(addressToFind))
+                        .forEach(txOutput -> {
+                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
+                        });
+            }
         }
         return relevantTransactionParts;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    /**
+     * Returns the raw String representation of the block, useful when saving the block or sending it to a peer.
+     *
+     * @return String The raw block
+     */
+    public String getRawBlock() {
+        return getRawBlockDataWithHash() + ",{" + nodeSignature + "},{" + nodeSignatureIndex + "}";
     }
 
     public long getBlockNum() {
@@ -141,14 +157,10 @@ public class Block {
     }
 
     public boolean hasNoExplicitTransactions() {
-        return transactions.isEmpty() || transactions.stream().allMatch(Transaction::isEmpty);
+        return transactions.isEmpty() || transactions.stream().allMatch(t -> t.isEmpty());
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setBlockNum(Long blockNum) {
+    public void setBlockNum(long blockNum) {
         this.blockNum = blockNum;
     }
 
@@ -180,6 +192,10 @@ public class Block {
         this.redeemAddress = redeemAddress;
     }
 
+    public String getPrintableString() {
+        return getRawBlock().substring(0, 30) + "...";
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -203,6 +219,7 @@ public class Block {
     }
 
 
-
+    public String getRawBlockDataWithHash() {
+        return getRawBlockData() + ",{" + blockHash + "}";
+    }
 }
-
