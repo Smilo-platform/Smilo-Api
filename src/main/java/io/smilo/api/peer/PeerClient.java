@@ -150,21 +150,6 @@ public class PeerClient {
     }
 
     /**
-     * Announces message to 1 peer.
-     *
-     * @param message  String to broadcast to peers
-     * @param iPeer Peer to send broadcast too
-     **/
-    public void broadcastToPeer(String message, Peer iPeer) {
-        peerStore.getPeers().stream()
-        .filter(p -> p.getIdentifier().equals(iPeer.getIdentifier()))
-        .forEach(peer -> {
-                        LOGGER.trace("Sent:: " + message);
-                        peer.write(message);
-                    });
-    }
-
-    /**
      * Returns a random peer host/port combo to the querying peer.
      * Future versions will detect dynamic ports and not send peers likely to not support direct connections.
      * While not part of GET_PEER, very-far-in-the-future-versions may support TCP punchthrough assists.
