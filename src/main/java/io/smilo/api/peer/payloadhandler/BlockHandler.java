@@ -86,15 +86,17 @@ public class BlockHandler implements PayloadHandler {
             if(block.getBlockNum() > networkState.getTopBlock()){
                 networkState.setTopBlock(block.getBlockNum()+1);
             }
-        } else if ((blockStore.getLatestBlockHeight() +1) > block.getBlockNum()){
+        } else if (blockStore.getLatestBlockHeight() == block.getBlockNum()) {
+            LOGGER.debug("Just parsed block " + block.getBlockNum() + ". Dropping.");
+        } else if ((blockStore.getLatestBlockHeight()+1) > block.getBlockNum()) {
             LOGGER.info("Dr. Emmett Brown: You’ve got to come back with me!\n" +
                     "Marty McFly: Where?\n" +
                     "Dr. Emmett Brown: Back to the future!");
             LOGGER.error("Old followup block. Dropping.");
-        }else {
-            LOGGER.error("Wrong followup block. Dropping.");
-            LOGGER.error("Block: " + block.getBlockNum() + " " + block.getBlockHash());
-            LOGGER.error("Should be: " + (blockStore.getLatestBlockHeight() + 1));
+        } else {
+            LOGGER.warn("Wrong followup block " + block.getBlockNum() + ". Dropping.");
+            LOGGER.debug("Block: " + block.getBlockNum() + " " + block.getBlockHash());
+            LOGGER.debug("Should be: " + (blockStore.getLatestBlockHeight() + 1));
         }
 
         //Remove all transactions from the pendingTransactionPool that appear in the block

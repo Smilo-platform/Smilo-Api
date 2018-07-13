@@ -20,10 +20,16 @@ package io.smilo.api.block;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionParser;
 import org.apache.log4j.Logger;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * https://smilo-platform.atlassian.net/wiki/spaces/SP/pages/96305164/Blocks TODO: refactor
@@ -36,9 +42,11 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
 
     private static final Logger LOGGER = Logger.getLogger(BlockParser.class);
     private final ObjectMapper dataMapper;
+    private final TransactionParser transactionParser;
 
-    public BlockParser(ObjectMapper dataMapper) {
+    public BlockParser(ObjectMapper dataMapper, TransactionParser transactionParser) {
         this.dataMapper = dataMapper;
+        this.transactionParser = transactionParser;
     }
 
     @Override
@@ -69,12 +77,33 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
 
     @Override
     public Block deserialize(byte[] raw) {
-        Block block = null;
+        if (raw.length == 0) return null;
+        MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(raw);
+        Block block;
         try {
-            BlockDTO dto = dataMapper.readValue(raw, BlockDTO.class);
-            block = BlockDTO.toBlock(dto);
-        } catch (IOException ex) {
+            Long timestamp = msgpack.unpackLong();
+            Long blockNumber = msgpack.unpackLong();
+            String previousBlockHash = msgpack.unpackString();
+            String redeemAddress = msgpack.unpackString();
+            String ledgerHash = msgpack.unpackString();
+            int numberOfTransactions = msgpack.unpackArrayHeader();
+            List<Transaction> transactions = new ArrayList<>();
+            for (int i = 0; i < numberOfTransactions; i++) {
+                int sizeOfTransaction = msgpack.unpackBinaryHeader();
+                byte[] rawTransaction = new byte[sizeOfTransaction];
+                msgpack.readPayload(rawTransaction);
+                transactions.add(transactionParser.deserialize(rawTransaction));
+            }
+            String blockHash = msgpack.unpackString();
+            String blockSignature = msgpack.unpackString();
+            Long blockSignatureIndex = msgpack.unpackLong();
+            block = new Block(timestamp,blockNumber,previousBlockHash,redeemAddress,ledgerHash,transactions,blockSignature,blockSignatureIndex.intValue());
+            block.setBlockHash(blockHash);
+        } catch (IndexOutOfBoundsException | IOException ex) {
             LOGGER.error("Unable to deserialize block", ex);
+            LOGGER.debug("Mensagem: "+ new String(raw));
+
+            return null;
         }
         return block;
     }
