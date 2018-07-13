@@ -83,7 +83,13 @@ public class Node {
 
     @Override
     public boolean equals(Object obj) {
-        final Node other = (Node) obj;
+        if (obj == null)
+            return false;
+
+        if (this.getClass() != obj.getClass())
+            return false;
+
+        Node other = (Node) obj;
         if (Objects.equals(this.label, other.label)) return true;
         return false;
     }
