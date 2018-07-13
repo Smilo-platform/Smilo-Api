@@ -14,24 +14,28 @@
  * limitations under the License.
  *
  */
+
 package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.api.peer.Peer;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class RequestIdentifierHandler implements PayloadHandler {
+public class PongHandler implements PayloadHandler {
+
+    private static final Logger LOGGER = Logger.getLogger(PongHandler.class);
 
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
-        peer.write(PayloadType.RESPOND_IDENTIFIER.name() + " SMILOAPI");
-        peer.write(PayloadType.REQUEST_NET_STATE.name());
+        // do nothing, peerReceiver already updated the last seen
+        LOGGER.debug("Received pong from " + peer.getIdentifier());
     }
 
     @Override
     public PayloadType supports() {
-        return PayloadType.REQUEST_IDENTIFIER;
+        return PayloadType.PONG;
     }
 }

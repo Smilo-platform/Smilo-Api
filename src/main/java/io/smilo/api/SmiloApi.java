@@ -64,6 +64,7 @@ public class SmiloApi {
          * - Parse blocks into NoSQL DB (LMDB)
          *
          */
+
         while (true) {
             if (peerClient.getPeers().size() > 0) {
                 peerReceiver.run();

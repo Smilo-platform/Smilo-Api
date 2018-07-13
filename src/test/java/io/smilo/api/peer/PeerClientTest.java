@@ -18,7 +18,6 @@
 package io.smilo.api.peer;
 
 import io.smilo.api.AbstractSpringTest;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

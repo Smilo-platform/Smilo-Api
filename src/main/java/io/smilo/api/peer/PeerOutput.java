@@ -73,6 +73,8 @@ public class PeerOutput implements Runnable {
                 Thread.sleep(100);
             }
             LOGGER.error("WHY AM I HERE?");
+        } catch (InterruptedException e) {
+            LOGGER.info("Peer is interrupted...");
         } catch (Exception e) {
             LOGGER.error("An error has occured while running the PeerOutput" + e);
         }

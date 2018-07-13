@@ -53,6 +53,7 @@ public class PeerClient {
         this.peerStore = peerStore;
         this.listenPort = DEFAULT_PORT;
         this.nodes = nodes;
+        peerStore.clear(); // make the peersStore empty so we connect to the list again.
         initializePeers();
         listenToSocket();
     }
@@ -148,11 +149,11 @@ public class PeerClient {
         });
     }
 
-    /*
+    /**
      * Returns a random peer host/port combo to the querying peer.
      * Future versions will detect dynamic ports and not send peers likely to not support direct connections.
      * While not part of GET_PEER, very-far-in-the-future-versions may support TCP punchthrough assists.
-     */
+     **/
     public Peer getRandomPeer() {
         List<Peer> peers = peerStore.getPeers();
         return peers.get(random.nextInt(peers.size()));
