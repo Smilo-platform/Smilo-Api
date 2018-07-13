@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.joining;
  */
 public class Block extends Content {
 
-    private long timestamp;
     private long blockNum;
     private String previousBlockHash;
     private String redeemAddress;
