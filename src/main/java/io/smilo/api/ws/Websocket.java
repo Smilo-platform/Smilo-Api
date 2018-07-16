@@ -1,8 +1,11 @@
 package io.smilo.api.ws;
 
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
 import io.smilo.api.block.Block;
 import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -88,12 +91,18 @@ public class Websocket {
 
     public JSONObject generateBlockObject(Block block){
         try{
+            // TODO remove both lines
+            JSONArray transactions = new JSONArray();
+            transactions.addAll(block.getTransactions());
+
+            // TODO foreach transaction in block.getTransactions, create JSONObject (same as with generateTxObject)
+
             JSONObject blockObject = new JSONObject();
             blockObject.put("blockHash", block.getBlockHash());
             blockObject.put("blocknum", block.getBlockNum());
             blockObject.put("prevBlockHash", block.getPreviousBlockHash());
             blockObject.put("timestamp", block.getTimestamp());
-            blockObject.put("transactions", block.getTransactions());
+            blockObject.put("transactions", transactions);
 
             return blockObject;
         }catch (Exception ex){
@@ -104,12 +113,20 @@ public class Websocket {
 
     public JSONObject generateTxObject(Transaction tx){
         try {
+            ArrayList transactions = new ArrayList();
+            JSONObject transaction = new JSONObject();
+
+            // TODO foreach transaction in tx.getTransactionOutputs(); (increment on the zero)
+            transaction.put("outputAddress",tx.getTransactionOutputs().get(0).getOutputAddress());
+            transaction.put("outputAmount",tx.getTransactionOutputs().get(0).getOutputAmount());
+            transactions.add(transaction);
+
             JSONObject txObject = new JSONObject();
             txObject.put("timestamp", tx.getTimestamp());
             txObject.put("assetID", tx.getAssetId());
             txObject.put("inputAddress", tx.getInputAddress());
             txObject.put("inputAmount", tx.getInputAmount());
-            txObject.put("txOutputArray", tx.getTransactionOutputs());
+            txObject.put("txOutputArray",transactions);
             txObject.put("txFee", tx.getFee());
             txObject.put("hash", tx.getDataHash());
             txObject.put("signatureData", tx.getSignatureData());
