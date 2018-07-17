@@ -1,9 +1,8 @@
 package io.smilo.api.ws;
 
-import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
 import io.smilo.api.block.Block;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionOutput;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -15,6 +14,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @ServerEndpoint("/websocket")
@@ -92,8 +92,10 @@ public class Websocket {
     public JSONObject generateBlockObject(Block block){
         try{
             // TODO remove both lines
-            JSONArray transactions = new JSONArray();
-            transactions.addAll(block.getTransactions());
+            ArrayList transactions = new ArrayList<>();
+            for (Transaction tx : block.getTransactions()){
+                transactions.add(generateTxObject(tx));
+            }
 
             // TODO foreach transaction in block.getTransactions, create JSONObject (same as with generateTxObject)
 
@@ -113,20 +115,22 @@ public class Websocket {
 
     public JSONObject generateTxObject(Transaction tx){
         try {
-            ArrayList transactions = new ArrayList();
-            JSONObject transaction = new JSONObject();
+            ArrayList transactionOutputs = new ArrayList();
+            JSONObject txObject = new JSONObject();
 
             // TODO foreach transaction in tx.getTransactionOutputs(); (increment on the zero)
-            transaction.put("outputAddress",tx.getTransactionOutputs().get(0).getOutputAddress());
-            transaction.put("outputAmount",tx.getTransactionOutputs().get(0).getOutputAmount());
-            transactions.add(transaction);
+            for (TransactionOutput txOut : tx.getTransactionOutputs()) {
+                JSONObject transactionOutput = new JSONObject();
+                transactionOutput.put("outputAddress", txOut.getOutputAddress());
+                transactionOutput.put("outputAmount", txOut.getOutputAmount());
+                transactionOutputs.add(transactionOutput);
+            }
 
-            JSONObject txObject = new JSONObject();
             txObject.put("timestamp", tx.getTimestamp());
             txObject.put("assetID", tx.getAssetId());
             txObject.put("inputAddress", tx.getInputAddress());
             txObject.put("inputAmount", tx.getInputAmount());
-            txObject.put("txOutputArray",transactions);
+            txObject.put("txOutputArray",transactionOutputs);
             txObject.put("txFee", tx.getFee());
             txObject.put("hash", tx.getDataHash());
             txObject.put("signatureData", tx.getSignatureData());

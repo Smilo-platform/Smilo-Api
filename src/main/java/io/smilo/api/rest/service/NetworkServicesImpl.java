@@ -44,7 +44,7 @@ public class NetworkServicesImpl implements NetworkServices {
     private ArrayList ignoreNodes = new ArrayList();
 
     private int maxNetworkSize = 20;
-    private int max2ndNetworkSize = 16;
+    private int max2ndNetworkSize = 15;
     private int maxNodes = 200;
 
     @Autowired
