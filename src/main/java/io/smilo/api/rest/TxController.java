@@ -17,6 +17,7 @@
 
 package io.smilo.api.rest;
 
+import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.rest.models.Tx;
 import org.springframework.web.bind.annotation.*;
 
