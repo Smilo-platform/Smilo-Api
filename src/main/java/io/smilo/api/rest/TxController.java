@@ -19,6 +19,7 @@ package io.smilo.api.rest;
 
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionDTO;
+import io.smilo.api.rest.models.PostTransactionResult;
 import io.smilo.api.rest.models.Tx;
 import io.smilo.api.rest.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class TxController {
 
     @RequestMapping(path = "/tx", method = RequestMethod.POST)
     @ResponseBody
-    public Transaction respondPost(@RequestBody Transaction transaction) {
+    public PostTransactionResult respondPost(@RequestBody Transaction transaction) {
         return this.transactionService.putTransaction(transaction);
     }
 }
