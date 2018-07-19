@@ -34,12 +34,14 @@ public class BlockDataCache {
         return transactions;
     }
 
-    public void addTransaction(Transaction transaction){
-        // Skip if block already exist
+    public Boolean isDuplicate(Transaction transaction){
         if(transactions.containsKey(transaction.getDataHash())){
-            return;
+            return true;
         }
+        return false;
+    }
 
+    public void addTransaction(Transaction transaction){
         // Store latest 100 blocks
         transactions.put(transaction.getDataHash(), transaction);
 //        while(transactions.size() >= 101){

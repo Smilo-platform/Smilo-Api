@@ -63,9 +63,10 @@ public class PendingBlockDataPool {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
         addBlockData(transaction);
-        blockDataCache.addTransaction(transaction);
-        websocket.sendBlockData(transaction);
-
+        if (!blockDataCache.isDuplicate(transaction)){
+//            blockDataCache.addTransaction(transaction);
+            websocket.sendPendingBlockData(transaction);
+        }
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {

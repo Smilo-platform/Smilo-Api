@@ -34,11 +34,6 @@ public class BlockCache {
     }
 
     public void addBlock(Block block){
-        // Skip if block already exist
-        if(blocks.containsKey(block.getBlockNum())){
-            return;
-        }
-
         // Store latest 100 blocks
         blocks.put(block.getBlockNum(), block);
         while(blocks.size() >= 101){

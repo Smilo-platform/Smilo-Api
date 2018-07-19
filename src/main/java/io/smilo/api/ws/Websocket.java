@@ -22,6 +22,7 @@ import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +41,8 @@ public class Websocket {
     private static final Logger LOGGER = Logger.getLogger(Websocket.class);
     private static final Set<Session> clients = Collections.synchronizedSet(new HashSet<Session>());
 
-    @Autowired
-    private BlockCache blockCache;
-
-    @Autowired
-    private BlockDataCache blockDataCache;
+    private final BlockCache blockCache = new BlockCache();
+    private final BlockDataCache blockDataCache = new BlockDataCache();
 
 
     public void broadcastMessage(String message) {
@@ -82,7 +80,8 @@ public class Websocket {
             case "GET_LAST_BLOCKS":
                 sendBlockCache();
                 break;
-            case "GET_LAST_TRANSACTIONS":
+            case "GET_LAST_BLOCK_DATA":
+                // send PendingBlockDataPool
                 sendBlockDataCache();
                 break;
         }
@@ -161,12 +160,10 @@ public class Websocket {
         }
     }
 
-    // TODO add amount of max blocks send?
     public void sendBlockCache(){
         try {
             for (Block block :  blockCache.getBlocks().values()){
-                JSONObject blockObject = generateBlockObject(block);
-                sendObject(blockObject, "msgBlock");
+                sendBlock(block);
             }
         } catch (NullPointerException e){
             LOGGER.warn("BlockCache is empty!");
@@ -174,28 +171,28 @@ public class Websocket {
 
     }
 
-    // TODO add amount of max blocks send?
     public void sendBlock(Block block){
         JSONObject blockObject = generateBlockObject(block);
-        sendObject(blockObject, "msgBlock");
+        sendObject(blockObject, "BLOCK");
     }
 
-    // TODO add amount of max blocks send?
     public void sendBlockDataCache(){
         try {
             for (Transaction tx :  blockDataCache.getTransactions().values()){
-                JSONObject txObject = generateTxObject(tx);
-                sendObject(txObject, "msgTx");
+                sendBlockData(tx);
             }
         } catch (NullPointerException e) {
             LOGGER.warn("BlockDataCache is empty!");
         }
-
     }
 
-    // TODO add amount of max blocks send?
     public void sendBlockData(Transaction tx){
         JSONObject txObject = generateTxObject(tx);
-        sendObject(txObject, "msgTx");
+        sendObject(txObject, "BLOCK_DATA");
+    }
+
+    public void sendPendingBlockData(Transaction tx){
+        JSONObject txObject = generateTxObject(tx);
+        sendObject(txObject, "PENDING_BLOCK_DATA");
     }
 }
