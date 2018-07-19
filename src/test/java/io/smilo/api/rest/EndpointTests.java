@@ -19,6 +19,7 @@ package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
 import io.smilo.api.StableTests;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -42,6 +43,7 @@ public class EndpointTests extends AbstractWebSpringTest {
     }
 
     @Test
+    @Ignore // Todo : Add again when we can search transactions
     public void shouldReturn200WhenRequestTxToTxController() throws Exception {
 
         this.webClient.perform(MockMvcRequestBuilders.get("/tx/testtransaction"))
