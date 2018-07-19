@@ -36,7 +36,6 @@ public class PeerSender {
         this.parserProvider = parserProvider;
     }
 
-    //TODO: fix type
     public void broadcast(PayloadType type, String data) {
         peerClient.broadcast(type.name() + " " + data);
     }
