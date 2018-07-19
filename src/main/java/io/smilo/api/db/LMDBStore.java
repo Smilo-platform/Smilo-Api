@@ -44,7 +44,8 @@ public class LMDBStore implements Store {
         // TODO: review env settings
         this.env = create()
                 // LMDB also needs to know how large our DB might be. Over-estimating is OK.
-                .setMapSize(1_048_576 * 1_024L * 1_024L) // 1 TB?
+                //.setMapSize(1_048_576 * 1_024L * 1_024L) // 1 TB? // TODO enable 1TB
+                .setMapSize(1_048_576 * 1_024L)
                 // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
                 .setMaxDbs(5)
                 .setMaxReaders(100)

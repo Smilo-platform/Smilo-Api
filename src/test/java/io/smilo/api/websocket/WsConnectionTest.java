@@ -40,7 +40,7 @@ public class WsConnectionTest extends AbstractSpringTest {
             // wait 0.1 seconds for messages from websocket
             Thread.sleep(100);
 
-            assertEquals("Welcome tot the Smilo Api!", clientEndPoint.lastMessage());
+            assertEquals("Welcome to the Smilo Api!", clientEndPoint.lastMessage());
 
         } catch (InterruptedException ex) {
             LOGGER.error("InterruptedException exception: " + ex.getMessage());

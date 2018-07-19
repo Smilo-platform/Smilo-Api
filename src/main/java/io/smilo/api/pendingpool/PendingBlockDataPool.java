@@ -27,6 +27,8 @@ import io.smilo.api.block.data.Parser;
 import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
+import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.ws.Websocket;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -39,13 +41,15 @@ import java.util.Set;
 public class PendingBlockDataPool {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBlockDataPool.class);
-
     private Set<BlockData> pendingBlockData;
-
     private final ParserProvider parserProvider;
+    private Websocket websocket;
+    private BlockDataCache blockDataCache;
 
-    public PendingBlockDataPool(ParserProvider parserProvider) {
+    public PendingBlockDataPool(ParserProvider parserProvider, Websocket websocket, BlockDataCache blockDataCache) {
         this.parserProvider = parserProvider;
+        this.websocket = websocket;
+        this.blockDataCache = blockDataCache;
         pendingBlockData = new HashSet<>();
     }
 
@@ -59,6 +63,10 @@ public class PendingBlockDataPool {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
         addBlockData(transaction);
+        if (!blockDataCache.isDuplicate(transaction)){
+//            blockDataCache.addTransaction(transaction);
+            websocket.sendPendingBlockData(transaction);
+        }
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {
