@@ -18,33 +18,43 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.rest.models.PostTransactionResult;
-import io.smilo.api.rest.models.Tx;
 import io.smilo.api.rest.service.TransactionService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class TxController {
+    private final Logger LOGGER = Logger.getLogger(TxController.class);
+    private final String COLLECTION_NAME = "TestCollection";
+
     @Autowired
     TransactionService transactionService;
 
     @GetMapping("/tx")
     @ResponseBody
-    public Tx respondAllTxs() {
-        return new Tx(1, "All txs!");
+    public List<Transaction> respondAllTxs() {
+        return null;
     }
 
     @RequestMapping(path = "/tx/{tx}")
     @ResponseBody
-    public Tx respondTx(@PathVariable("tx") String tx) {
-        return new Tx(1, tx);
+    public ResponseEntity<Transaction> respondTx(@PathVariable("tx") String tx) {
+        Transaction transaction = transactionService.get(tx);
+
+        return new ResponseEntity<>(transaction, transaction == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
     @RequestMapping(path = "/tx", method = RequestMethod.POST)
     @ResponseBody
-    public PostTransactionResult respondPost(@RequestBody Transaction transaction) {
-        return this.transactionService.putTransaction(transaction);
+    public ResponseEntity<PostTransactionResult> respondPost(@RequestBody Transaction transaction) {
+        PostTransactionResult result = this.transactionService.putTransaction(transaction);
+
+        return new ResponseEntity<>(result, result.getSucceeded() ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 }

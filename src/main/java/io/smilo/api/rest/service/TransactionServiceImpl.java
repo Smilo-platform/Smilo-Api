@@ -20,6 +20,7 @@ package io.smilo.api.rest.service;
 import io.smilo.api.block.AddResultType;
 import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.PeerClient;
 import io.smilo.api.peer.PeerSender;
 import io.smilo.api.peer.payloadhandler.PayloadType;
@@ -28,6 +29,8 @@ import io.smilo.api.rest.models.PostTransactionResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("transactionService")
 public class TransactionServiceImpl implements TransactionService {
     @Autowired
@@ -35,6 +38,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     PendingBlockDataPool pendingBlockDataPool;
+
+    @Autowired
+    TransactionStore transactionStore;
 
     @Override
     public PostTransactionResult putTransaction(Transaction transaction) {
@@ -47,5 +53,20 @@ public class TransactionServiceImpl implements TransactionService {
         else {
             return new PostTransactionResult(false, result.getMessage());
         }
+    }
+
+    @Override
+    public Transaction get(String transactionHash) {
+        return transactionStore.getTransaction(transactionHash);
+    }
+
+    @Override
+    public List<Transaction> getAll() {
+        return null;
+    }
+
+    @Override
+    public List<Transaction> getAll(String address) {
+        return null;
     }
 }
