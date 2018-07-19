@@ -89,17 +89,13 @@ public class Transaction extends BlockData {
         return getRawTransactionDataWithHash() + ";" + getSignatureData() + ";" + getSignatureIndex();
     }
 
-    private String replaceNullByEmptyString(String input) {
-        return input == null ? "" : input;
-    }
-
     /**
      * Returns the transaction as string without signature data and index
      * @return
      */
     public String getTransactionBody() {
         String[] tx = getRawTransaction().split(";");
-        return Stream.of(tx).limit(tx.length - 2).collect(joining(";"));
+        return Stream.of(tx).limit(tx.length - 2L).collect(joining(";"));
     }
 
     /**

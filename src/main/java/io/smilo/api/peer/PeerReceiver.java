@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PeerReceiver {
@@ -56,10 +57,6 @@ public class PeerReceiver {
         // copy the peer list to make sure we don't get any concurrency issues when adding new received peers
         new ArrayList<>(peerClient.getPeers()).stream().filter(Peer::isInitialized).forEach(peer -> {
             List<String> input = peer.readData();
-            if (input == null) {
-                LOGGER.error("NULL RET RETRY");
-                System.exit(-4);
-            }
             /*
              * While taking up new transactions and blocks, the client will broadcast them to the network if they are new to the client.
              * As a result, if you are connected to 7 peers, you will get reverb 7 times for a broadcast of a block or transaction.
@@ -68,7 +65,7 @@ public class PeerReceiver {
              * No point in sending 4 KB when a 64-byte message (or less) could check to make sure a transaction hasn't already been sent.
              * Not wanting to complicate Proof of Concept, there are no fancy algorithms or means of telling if peers have already heard the news you are going to deliver.
              */
-            input.forEach(data -> {
+            input.stream().filter(Objects::nonNull).forEach(data -> {
                 if (data.length() > 60) {
                     LOGGER.info("got data: " + data.substring(0, 30) + "..." + data.substring(data.length() - 30, data.length()));
                 } else {
@@ -76,8 +73,15 @@ public class PeerReceiver {
                 }
                 List<String> parts = Arrays.asList(data.split(" "));
                 if (!parts.isEmpty()) {
-                    handlePayload(parts, peer);
-                }
+                    try {
+                       handlePayload(parts, peer);
+                       } catch (ArrayIndexOutOfBoundsException e) {
+                       LOGGER.error("Incomplete message... " + data);
+                            peer.write("ERROR the message was not complete!");
+                        } catch (Exception e) {
+                            LOGGER.error("No idea what happened here...", e);
+                        }
+                    }
             });
         });
     }

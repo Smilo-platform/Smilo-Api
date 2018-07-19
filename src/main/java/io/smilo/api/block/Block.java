@@ -100,15 +100,11 @@ public class Block extends Content {
             String sender = tempTransaction.getInputAddress();
             if (sender.equalsIgnoreCase(addressToFind)) {
                 tempTransaction.getTransactionOutputs()
-                        .forEach(txOutput -> {
-                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
-                        });
+                        .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
             } else {
                 tempTransaction.getTransactionOutputs().stream()
                         .filter(txOutput -> txOutput.getOutputAddress().equals(addressToFind))
-                        .forEach(txOutput -> {
-                            relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount());
-                        });
+                        .forEach(txOutput -> relevantTransactionParts.add(assetid + ":" + sender + ":" + txOutput.getOutputAddress() + ":" + txOutput.getOutputAmount()));
             }
         }
         return relevantTransactionParts;
@@ -156,7 +152,7 @@ public class Block extends Content {
     }
 
     public boolean hasNoExplicitTransactions() {
-        return transactions.isEmpty() || transactions.stream().allMatch(t -> t.isEmpty());
+        return transactions.isEmpty() || transactions.stream().allMatch(Transaction::isEmpty);
     }
 
     public void setBlockNum(long blockNum) {
