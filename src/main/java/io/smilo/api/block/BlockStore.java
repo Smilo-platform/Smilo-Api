@@ -113,7 +113,7 @@ public class BlockStore {
      */
     public void writeBlockToFile(Block block) {
         final ByteBuffer key = allocateDirect(64);
-        final ByteBuffer val = allocateDirect(10000);
+        final ByteBuffer val = allocateDirect(1000000);
 
         try {
             BlockDTO dto = BlockDTO.toDTO(block);
