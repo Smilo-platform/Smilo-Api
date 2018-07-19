@@ -75,7 +75,7 @@ public class PendingBlockDataPool {
                 return new AddBlockDataResult(blockData, AddResultType.VALIDATION_ERROR, "Throwing out a " + blockData.getClass().getSimpleName() + " deemed invalid");
             }
 
-            // Todo: Do something!
+            pendingBlockData.add(blockData);
 
             return new AddBlockDataResult(blockData, AddResultType.ADDED, "Added " + blockData.getClass().getSimpleName());
         } catch (Exception e) {

@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
-package io.smilo.api.peer;
 
-import java.net.Socket;
+package io.smilo.api.rest.service;
 
-public interface PeerInitializer {
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.rest.models.PostTransactionResult;
 
-    Peer initializePeer(String hostname, int port);
-
-    Peer initializePeer(Socket socket);
+public interface TransactionService {
+    PostTransactionResult putTransaction(Transaction transaction);
 }

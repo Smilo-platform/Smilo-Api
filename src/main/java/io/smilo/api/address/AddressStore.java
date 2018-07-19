@@ -44,10 +44,6 @@ public class AddressStore {
         store.initializeCollection(COLLECTION_NAME);
     }
 
-    public void clearAccounts() {
-        this.store.clear(COLLECTION_NAME);
-    }
-
     /*
      * Looks up an account in the ledger, if account exists return it otherwise create
      * new account with 0 balance.

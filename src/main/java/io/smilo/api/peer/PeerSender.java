@@ -17,19 +17,36 @@
 
 package io.smilo.api.peer;
 
+import io.smilo.api.block.Content;
+import io.smilo.api.block.ParserProvider;
+import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.block.data.Parser;
+import io.smilo.api.peer.payloadhandler.PayloadType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PeerSender {
 
     private final PeerClient peerClient;
+    private final ParserProvider parserProvider;
 
-    public PeerSender(PeerClient peerClient) {
+    public PeerSender(PeerClient peerClient, ParserProvider parserProvider) {
         this.peerClient = peerClient;
+        this.parserProvider = parserProvider;
     }
 
-    //TODO: fix type
-    public void broadcast(String type, String data) {
-        peerClient.broadcast(type + " " + data);
+    public void broadcast(PayloadType type, String data) {
+        peerClient.broadcast(type.name() + " " + data);
+    }
+
+    public void broadcastContent(PayloadType type, Content content) {
+        Parser parser = parserProvider.getParser(content.getClass());
+        String data = BlockDataParser.encode(parser.serialize(content));
+        broadcast(type, data);
+    }
+
+    public void broadcastContent(Content content) {
+        broadcastContent(PayloadType.valueOf(StringUtils.upperCase(content.getClass().getSimpleName())), content);
     }
 }

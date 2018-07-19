@@ -14,13 +14,24 @@
  * limitations under the License.
  *
  */
-package io.smilo.api.peer;
 
-import java.net.Socket;
+package io.smilo.api.rest.models;
 
-public interface PeerInitializer {
+public class PostTransactionResult {
+    private boolean succeeded;
+    private String error;
 
-    Peer initializePeer(String hostname, int port);
+    public PostTransactionResult(boolean succeeded, String error) {
+        this.succeeded = succeeded;
+        this.error = error;
+    }
 
-    Peer initializePeer(Socket socket);
+    public boolean getSucceeded() {
+        return this.succeeded;
+    }
+
+    public String getError() {
+        return this.error;
+    }
+
 }
