@@ -28,8 +28,8 @@ public class TransactionStore {
      * @param transaction
      */
     public void writeTransactionToFile(Transaction transaction) {
-        final ByteBuffer keyBuffer = ByteBuffer.allocateDirect(64);
-        final ByteBuffer valueBuffer = ByteBuffer.allocateDirect(1000000);
+        final ByteBuffer keyBuffer;
+        final ByteBuffer valueBuffer;
 
         // Try and convert the transaction to a byte key buffer and value key buffer.
         try {
@@ -37,8 +37,8 @@ public class TransactionStore {
             byte[] dataHashBytes = dto.getDataHash().getBytes();
             byte[] valueBytes = dataMapper.writeValueAsBytes(dto);
 
-//            keyBuffer = ByteBuffer.allocateDirect(dataHashBytes.length);
-//            valueBuffer = ByteBuffer.allocateDirect(valueBytes.length);
+            keyBuffer = ByteBuffer.allocateDirect(dataHashBytes.length);
+            valueBuffer = ByteBuffer.allocateDirect(valueBytes.length);
 
             keyBuffer.put(dataHashBytes).flip();
             valueBuffer.put(valueBytes).flip();
@@ -58,9 +58,8 @@ public class TransactionStore {
      * @return
      */
     public Transaction getTransaction(String id) {
-        ByteBuffer keyBuffer = ByteBuffer.allocateDirect(64);
-
         byte[] idBytes = id.getBytes();
+        ByteBuffer keyBuffer = ByteBuffer.allocateDirect(idBytes.length);
         keyBuffer.put(idBytes).flip();
 
         byte[] rawTransaction = store.get(COLLECTION_NAME, keyBuffer);

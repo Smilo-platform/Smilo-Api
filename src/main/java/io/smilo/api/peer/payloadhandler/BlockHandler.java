@@ -113,22 +113,7 @@ public class BlockHandler implements PayloadHandler {
 
     private void storeTransactions(List<Transaction> transactions) {
         for(Transaction transaction : transactions) {
-            LOGGER.info("Write transaction " + transaction.getDataHash() + " to lmdb...");
             transactionStore.writeTransactionToFile(transaction);
-            LOGGER.info("wrote transaction!");
-        }
-
-        // Try and read transactions
-        for(Transaction transaction : transactions) {
-            LOGGER.info("Try get transaction");
-            Transaction other = transactionStore.getTransaction(transaction.getDataHash());
-
-            if(other != null) {
-                LOGGER.info("Could read transactions!");
-            }
-            else {
-                LOGGER.error("Could not read transaction!");
-            }
         }
     }
 
