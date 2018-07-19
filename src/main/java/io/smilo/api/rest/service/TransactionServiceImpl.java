@@ -13,9 +13,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     PeerSender peerSender;
 
-    @Autowired
-    PendingBlockDataPool dataPool;
-
     @Override
     public Transaction putTransaction(Transaction transaction) {
         peerSender.broadcastContent(transaction);
