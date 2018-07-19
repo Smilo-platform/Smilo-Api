@@ -24,6 +24,7 @@ import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
@@ -39,6 +40,7 @@ public class BlockHandler implements PayloadHandler {
     private PendingBlockDataPool pendingBlockDataPool;
     private BlockParser blockParser;
     private BlockStore blockStore;
+    private TransactionStore transactionStore;
     private NetworkState networkState;
     private Websocket websocket;
     private BlockCache blockCache;
@@ -46,7 +48,14 @@ public class BlockHandler implements PayloadHandler {
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket, BlockCache blockCache, BlockDataCache blockDataCache) {
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, 
+                        BlockParser blockParser, 
+                        BlockStore blockStore, 
+                        NetworkState networkState, 
+                        Websocket websocket, 
+                        BlockCache blockCache, 
+                        BlockDataCache blockDataCache,
+                        TransactionStore transactionStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
@@ -54,6 +63,7 @@ public class BlockHandler implements PayloadHandler {
         this.websocket = websocket;
         this.blockCache = blockCache;
         this.blockDataCache = blockDataCache;
+        this.transactionStore = transactionStore;
     }
 
     @Override
@@ -96,6 +106,8 @@ public class BlockHandler implements PayloadHandler {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
             }
 
+            storeTransactions(block.getTransactions());
+
             networkState.updateCatchupMode();
 
         } else if ((blockStore.getLatestBlockHeight() +1) < block.getBlockNum()){
@@ -115,6 +127,12 @@ public class BlockHandler implements PayloadHandler {
             LOGGER.warn("Wrong followup block " + block.getBlockNum() + ". Dropping.");
             LOGGER.debug("Block: " + block.getBlockNum() + " " + block.getBlockHash());
             LOGGER.debug("Should be: " + (blockStore.getLatestBlockHeight() + 1));
+        }
+    }
+
+    private void storeTransactions(List<Transaction> transactions) {
+        for(Transaction transaction : transactions) {
+            transactionStore.writeTransactionToFile(transaction);
         }
     }
 
