@@ -34,6 +34,7 @@ public class TransactionHandler implements PayloadHandler {
 
     @Override
     public void handlePeerPayload(List<String> parts, Peer peer) {
+
         pendingBlockDataPool.addTransaction(parts.get(1));
     }
 

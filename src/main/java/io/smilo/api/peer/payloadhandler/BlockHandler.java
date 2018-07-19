@@ -21,6 +21,7 @@ import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.cache.BlockCache;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
@@ -38,15 +39,17 @@ public class BlockHandler implements PayloadHandler {
     private BlockStore blockStore;
     private NetworkState networkState;
     private Websocket websocket;
+    private BlockCache blockCache;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket) {
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket, BlockCache blockCache) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
         this.websocket = websocket;
+        this.blockCache = blockCache;
     }
 
     @Override
@@ -71,7 +74,8 @@ public class BlockHandler implements PayloadHandler {
             blockStore.setLatestBlockHeight(block.getBlockNum());
             try {
                 blockStore.writeBlockToFile(block);
-                websocket.addBlock(block);
+                blockCache.addBlock(block);
+                websocket.sendBlock(block);
 
                 // Todo:
                 // Write BlockData to disk/mem

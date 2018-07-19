@@ -1,11 +1,30 @@
+/*
+ * Copyright (c) 2018 Smilo Platform B.V.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package io.smilo.api.ws;
 
 import io.smilo.api.block.Block;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
+import io.smilo.api.cache.BlockCache;
+import io.smilo.api.cache.BlockDataCache;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -14,18 +33,19 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @ServerEndpoint("/websocket")
 public class Websocket {
-
-    private static final WebsocketCache websocketCache = new WebsocketCache();
-
     private static final Logger LOGGER = Logger.getLogger(Websocket.class);
+    private static final Set<Session> clients = Collections.synchronizedSet(new HashSet<Session>());
 
-    private static final Set<Session> clients =
-            Collections.synchronizedSet(new HashSet<Session>());
+    @Autowired
+    private BlockCache blockCache;
+
+    @Autowired
+    private BlockDataCache blockDataCache;
+
 
     public void broadcastMessage(String message) {
         synchronized(clients){
@@ -60,10 +80,10 @@ public class Websocket {
     public void onMessage (String message, Session session){
         switch (message) {
             case "GET_LAST_BLOCKS":
-                websocketCache.sendBlockCache();
+                sendBlockCache();
                 break;
             case "GET_LAST_TRANSACTIONS":
-                websocketCache.sendTxCache();
+                sendBlockDataCache();
                 break;
         }
 
@@ -75,19 +95,6 @@ public class Websocket {
     public void onClose (Session session) {
         // Remove session from the connected sessions set
         clients.remove(session);
-    }
-
-    public void addBlock(Block block){
-        websocketCache.addLatestBlock(block);
-        JSONObject blockObject = generateBlockObject(block);
-        sendObject(blockObject, "msgBlock");
-    }
-
-    public void addTransaction(Transaction tx){
-        if(websocketCache.addLatestTransaction(tx)){
-            JSONObject txObject = generateTxObject(tx);
-            sendObject(txObject, "msgTx");
-        }
     }
 
     public JSONObject generateBlockObject(Block block){
@@ -152,5 +159,43 @@ public class Websocket {
         }catch (Exception e){
             LOGGER.error("Sending message failed");
         }
+    }
+
+    // TODO add amount of max blocks send?
+    public void sendBlockCache(){
+        try {
+            for (Block block :  blockCache.getBlocks().values()){
+                JSONObject blockObject = generateBlockObject(block);
+                sendObject(blockObject, "msgBlock");
+            }
+        } catch (NullPointerException e){
+            LOGGER.warn("BlockCache is empty!");
+        }
+
+    }
+
+    // TODO add amount of max blocks send?
+    public void sendBlock(Block block){
+        JSONObject blockObject = generateBlockObject(block);
+        sendObject(blockObject, "msgBlock");
+    }
+
+    // TODO add amount of max blocks send?
+    public void sendBlockDataCache(){
+        try {
+            for (Transaction tx :  blockDataCache.getTransactions().values()){
+                JSONObject txObject = generateTxObject(tx);
+                sendObject(txObject, "msgTx");
+            }
+        } catch (NullPointerException e) {
+            LOGGER.warn("BlockDataCache is empty!");
+        }
+
+    }
+
+    // TODO add amount of max blocks send?
+    public void sendBlockData(Transaction tx){
+        JSONObject txObject = generateTxObject(tx);
+        sendObject(txObject, "msgTx");
     }
 }
