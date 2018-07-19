@@ -7,6 +7,11 @@ FULLDOCKERNAME=$(COMPANY)/$(NAME):$(VERSION)
 DIR = $(shell pwd)
 
 build:
+	mvn clean install
+	docker build --no-cache -t $(FULLDOCKERNAME) .
+
+build-skip:
+	mvn clean install -DskipTests=true
 	docker build --no-cache -t $(FULLDOCKERNAME) .
 
 mvn:
