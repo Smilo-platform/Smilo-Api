@@ -30,11 +30,19 @@ public class WebsocketCache {
         }
     }
 
-    public void addLatestTransaction(Transaction tx){
-        this.transactions.putIfAbsent(tx.getDataHash(), tx);
+    public boolean addLatestTransaction(Transaction tx){
+        // Transaction already exist
+        if(this.transactions.containsKey(tx.getDataHash())){
+            return false;
+        }
+
+        this.transactions.put(tx.getDataHash(), tx);
+
         while(this.transactions.size() >= 26){
             this.transactions.remove(0);
         }
+
+        return true;
     }
 
     public void sendTxCache(){

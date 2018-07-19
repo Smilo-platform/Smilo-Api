@@ -84,20 +84,18 @@ public class Websocket {
     }
 
     public void addTransaction(Transaction tx){
-        websocketCache.addLatestTransaction(tx);
-        JSONObject txObject = generateTxObject(tx);
-        sendObject(txObject, "msgTx");
+        if(websocketCache.addLatestTransaction(tx)){
+            JSONObject txObject = generateTxObject(tx);
+            sendObject(txObject, "msgTx");
+        }
     }
 
     public JSONObject generateBlockObject(Block block){
         try{
-            // TODO remove both lines
             ArrayList transactions = new ArrayList<>();
             for (Transaction tx : block.getTransactions()){
                 transactions.add(generateTxObject(tx));
             }
-
-            // TODO foreach transaction in block.getTransactions, create JSONObject (same as with generateTxObject)
 
             JSONObject blockObject = new JSONObject();
             blockObject.put("blockHash", block.getBlockHash());
@@ -118,7 +116,6 @@ public class Websocket {
             ArrayList transactionOutputs = new ArrayList();
             JSONObject txObject = new JSONObject();
 
-            // TODO foreach transaction in tx.getTransactionOutputs(); (increment on the zero)
             for (TransactionOutput txOut : tx.getTransactionOutputs()) {
                 JSONObject transactionOutput = new JSONObject();
                 transactionOutput.put("outputAddress", txOut.getOutputAddress());
