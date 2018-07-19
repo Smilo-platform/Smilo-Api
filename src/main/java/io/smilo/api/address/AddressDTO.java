@@ -17,19 +17,21 @@
 
 package io.smilo.api.address;
 
+import java.util.Map;
+
 public class AddressDTO {
 
     private String address;
-    private long balance;
-    private int signatureCount;
+    private Map<String, Double> contractBalanceMap;
+    private long signatureCount;
 
     public AddressDTO() {
         // Make sonar happy :)
     }
 
-    public AddressDTO(String address, long balance, int signatureCount) {
+    public AddressDTO(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
         this.address = address;
-        this.balance = balance;
+        this.contractBalanceMap = contractBalanceMap;
         this.signatureCount = signatureCount;
     }
 
@@ -41,26 +43,26 @@ public class AddressDTO {
         return address;
     }
     
-    public long getBalance() {
-        return balance;
+    public Map<String, Double> getContractBalanceMap() {
+        return contractBalanceMap;
     }
     
-    public void setBalance(long balance) {
-        this.balance = balance;
+    public void setContractBalanceMap(Map<String, Double> balance) {
+        this.contractBalanceMap = balance;
     }
 
-    public int getSignatureCount() {
+    public long getSignatureCount() {
         return signatureCount;
     }
 
-    public void setSignatureCount(int signatureCount) {
+    public void setSignatureCount(long signatureCount) {
         this.signatureCount = signatureCount;
     }
 
     public static AddressDTO toDTO(Address address) {
         AddressDTO dto = new AddressDTO();
         dto.setAddress(address.getAddress());
-        dto.setBalance(address.getBalance());
+        dto.setContractBalanceMap(address.getContractBalanceMap());
         dto.setSignatureCount(address.getSignatureCount());
         return dto;
     }
@@ -68,7 +70,7 @@ public class AddressDTO {
     public static Address toAddress(AddressDTO dto) {
         Address address = new Address();
         address.setAddress(dto.getAddress());
-        address.setBalance(dto.getBalance());
+        address.setContractBalanceMap(dto.getContractBalanceMap());
         address.setSignatureCount(dto.getSignatureCount());
         return address;
     }

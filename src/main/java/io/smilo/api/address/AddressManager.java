@@ -56,11 +56,11 @@ public class AddressManager {
 
             //Looks like everything is correct--transaction should be executed correctly
             Address inputAccount = addressStore.findOrCreate(transaction.getInputAddress());
-            inputAccount.incrementBalance(-transaction.getInputAmount());
+            inputAccount.decrementBalance(transaction.getAssetId(), -transaction.getInputAmount());
 
             transaction.getTransactionOutputs().forEach(txOutput -> {
                 Address outputAccount = addressStore.findOrCreate(txOutput.getOutputAddress());
-                outputAccount.incrementBalance(txOutput.getOutputAmount());
+                outputAccount.incrementBalance(transaction.getAssetId(), txOutput.getOutputAmount());
             });
             adjustAddressSignatureCount(transaction.getInputAddress(), 1);
             return true;
@@ -86,11 +86,11 @@ public class AddressManager {
             }
             //Looks like everything is correct--transaction should be reversed correctly
             Address inputAccount = addressStore.findOrCreate(transaction.getInputAddress());
-            inputAccount.incrementBalance(transaction.getInputAmount());
+            inputAccount.incrementBalance(transaction.getAssetId(), transaction.getInputAmount());
 
             transaction.getTransactionOutputs().forEach(txOutput -> {
                 Address outputAccount = addressStore.findOrCreate(txOutput.getOutputAddress());
-                outputAccount.incrementBalance(-txOutput.getOutputAmount());
+                outputAccount.decrementBalance(transaction.getAssetId(), txOutput.getOutputAmount());
             });
             adjustAddressSignatureCount(transaction.getInputAddress(), - 1);
             return true;
@@ -106,7 +106,7 @@ public class AddressManager {
      *
      * @return int Last signature index used by address
      */
-    public int getAddressSignatureCount(String address) {
+    public long getAddressSignatureCount(String address) {
         Address result = addressStore.getByAddress(address);
         if (result == null) return -1;
         return result.getSignatureCount();
@@ -120,8 +120,8 @@ public class AddressManager {
      *
      * @return boolean Whether the adjustment was successful
      */
-    public boolean adjustAddressSignatureCount(String address, int adjustment) {
-        int oldCount = getAddressSignatureCount(address);
+    public boolean adjustAddressSignatureCount(String address, long adjustment) {
+        long oldCount = getAddressSignatureCount(address);
         if (oldCount + adjustment < 0) //Adjustment is negative with an absolute value larger than oldBalance
         {
             return false;
@@ -137,7 +137,7 @@ public class AddressManager {
      *
      * @return boolean Whether the adjustment was successful
      */
-    private boolean updateAddressSignatureCount(String address, int newCount) {
+    private boolean updateAddressSignatureCount(String address, long newCount) {
         try {
             Address account = addressStore.findOrCreate(address);
             account.setSignatureCount(newCount);
@@ -159,7 +159,7 @@ public class AddressManager {
     public long getAddressBalance(String address) {
         Address result = addressStore.getByAddress(address);
         if (result == null) return 0L;
-        return result.getBalance();
+        return (long)result.getBalance("000x00123");
     }
 
     /**
@@ -171,7 +171,7 @@ public class AddressManager {
      * @return boolean Whether the adjustment was successful
      */
     public boolean adjustAddressBalance(String address, long adjustment) {
-        long oldBalance = addressStore.findOrCreate(address).getBalance();
+        long oldBalance = (long)addressStore.findOrCreate(address).getBalance("000x00123");
         if (oldBalance + adjustment < 0) //Adjustment is negative with an absolute value larger than oldBalance
         {
             return false;
@@ -190,7 +190,7 @@ public class AddressManager {
     public boolean updateAddressBalance(String address, long newAmount) {
         try {
             Address account = addressStore.findOrCreate(address);
-            account.setBalance(newAmount);
+            account.setBalance("000x00123", newAmount);
             addressStore.writeToFile(account);
         } catch (Exception e) {
             LOGGER.error(e);

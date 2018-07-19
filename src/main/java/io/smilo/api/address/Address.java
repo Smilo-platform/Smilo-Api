@@ -17,18 +17,26 @@
 
 package io.smilo.api.address;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Address {
 
     private String publickey;
-    private long balance;
-    private int signatureCount;
+    /**
+     * We use a map with string as key and double as value. Even though XSM will never have a decimal value
+     * we still use double because all other tokens could be decimal. Applications implementing this API
+     * should account for this.
+     */
+    private Map<String, Double> contractBalanceMap = new HashMap<String, Double>();
+    private long signatureCount;
 
     public Address() {
     }
 
-    public Address(String address, long balance, int signatureCount) {
+    public Address(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
         this.publickey = address;
-        this.balance = balance;
+        this.contractBalanceMap = contractBalanceMap;
         this.signatureCount = signatureCount;
     }
 
@@ -39,29 +47,45 @@ public class Address {
     public String getAddress() {
         return publickey;
     }
-    
-    public long getBalance() {
-        return balance;
+
+    public Map<String, Double> getContractBalanceMap() {
+        return this.contractBalanceMap;
     }
 
-    public void incrementBalance(long increment) {
-        this.balance += increment;
+    public void setContractBalanceMap(Map<String, Double> contractBalanceMap) {
+        this.contractBalanceMap = contractBalanceMap;
     }
     
-    public void setBalance(long balance) {
-        this.balance = balance;
+    public double getBalance(String contract) {
+        return contractBalanceMap.get(contract);
     }
 
-    public int getSignatureCount() {
+    /**
+     * Increments the balance for the given contract. If the contract was not found the balance is simply set to the given amount.
+     * @param contract
+     * @param increment
+     */
+    public void incrementBalance(String contract, double increment) {
+        if(this.contractBalanceMap.containsKey(contract))
+            this.contractBalanceMap.put(contract, this.contractBalanceMap.get(contract) + increment);
+        else
+            this.contractBalanceMap.put(contract, increment);
+    }
+
+    public void decrementBalance(String contract, double decrement) {
+        incrementBalance(contract, -decrement);
+    }
+    
+    public void setBalance(String contract, double balance) {
+        this.contractBalanceMap.put(contract, balance);
+    }
+
+    public long getSignatureCount() {
         return signatureCount;
     }
 
-    public void setSignatureCount(int signatureCount) {
+    public void setSignatureCount(long signatureCount) {
         this.signatureCount = signatureCount;
-    }
-    
-    public String getRawAccount() {
-        return publickey + ":" + balance + ":" + signatureCount;
     }
     
 }
