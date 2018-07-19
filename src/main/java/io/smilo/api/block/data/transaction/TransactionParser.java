@@ -22,7 +22,9 @@ import io.smilo.api.address.AddressUtility;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
 import org.apache.log4j.Logger;
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.core.buffer.ArrayBufferInput;
 import org.msgpack.core.buffer.MessageBufferInput;
@@ -69,6 +71,8 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
 //                LOGGER.error("Error validating Tx hash: " + transaction.getDataHash() + " not valid.");
 //                isValid = false;
 //            }
+
+            // Todo: Signature check
 
             if (!addressUtility.isAddressFormattedCorrectly(transaction.getInputAddress())) {
                 LOGGER.error("Error validating transaction: input address " + transaction.getInputAddress() + " is misformatted.");
@@ -150,13 +154,39 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
 
     @Override
     public byte[] serialize(Transaction transaction) {
-        byte[] bytes = null;
-        try {
-            bytes = dataMapper.writeValueAsBytes(TransactionDTO.toDTO(transaction));
-        } catch (IOException ex) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (MessagePacker msgpack = MessagePack.newDefaultPacker(out)) {
+            msgpack.packLong(transaction.getTimestamp());
+            msgpack.packString(transaction.getAssetId());
+            msgpack.packString(transaction.getInputAddress());
+            msgpack.packLong(transaction.getInputAmount());
+            List<TransactionOutput> outputs = transaction.getTransactionOutputs();
+            msgpack.packArrayHeader(outputs.size());
+            for (TransactionOutput txout : outputs) {
+                byte[] rawoutput = packOutput(txout);
+                msgpack.packBinaryHeader(rawoutput.length);
+                msgpack.addPayload(rawoutput);
+            }
+            msgpack.packLong(transaction.getFee());
+            msgpack.packString(transaction.getDataHash());
+            msgpack.packString(transaction.getSignatureData());
+            msgpack.packLong(transaction.getSignatureIndex());
+            msgpack.flush();
+            return out.toByteArray();
+        } catch (ArrayIndexOutOfBoundsException | IOException ex) {
             LOGGER.error("Unable to serialize transaction", ex);
         }
-        return bytes;
+        return null;
+    }
+
+    private byte[] packOutput(TransactionOutput txout) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (MessagePacker msgpack = MessagePack.newDefaultPacker(out)) {
+            msgpack.packString(txout.getOutputAddress());
+            msgpack.packLong(txout.getOutputAmount());
+            msgpack.flush();
+        }
+        return out.toByteArray();
     }
 
     @Override

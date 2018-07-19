@@ -21,6 +21,9 @@ import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.cache.BlockCache;
+import io.smilo.api.cache.BlockDataCache;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
@@ -38,15 +41,19 @@ public class BlockHandler implements PayloadHandler {
     private BlockStore blockStore;
     private NetworkState networkState;
     private Websocket websocket;
+    private BlockCache blockCache;
+    private BlockDataCache blockDataCache;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket) {
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState, Websocket websocket, BlockCache blockCache, BlockDataCache blockDataCache) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
         this.websocket = websocket;
+        this.blockCache = blockCache;
+        this.blockDataCache = blockDataCache;
     }
 
     @Override
@@ -71,11 +78,19 @@ public class BlockHandler implements PayloadHandler {
             blockStore.setLatestBlockHeight(block.getBlockNum());
             try {
                 blockStore.writeBlockToFile(block);
-                websocket.addBlock(block);
+                blockCache.addBlock(block);
+                websocket.sendBlock(block);
+
+                for (Transaction transaction : block.getTransactions()){
+                    blockDataCache.addTransaction(transaction);
+                }
 
                 // Todo:
-                // Write BlockData to disk/mem
+                // Process and store transactions
                 // Update balance
+
+                //Remove all transactions from the pendingTransactionPool that appear in the block
+                pendingBlockDataPool.removeTransactionsInBlock(block);
 
             } catch(Exception e) {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
@@ -101,9 +116,6 @@ public class BlockHandler implements PayloadHandler {
             LOGGER.debug("Block: " + block.getBlockNum() + " " + block.getBlockHash());
             LOGGER.debug("Should be: " + (blockStore.getLatestBlockHeight() + 1));
         }
-
-        //Remove all transactions from the pendingTransactionPool that appear in the block
-        pendingBlockDataPool.removeTransactionsInBlock(block);
     }
 
     @Override

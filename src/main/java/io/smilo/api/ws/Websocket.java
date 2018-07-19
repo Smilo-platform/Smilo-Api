@@ -1,11 +1,31 @@
+/*
+ * Copyright (c) 2018 Smilo Platform B.V.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package io.smilo.api.ws;
 
 import io.smilo.api.block.Block;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
+import io.smilo.api.cache.BlockCache;
+import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -14,18 +34,16 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @ServerEndpoint("/websocket")
 public class Websocket {
-
-    private static final WebsocketCache websocketCache = new WebsocketCache();
-
     private static final Logger LOGGER = Logger.getLogger(Websocket.class);
+    private static final Set<Session> clients = Collections.synchronizedSet(new HashSet<Session>());
 
-    private static final Set<Session> clients =
-            Collections.synchronizedSet(new HashSet<Session>());
+    private final BlockCache blockCache = new BlockCache();
+    private final BlockDataCache blockDataCache = new BlockDataCache();
+
 
     public void broadcastMessage(String message) {
         synchronized(clients){
@@ -60,10 +78,11 @@ public class Websocket {
     public void onMessage (String message, Session session){
         switch (message) {
             case "GET_LAST_BLOCKS":
-                websocketCache.sendBlockCache();
+                sendBlockCache();
                 break;
-            case "GET_LAST_TRANSACTIONS":
-                websocketCache.sendTxCache();
+            case "GET_LAST_BLOCK_DATA":
+                // send PendingBlockDataPool
+                sendBlockDataCache();
                 break;
         }
 
@@ -77,27 +96,12 @@ public class Websocket {
         clients.remove(session);
     }
 
-    public void addBlock(Block block){
-        websocketCache.addLatestBlock(block);
-        JSONObject blockObject = generateBlockObject(block);
-        sendObject(blockObject, "msgBlock");
-    }
-
-    public void addTransaction(Transaction tx){
-        websocketCache.addLatestTransaction(tx);
-        JSONObject txObject = generateTxObject(tx);
-        sendObject(txObject, "msgTx");
-    }
-
     public JSONObject generateBlockObject(Block block){
         try{
-            // TODO remove both lines
             ArrayList transactions = new ArrayList<>();
             for (Transaction tx : block.getTransactions()){
                 transactions.add(generateTxObject(tx));
             }
-
-            // TODO foreach transaction in block.getTransactions, create JSONObject (same as with generateTxObject)
 
             JSONObject blockObject = new JSONObject();
             blockObject.put("blockHash", block.getBlockHash());
@@ -118,7 +122,6 @@ public class Websocket {
             ArrayList transactionOutputs = new ArrayList();
             JSONObject txObject = new JSONObject();
 
-            // TODO foreach transaction in tx.getTransactionOutputs(); (increment on the zero)
             for (TransactionOutput txOut : tx.getTransactionOutputs()) {
                 JSONObject transactionOutput = new JSONObject();
                 transactionOutput.put("outputAddress", txOut.getOutputAddress());
@@ -155,5 +158,41 @@ public class Websocket {
         }catch (Exception e){
             LOGGER.error("Sending message failed");
         }
+    }
+
+    public void sendBlockCache(){
+        try {
+            for (Block block :  blockCache.getBlocks().values()){
+                sendBlock(block);
+            }
+        } catch (NullPointerException e){
+            LOGGER.warn("BlockCache is empty!");
+        }
+
+    }
+
+    public void sendBlock(Block block){
+        JSONObject blockObject = generateBlockObject(block);
+        sendObject(blockObject, "BLOCK");
+    }
+
+    public void sendBlockDataCache(){
+        try {
+            for (Transaction tx :  blockDataCache.getTransactions().values()){
+                sendBlockData(tx);
+            }
+        } catch (NullPointerException e) {
+            LOGGER.warn("BlockDataCache is empty!");
+        }
+    }
+
+    public void sendBlockData(Transaction tx){
+        JSONObject txObject = generateTxObject(tx);
+        sendObject(txObject, "BLOCK_DATA");
+    }
+
+    public void sendPendingBlockData(Transaction tx){
+        JSONObject txObject = generateTxObject(tx);
+        sendObject(txObject, "PENDING_BLOCK_DATA");
     }
 }

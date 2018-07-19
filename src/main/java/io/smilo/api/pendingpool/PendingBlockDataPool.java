@@ -27,9 +27,10 @@ import io.smilo.api.block.data.Parser;
 import io.smilo.api.block.data.message.Message;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
+import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.ws.Websocket;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-import io.smilo.api.ws.Websocket;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,10 +44,12 @@ public class PendingBlockDataPool {
     private Set<BlockData> pendingBlockData;
     private final ParserProvider parserProvider;
     private Websocket websocket;
+    private BlockDataCache blockDataCache;
 
-    public PendingBlockDataPool(ParserProvider parserProvider, Websocket websocket) {
+    public PendingBlockDataPool(ParserProvider parserProvider, Websocket websocket, BlockDataCache blockDataCache) {
         this.parserProvider = parserProvider;
         this.websocket = websocket;
+        this.blockDataCache = blockDataCache;
         pendingBlockData = new HashSet<>();
     }
 
@@ -60,7 +63,10 @@ public class PendingBlockDataPool {
         Parser parser = parserProvider.getParser(Transaction.class);
         Transaction transaction = (Transaction) parser.deserialize(BlockDataParser.decode(rawTransaction));
         addBlockData(transaction);
-        websocket.addTransaction(transaction);
+        if (!blockDataCache.isDuplicate(transaction)){
+//            blockDataCache.addTransaction(transaction);
+            websocket.sendPendingBlockData(transaction);
+        }
     }
 
     public AddBlockDataResult addBlockData(BlockData blockData) {
@@ -77,7 +83,7 @@ public class PendingBlockDataPool {
                 return new AddBlockDataResult(blockData, AddResultType.VALIDATION_ERROR, "Throwing out a " + blockData.getClass().getSimpleName() + " deemed invalid");
             }
 
-            // Todo: Do something!
+            pendingBlockData.add(blockData);
 
             return new AddBlockDataResult(blockData, AddResultType.ADDED, "Added " + blockData.getClass().getSimpleName());
         } catch (Exception e) {
