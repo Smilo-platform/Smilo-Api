@@ -17,9 +17,10 @@
 
 package io.smilo.api.block.data;
 
-public abstract class BlockData {
+import io.smilo.api.block.Content;
 
-    private Long timestamp;
+public abstract class BlockData extends Content {
+
     private String inputAddress;
     private Long fee;
     private String signatureData;
@@ -29,20 +30,12 @@ public abstract class BlockData {
     protected BlockData () {}
 
     protected BlockData(Long timestamp, String inputAddress, Long fee, String signatureData, Long signatureIndex, String dataHash) {
-        this.timestamp = timestamp;
+        super(timestamp);
         this.inputAddress = inputAddress;
         this.fee = fee;
         this.signatureData = signatureData;
         this.signatureIndex = signatureIndex;
         this.dataHash = dataHash;
-    }
-
-    /**
-     * timestamp of creation
-     * @return timestamp of creation
-     */
-    public Long getTimestamp() {
-        return timestamp;
     }
 
     public String getInputAddress() {
@@ -63,10 +56,6 @@ public abstract class BlockData {
 
     public String getDataHash() {
         return dataHash;
-    }
-
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public void setInputAddress(String inputAddress) {
