@@ -21,6 +21,8 @@ import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
@@ -35,15 +37,19 @@ public class BlockHandler implements PayloadHandler {
     private PendingBlockDataPool pendingBlockDataPool;
     private BlockParser blockParser;
     private BlockStore blockStore;
+    private TransactionStore transactionStore;
     private NetworkState networkState;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser, BlockStore blockStore, NetworkState networkState) {
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser,
+                        BlockStore blockStore, NetworkState networkState,
+                        TransactionStore transactionStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
+        this.transactionStore = transactionStore;
     }
 
     @Override
@@ -78,6 +84,8 @@ public class BlockHandler implements PayloadHandler {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
             }
 
+            storeTransactions(block.getTransactions());
+
             networkState.updateCatchupMode();
 
         } else if ((blockStore.getLatestBlockHeight() +1) < block.getBlockNum()){
@@ -101,6 +109,27 @@ public class BlockHandler implements PayloadHandler {
 
         //Remove all transactions from the pendingTransactionPool that appear in the block
         pendingBlockDataPool.removeTransactionsInBlock(block);
+    }
+
+    private void storeTransactions(List<Transaction> transactions) {
+        for(Transaction transaction : transactions) {
+            LOGGER.info("Write transaction " + transaction.getDataHash() + " to lmdb...");
+            transactionStore.writeTransactionToFile(transaction);
+            LOGGER.info("wrote transaction!");
+        }
+
+        // Try and read transactions
+        for(Transaction transaction : transactions) {
+            LOGGER.info("Try get transaction");
+            Transaction other = transactionStore.getTransaction(transaction.getDataHash());
+
+            if(other != null) {
+                LOGGER.info("Could read transactions!");
+            }
+            else {
+                LOGGER.error("Could not read transaction!");
+            }
+        }
     }
 
     @Override
