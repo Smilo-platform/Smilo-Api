@@ -72,6 +72,8 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
 //                isValid = false;
 //            }
 
+            // Todo: Signature check
+
             if (!addressUtility.isAddressFormattedCorrectly(transaction.getInputAddress())) {
                 LOGGER.error("Error validating transaction: input address " + transaction.getInputAddress() + " is misformatted.");
                 isValid = false;
