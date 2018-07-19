@@ -19,6 +19,7 @@ package io.smilo.api.rest.service;
 
 import io.smilo.api.rest.models.Node;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ public class NetworkServicesImpl implements NetworkServices {
 
     private MessageDigest md;
     private Base64 base64 = new Base64(true);
+    private static final Logger LOGGER = Logger.getLogger(NetworkServicesImpl.class);
 
     private Map<String, Object> response = new HashMap<>();
     private Map<String, ArrayList<Node>> network = new HashMap<>();
@@ -194,7 +196,7 @@ public class NetworkServicesImpl implements NetworkServices {
         try {
             return base64.encodeAsString(md.digest(String.valueOf(toHash).getBytes(UTF_8))).substring(0, 16);
         } catch (Exception e) {
-            System.out.println(e);
+            LOGGER.error("Creating SHA256Short failed!", e);
         }
         return null;
     }
