@@ -101,10 +101,8 @@ public class LMDBStore implements Store {
             fetchedVal = txn.val();
         }
         if(fetchedVal == null) return null;
-        byte[] bytes = new byte[fetchedVal.remaining()];
 
-        fetchedVal.get(bytes);
-        return bytes;
+        return toByteArray(fetchedVal);
     }
 
     @Override
@@ -129,11 +127,7 @@ public class LMDBStore implements Store {
                     ByteBuffer valueBuffer = db.get(txn, toByteBuffer(retrieveKey));
 
                     if (valueBuffer != null) {
-                        byte[] bytes = new byte[valueBuffer.remaining()];
-
-                        valueBuffer.get(bytes);
-
-                        result.add(bytes);
+                        result.add(toByteArray(valueBuffer));
                     } else {
                         // Value could not be found, it means we found the end of the array
                         break;
@@ -189,11 +183,8 @@ public class LMDBStore implements Store {
                 return null;
             }
         }
-        byte[] bytes = new byte[fetchedVal.remaining()];
-        for (int i = 0; i < fetchedVal.remaining(); i++) {
-            bytes[i] = fetchedVal.get(i);
-        }
-        return bytes;
+
+        return toByteArray(fetchedVal);
     }
 
     @Override
@@ -209,8 +200,76 @@ public class LMDBStore implements Store {
     }
 
     @Override
+    public List<byte[]> getAll(String collection, long skip, long take, boolean isDescending) {
+        List<byte[]> result = new ArrayList<>();
+
+        try(Txn<ByteBuffer> txn = env.txnRead()) {
+            Dbi<ByteBuffer> db = getDatabase(collection);
+
+            // Get the amount of elements
+            long count = db.stat(txn).entries;
+
+            // Do some quick checks to prevent reading 'out of bounds'.
+            long baseIndex = isDescending ? count - 1 : 0;
+            long startIndex = isDescending ? baseIndex - skip : baseIndex + skip;
+            long endIndex = isDescending ? startIndex - take : startIndex + take;
+
+            if(isDescending) {
+                if(startIndex < 0)
+                    return result; // Nothing to read
+                if(endIndex < 0) {
+                    // Adjust take
+                    take += endIndex;
+                }
+            }
+            else {
+                if(startIndex >= count)
+                    return result; // Nothing to read
+                if(endIndex >= count) {
+                    // Adjust take
+                    take -= (endIndex - count);
+                }
+            }
+
+            Cursor<ByteBuffer> cursor = getDatabase(collection).openCursor(txn);
+
+            // Move to back if reading in descending order
+            if (isDescending)
+                cursor.seek(SeekOp.MDB_LAST);
+
+            // Skip
+            for (long i = 0; i < skip; i++) {
+                if (isDescending)
+                    cursor.prev();
+                else
+                    cursor.next();
+            }
+
+            // Take
+            for (long i = 0; i < take; i++) {
+                result.add(toByteArray(cursor.val()));
+
+                if (isDescending)
+                    cursor.prev();
+                else
+                    cursor.next();
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public void initializeCollection(String collectionName) {
         getDatabase(collectionName);
+    }
+
+    private byte[] toByteArray(ByteBuffer buffer) {
+        byte[] bytes = new byte[buffer.remaining()];
+
+        buffer.get(bytes);
+
+        return bytes;
     }
 
     private ByteBuffer toByteBuffer(String value) {

@@ -66,6 +66,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> getAll(long skip, long take, boolean isDescending) {
-        return null;
+        return transactionStore.getTransactions(skip, take, isDescending);
     }
 }

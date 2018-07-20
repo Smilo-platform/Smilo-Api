@@ -33,6 +33,8 @@ public interface Store {
 
     Map<String,String> getAll(String collection);
 
+    List<byte[]> getAll(String collection, long skip, long take, boolean isDescending);
+
     byte[] last(String collection);
 
     void initializeCollection(String collectionName);
