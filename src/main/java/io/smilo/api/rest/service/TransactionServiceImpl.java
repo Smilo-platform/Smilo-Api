@@ -20,6 +20,7 @@ package io.smilo.api.rest.service;
 import io.smilo.api.block.AddResultType;
 import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.PeerClient;
 import io.smilo.api.peer.PeerSender;
@@ -42,6 +43,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     TransactionStore transactionStore;
 
+    @Autowired
+    TransactionAddressStore transactionAddressStore;
+
     @Override
     public PostTransactionResult putTransaction(Transaction transaction) {
         AddBlockDataResult result = pendingBlockDataPool.addBlockData(transaction);
@@ -61,12 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getAll() {
-        return null;
-    }
-
-    @Override
-    public List<Transaction> getAll(String address) {
-        return null;
+    public List<Transaction> getAll(long skip, long take, boolean isDescending) {
+        return transactionStore.getTransactions(skip, take, isDescending);
     }
 }

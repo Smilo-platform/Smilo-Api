@@ -27,7 +27,5 @@ public interface TransactionService {
 
     Transaction get(String transactionHash);
 
-    List<Transaction> getAll();
-
-    List<Transaction> getAll(String address);
+    List<Transaction> getAll(long skip, long take, boolean isDescending);
 }
