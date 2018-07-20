@@ -28,7 +28,7 @@ public class Address {
      * we still use double because all other tokens could be decimal. Applications implementing this API
      * should account for this.
      */
-    private Map<String, Double> contractBalanceMap = new HashMap<String, Double>();
+    private Map<String, Double> balances = new HashMap<String, Double>();
     private long signatureCount;
 
     public Address() {
@@ -36,7 +36,7 @@ public class Address {
 
     public Address(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
         this.publickey = address;
-        this.contractBalanceMap = contractBalanceMap;
+        this.balances = contractBalanceMap;
         this.signatureCount = signatureCount;
     }
 
@@ -48,16 +48,16 @@ public class Address {
         return publickey;
     }
 
-    public Map<String, Double> getContractBalanceMap() {
-        return this.contractBalanceMap;
+    public Map<String, Double> getBalances() {
+        return this.balances;
     }
 
-    public void setContractBalanceMap(Map<String, Double> contractBalanceMap) {
-        this.contractBalanceMap = contractBalanceMap;
+    public void setBalances(Map<String, Double> balances) {
+        this.balances = balances;
     }
     
     public double getBalance(String contract) {
-        return contractBalanceMap.get(contract);
+        return balances.get(contract);
     }
 
     /**
@@ -66,10 +66,10 @@ public class Address {
      * @param increment
      */
     public void incrementBalance(String contract, double increment) {
-        if(this.contractBalanceMap.containsKey(contract))
-            this.contractBalanceMap.put(contract, this.contractBalanceMap.get(contract) + increment);
+        if(this.balances.containsKey(contract))
+            this.balances.put(contract, this.balances.get(contract) + increment);
         else
-            this.contractBalanceMap.put(contract, increment);
+            this.balances.put(contract, increment);
     }
 
     public void decrementBalance(String contract, double decrement) {
@@ -77,7 +77,7 @@ public class Address {
     }
     
     public void setBalance(String contract, double balance) {
-        this.contractBalanceMap.put(contract, balance);
+        this.balances.put(contract, balance);
     }
 
     public long getSignatureCount() {

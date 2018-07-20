@@ -22,7 +22,7 @@ import java.util.Map;
 public class AddressDTO {
 
     private String address;
-    private Map<String, Double> contractBalanceMap;
+    private Map<String, Double> balances;
     private long signatureCount;
 
     public AddressDTO() {
@@ -31,7 +31,7 @@ public class AddressDTO {
 
     public AddressDTO(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
         this.address = address;
-        this.contractBalanceMap = contractBalanceMap;
+        this.balances = contractBalanceMap;
         this.signatureCount = signatureCount;
     }
 
@@ -43,12 +43,12 @@ public class AddressDTO {
         return address;
     }
     
-    public Map<String, Double> getContractBalanceMap() {
-        return contractBalanceMap;
+    public Map<String, Double> getBalances() {
+        return balances;
     }
     
-    public void setContractBalanceMap(Map<String, Double> balance) {
-        this.contractBalanceMap = balance;
+    public void setBalances(Map<String, Double> balance) {
+        this.balances = balance;
     }
 
     public long getSignatureCount() {
@@ -62,7 +62,7 @@ public class AddressDTO {
     public static AddressDTO toDTO(Address address) {
         AddressDTO dto = new AddressDTO();
         dto.setAddress(address.getAddress());
-        dto.setContractBalanceMap(address.getContractBalanceMap());
+        dto.setBalances(address.getBalances());
         dto.setSignatureCount(address.getSignatureCount());
         return dto;
     }
@@ -70,7 +70,7 @@ public class AddressDTO {
     public static Address toAddress(AddressDTO dto) {
         Address address = new Address();
         address.setAddress(dto.getAddress());
-        address.setContractBalanceMap(dto.getContractBalanceMap());
+        address.setBalances(dto.getBalances());
         address.setSignatureCount(dto.getSignatureCount());
         return address;
     }
