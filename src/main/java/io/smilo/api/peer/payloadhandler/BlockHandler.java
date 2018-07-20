@@ -17,11 +17,14 @@
 
 package io.smilo.api.peer.payloadhandler;
 
+import io.smilo.api.address.Address;
+import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
 import io.smilo.api.block.data.transaction.TransactionStore;
@@ -41,6 +44,7 @@ public class BlockHandler implements PayloadHandler {
     private BlockParser blockParser;
     private BlockStore blockStore;
     private TransactionStore transactionStore;
+    private AddressStore addressStore;
     private NetworkState networkState;
     private Websocket websocket;
     private BlockCache blockCache;
@@ -55,11 +59,13 @@ public class BlockHandler implements PayloadHandler {
                         Websocket websocket, 
                         BlockCache blockCache, 
                         BlockDataCache blockDataCache,
-                        TransactionStore transactionStore) {
+                        TransactionStore transactionStore,
+                        AddressStore addressStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
+        this.addressStore = addressStore;
         this.websocket = websocket;
         this.blockCache = blockCache;
         this.blockDataCache = blockDataCache;
@@ -133,6 +139,31 @@ public class BlockHandler implements PayloadHandler {
     private void storeTransactions(List<Transaction> transactions) {
         for(Transaction transaction : transactions) {
             transactionStore.writeTransactionToFile(transaction);
+
+            updateTransactionAddressBalance(transaction);
+        }
+    }
+
+    private void updateTransactionAddressBalance(Transaction transaction) {
+        // We must update both the input address and the output addresses.
+        Address inputAddress = addressStore.findOrCreate(transaction.getInputAddress());
+
+        // Update signature index
+        inputAddress.setSignatureCount(transaction.getSignatureIndex());
+
+        // Update balance
+        inputAddress.decrementBalance(transaction.getAssetId(), transaction.getInputAmount());
+        inputAddress.decrementBalance("000x00123", transaction.getFee());
+
+        addressStore.writeToFile(inputAddress);
+
+        // Now update the outputs
+        for(TransactionOutput output : transaction.getTransactionOutputs()) {
+            Address outputAddress = addressStore.findOrCreate(output.getOutputAddress());
+
+            outputAddress.incrementBalance(transaction.getAssetId(), output.getOutputAmount());
+
+            addressStore.writeToFile(outputAddress);
         }
     }
 

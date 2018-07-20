@@ -18,8 +18,7 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
-import io.smilo.api.address.AddressManager;
-import io.smilo.api.address.AddressStore;
+import io.smilo.api.TestUtility;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -28,25 +27,22 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class AddressTests extends AbstractWebSpringTest {
 
     @Autowired
-    private AddressStore addressStore;
-
-    @Autowired
-    private AddressManager addressManager;
+    private TestUtility testUtility;
 
     @Test
     public void shouldReturn200WhenSendingRequestToAddressController() throws Exception {
+        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/address/S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.balance").value(200000000))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(-1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rawAccount").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR:200000000:-1"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").value(200000000))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(0));
     }
 
     @Test
     public void shouldReturn404WhenSendingRequestToAddressControllerIfNotExist() throws Exception {
-        this.addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
-        this.addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
+        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/address/ETm9QUJLVdJkTqRojTNqswmeAQGaofojJJ"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

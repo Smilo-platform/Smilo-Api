@@ -66,8 +66,8 @@ public class BlockStore {
             latestBlockHeight = latestBlock.getBlockNum();
             latestBlockHash = latestBlock.getBlockHash();
         } else {
-            addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
-            addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
+//            addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
+//            addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
             // Todo
         }
     }
