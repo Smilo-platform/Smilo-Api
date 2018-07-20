@@ -49,6 +49,6 @@ public abstract class AbstractSpringTest {
 
     @Before
     public void cleanUpFiles() {
-        testUtility.cleanUp();
+        testUtility.initialize();
     }
 }
