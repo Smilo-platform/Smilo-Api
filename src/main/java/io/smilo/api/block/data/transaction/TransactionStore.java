@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TransactionStore {
@@ -67,6 +69,31 @@ public class TransactionStore {
 
         // Write to LMDB
         store.put(COLLECTION_NAME, keyBuffer, valueBuffer);
+    }
+
+    public List<Transaction> getTransactions(long skip, long take, boolean isDescending) {
+        // Clamp take between 0 and 32
+        take = Math.min(Math.max(take, 0), 32);
+
+        List<byte[]> values = store.getAll(COLLECTION_NAME, skip, take, isDescending);
+
+        List<Transaction> transactions = new ArrayList<>();
+
+        for(byte[] bytes : values) {
+            TransactionDTO dto;
+            try {
+                dto = dataMapper.readValue(bytes, TransactionDTO.class);
+            }
+            catch(IOException ex) {
+                LOGGER.error("Unable to convert data to TransactionDTO " + ex);
+
+                return null;
+            }
+
+            transactions.add(TransactionDTO.toTransaction(dto));
+        }
+
+        return transactions;
     }
 
     /**

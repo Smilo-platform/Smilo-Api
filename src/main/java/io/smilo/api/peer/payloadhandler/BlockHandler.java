@@ -24,6 +24,7 @@ import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
@@ -49,8 +50,10 @@ public class BlockHandler implements PayloadHandler {
     private Websocket websocket;
     private BlockCache blockCache;
     private BlockDataCache blockDataCache;
+    private TransactionAddressStore transactionAddressStore;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
+
 
     public BlockHandler(PendingBlockDataPool pendingBlockDataPool, 
                         BlockParser blockParser, 
@@ -60,7 +63,8 @@ public class BlockHandler implements PayloadHandler {
                         BlockCache blockCache, 
                         BlockDataCache blockDataCache,
                         TransactionStore transactionStore,
-                        AddressStore addressStore) {
+                        AddressStore addressStore,
+                        TransactionAddressStore transactionAddressStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
@@ -70,6 +74,7 @@ public class BlockHandler implements PayloadHandler {
         this.blockCache = blockCache;
         this.blockDataCache = blockDataCache;
         this.transactionStore = transactionStore;
+        this.transactionAddressStore = transactionAddressStore;
     }
 
     @Override
@@ -141,6 +146,15 @@ public class BlockHandler implements PayloadHandler {
             transactionStore.writeTransactionToFile(transaction);
 
             updateTransactionAddressBalance(transaction);
+
+            // Link transaction to addresses
+            this.transactionAddressStore.writeTransactionForAddress(transaction, transaction.getInputAddress());
+            for(TransactionOutput output : transaction.getTransactionOutputs()) {
+                // Make sure input address does not equal output address
+                if(!output.getOutputAddress().equals(transaction.getInputAddress())) {
+                    this.transactionAddressStore.writeTransactionForAddress(transaction, output.getOutputAddress());
+                }
+            }
         }
     }
 

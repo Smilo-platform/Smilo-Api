@@ -22,12 +22,13 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
 public class BlockDataCache {
 
-    private static final Map<String, Transaction> transactions = new HashMap<>();
+    private static final Map<String, Transaction> transactions = new LinkedHashMap<>();
     private static final Logger LOGGER = Logger.getLogger(BlockDataCache.class);
 
     public Map<String, Transaction> getTransactions(){
@@ -44,8 +45,8 @@ public class BlockDataCache {
     public void addTransaction(Transaction transaction){
         // Store latest 100 blocks
         transactions.put(transaction.getDataHash(), transaction);
-//        while(transactions.size() >= 101){
-//            // delete iets TODO!
-//        }
+        while(transactions.size() > 25){
+            transactions.remove(transactions.entrySet().iterator().next().getKey());
+        }
     }
 }
