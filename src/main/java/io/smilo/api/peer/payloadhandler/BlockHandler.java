@@ -17,15 +17,21 @@
 
 package io.smilo.api.peer.payloadhandler;
 
+import io.smilo.api.address.Address;
+import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockParser;
 import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionOutput;
+import io.smilo.api.cache.BlockCache;
+import io.smilo.api.cache.BlockDataCache;
 import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.NetworkState;
 import io.smilo.api.peer.Peer;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
+import io.smilo.api.ws.Websocket;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -38,17 +44,32 @@ public class BlockHandler implements PayloadHandler {
     private BlockParser blockParser;
     private BlockStore blockStore;
     private TransactionStore transactionStore;
+    private AddressStore addressStore;
     private NetworkState networkState;
+    private Websocket websocket;
+    private BlockCache blockCache;
+    private BlockDataCache blockDataCache;
 
     private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, BlockParser blockParser,
-                        BlockStore blockStore, NetworkState networkState,
-                        TransactionStore transactionStore) {
+
+    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, 
+                        BlockParser blockParser, 
+                        BlockStore blockStore, 
+                        NetworkState networkState, 
+                        Websocket websocket, 
+                        BlockCache blockCache, 
+                        BlockDataCache blockDataCache,
+                        TransactionStore transactionStore,
+                        AddressStore addressStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
         this.networkState = networkState;
+        this.addressStore = addressStore;
+        this.websocket = websocket;
+        this.blockCache = blockCache;
+        this.blockDataCache = blockDataCache;
         this.transactionStore = transactionStore;
     }
 
@@ -57,9 +78,7 @@ public class BlockHandler implements PayloadHandler {
         byte[] byteArray = BlockDataParser.decode(parts.get(1));
         Block block = blockParser.deserialize(byteArray);
 
-        // Todo: include block in database.
-        // Todo: include block in last 10 blocks list
-        // Todo: update latestBlock
+        // Todo: include block in last 25 blocks list
 
         // Topblock = 1 (From network)
         // Last block = 1
@@ -68,17 +87,27 @@ public class BlockHandler implements PayloadHandler {
                 blockStore.getLatestBlockHash().equals(block.getPreviousBlockHash())){
             // Add Block
             LOGGER.info("Previous Block Height: " + blockStore.getLatestBlockHeight());
-            LOGGER.info("Added Block " + block.getBlockNum() + " to the database.");
+            LOGGER.info("Add Block " + block.getBlockNum() + " to the database.");
             LOGGER.info("Hash: " + block.getBlockHash());
-            LOGGER.info("Current Block heigth: " + (blockStore.getLatestBlockHeight() + 1));
+            LOGGER.info("New Block heigth: " + (blockStore.getLatestBlockHeight() + 1));
 
             blockStore.setLatestBlockHash(block.getBlockHash());
             blockStore.setLatestBlockHeight(block.getBlockNum());
             try {
                 blockStore.writeBlockToFile(block);
+                blockCache.addBlock(block);
+                websocket.sendBlock(block);
+
+                for (Transaction transaction : block.getTransactions()){
+                    blockDataCache.addTransaction(transaction);
+                }
+
                 // Todo:
-                // Write BlockData to disk/mem
+                // Process and store transactions
                 // Update balance
+
+                //Remove all transactions from the pendingTransactionPool that appear in the block
+                pendingBlockDataPool.removeTransactionsInBlock(block);
 
             } catch(Exception e) {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
@@ -106,14 +135,36 @@ public class BlockHandler implements PayloadHandler {
             LOGGER.debug("Block: " + block.getBlockNum() + " " + block.getBlockHash());
             LOGGER.debug("Should be: " + (blockStore.getLatestBlockHeight() + 1));
         }
-
-        //Remove all transactions from the pendingTransactionPool that appear in the block
-        pendingBlockDataPool.removeTransactionsInBlock(block);
     }
 
     private void storeTransactions(List<Transaction> transactions) {
         for(Transaction transaction : transactions) {
             transactionStore.writeTransactionToFile(transaction);
+
+            updateTransactionAddressBalance(transaction);
+        }
+    }
+
+    private void updateTransactionAddressBalance(Transaction transaction) {
+        // We must update both the input address and the output addresses.
+        Address inputAddress = addressStore.findOrCreate(transaction.getInputAddress());
+
+        // Update signature index
+        inputAddress.setSignatureCount(transaction.getSignatureIndex());
+
+        // Update balance
+        inputAddress.decrementBalance(transaction.getAssetId(), transaction.getInputAmount());
+        inputAddress.decrementBalance("000x00123", transaction.getFee());
+
+        addressStore.writeToFile(inputAddress);
+
+        // Now update the outputs
+        for(TransactionOutput output : transaction.getTransactionOutputs()) {
+            Address outputAddress = addressStore.findOrCreate(output.getOutputAddress());
+
+            outputAddress.incrementBalance(transaction.getAssetId(), output.getOutputAmount());
+
+            addressStore.writeToFile(outputAddress);
         }
     }
 

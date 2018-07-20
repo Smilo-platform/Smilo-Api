@@ -15,29 +15,31 @@
  *
  */
 
-package io.smilo.api.peer.payloadhandler;
+package io.smilo.api.cache;
 
-import io.smilo.api.peer.Peer;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
+import io.smilo.api.block.Block;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
-public class TransactionHandler implements PayloadHandler {
+public class BlockCache {
+    private static final Map<Long, Block> blocks = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(BlockCache.class);
 
-    private PendingBlockDataPool pendingBlockDataPool;
-
-    public TransactionHandler(PendingBlockDataPool pendingBlockDataPool) {
-        this.pendingBlockDataPool = pendingBlockDataPool;
+    public Map<Long, Block> getBlocks(){
+        return blocks;
     }
 
-    @Override
-    public void handlePeerPayload(List<String> parts, Peer peer) {
-
-        pendingBlockDataPool.addTransaction(parts.get(1));
+    public void addBlock(Block block){
+        // Store latest 100 blocks
+        blocks.put(block.getBlockNum(), block);
+        while(blocks.size() >= 101){
+            blocks.remove(block.getBlockNum() - 100);
+        }
     }
 
-    @Override
-    public PayloadType supports() { return PayloadType.TRANSACTION; }
 }
+

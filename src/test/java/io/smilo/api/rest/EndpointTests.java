@@ -19,13 +19,19 @@ package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
 import io.smilo.api.StableTests;
+import io.smilo.api.TestUtility;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @Category(StableTests.class)
 public class EndpointTests extends AbstractWebSpringTest {
+
+    @Autowired
+    private TestUtility testUtility;
 
     @Test
     public void shouldReturn200WhenSendingRequestToStatusController() throws Exception {
@@ -43,8 +49,8 @@ public class EndpointTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenRequestTxToTxController() throws Exception {
-
-        this.webClient.perform(MockMvcRequestBuilders.get("/tx/testtransaction"))
+        testUtility.addBlockZero();
+        this.webClient.perform(MockMvcRequestBuilders.get("/tx/7E6F401FFFD55A1AF05E666D7CF1CD5B38628D3E6FC0CFB9935E82D9BA5329B3"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
