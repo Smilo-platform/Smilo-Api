@@ -18,11 +18,14 @@
 package io.smilo.api.db;
 
 import org.lmdbjava.*;
+import org.springframework.boot.liquibase.CommonsLoggingLiquibaseLogger;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.lmdbjava.Env.create;
@@ -105,6 +108,74 @@ public class LMDBStore implements Store {
     }
 
     @Override
+    public List<byte[]> getArray(String collection, String key, long skip, long take, boolean isDescending) {
+        List<byte[]> result = new ArrayList<>();
+
+        try(Txn<ByteBuffer> txn = env.txnRead()) {
+            final Dbi<ByteBuffer> db = getDatabase(collection);
+
+            // First retrieve count
+            ByteBuffer countBuffer = db.get(txn, toByteBuffer(key));
+            if (countBuffer != null) {
+                // Key exists
+                long count = countBuffer.getLong();
+
+                long startIndex = isDescending ? (count - 1) - skip : skip;
+                long endIndex = isDescending ? count - skip - take : skip + take;
+                long indexIncrement = isDescending ? -1 : 1;
+                for (long i = startIndex; i != endIndex && i >= 0; i += indexIncrement) {
+                    String retrieveKey = key + i;
+
+                    ByteBuffer valueBuffer = db.get(txn, toByteBuffer(retrieveKey));
+
+                    if (valueBuffer != null) {
+                        byte[] bytes = new byte[valueBuffer.remaining()];
+
+                        valueBuffer.get(bytes);
+
+                        result.add(bytes);
+                    } else {
+                        // Value could not be found, it means we found the end of the array
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public void addToArray(String collection, String key, ByteBuffer value) {
+        try(Txn<ByteBuffer> readTxn = env.txnRead()) {
+            Dbi<ByteBuffer> db = getDatabase(collection);
+
+            ByteBuffer arrayLengthBuffer = db.get(readTxn, toByteBuffer(key));
+
+            long arrayLength;
+            if(arrayLengthBuffer != null) {
+                arrayLength = arrayLengthBuffer.getLong();
+            }
+            else {
+                // Array does not exist yet
+                arrayLength = 0;
+            }
+
+            long nextElementId = arrayLength + 1;
+
+            // Update array count
+            ByteBuffer arrayHeaderBuffer = ByteBuffer.allocateDirect(64);
+            arrayHeaderBuffer.putLong(nextElementId);
+            arrayHeaderBuffer.flip();
+
+            db.put(toByteBuffer(key), arrayHeaderBuffer);
+
+            // Write element
+            db.put(toByteBuffer(key + arrayLength), value);
+        }
+    }
+
+    @Override
     public byte[] last(String collection) {
         final ByteBuffer fetchedVal;
         try (Txn<ByteBuffer> txn = env.txnRead()) {
@@ -140,6 +211,16 @@ public class LMDBStore implements Store {
     @Override
     public void initializeCollection(String collectionName) {
         getDatabase(collectionName);
+    }
+
+    private ByteBuffer toByteBuffer(String value) {
+        byte[] bytes = value.getBytes();
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
+
+        buffer.put(bytes).flip();
+
+        return buffer;
     }
 
 }

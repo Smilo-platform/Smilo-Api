@@ -18,6 +18,7 @@
 package io.smilo.api.db;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 
 public interface Store {
@@ -25,6 +26,10 @@ public interface Store {
     void put(String collection, ByteBuffer key, ByteBuffer value);
 
     byte[] get(String collection, ByteBuffer key);
+
+    List<byte[]> getArray(String collection, String key, long skip, long take, boolean isDescending);
+
+    void addToArray(String collection, String key, ByteBuffer value);
 
     Map<String,String> getAll(String collection);
 

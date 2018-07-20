@@ -19,18 +19,22 @@ package io.smilo.api.rest;
 
 import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressStore;
+import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class AddressController {
 
     @Autowired
     AddressStore addressStore;
+
+    @Autowired
+    TransactionAddressStore transactionAddressStore;
 
     @GetMapping("/address/{address}")
     public Address listAddress(@PathVariable("address") String address) {
@@ -39,6 +43,16 @@ public class AddressController {
         if (response == null) throw new AddressNotFoundException();
         return response;
     }
+
+    @GetMapping("/address/tx/{address}")
+    @ResponseBody
+    public List<Transaction> getTransactions(@PathVariable String address,
+                                             @RequestParam(value = "skip", required = false, defaultValue = "0") long skip,
+                                             @RequestParam(value = "take", required = false, defaultValue = "32") long take,
+                                             @RequestParam(value = "isdescending", required = false, defaultValue = "false") boolean isDescending) {
+        return this.transactionAddressStore.getTransactionsForAddress(address, skip, take, isDescending);
+    }
+
 
     @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Address not found")  // 404
     public class AddressNotFoundException extends RuntimeException {
