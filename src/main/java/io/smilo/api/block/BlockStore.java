@@ -65,10 +65,6 @@ public class BlockStore {
             Block latestBlock = getLatestBlockFromStore();
             latestBlockHeight = latestBlock.getBlockNum();
             latestBlockHash = latestBlock.getBlockHash();
-        } else {
-//            addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
-//            addressManager.adjustAddressBalance("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", 200000000);
-            // Todo
         }
     }
 
@@ -113,7 +109,7 @@ public class BlockStore {
      */
     public void writeBlockToFile(Block block) {
         final ByteBuffer key = allocateDirect(64);
-        final ByteBuffer val = allocateDirect(1000000);
+        final ByteBuffer val = allocateDirect(100000000);
 
         try {
             BlockDTO dto = BlockDTO.toDTO(block);
