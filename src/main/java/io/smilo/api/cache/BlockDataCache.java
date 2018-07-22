@@ -21,7 +21,6 @@ import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
