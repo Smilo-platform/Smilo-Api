@@ -22,10 +22,8 @@ import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -33,7 +31,10 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @ServerEndpoint("/websocket")

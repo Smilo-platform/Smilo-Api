@@ -18,26 +18,33 @@
 package io.smilo.api.cache;
 
 import io.smilo.api.block.Block;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
 public class BlockCache {
-    private static final Map<Long, Block> blocks = new HashMap<>();
-    private static final Logger LOGGER = Logger.getLogger(BlockCache.class);
+    private static final Map<Long, Block> blocks = new LinkedHashMap<>();
 
     public Map<Long, Block> getBlocks(){
         return blocks;
     }
 
+    public Boolean isDuplicate(Block block){
+        if(blocks.containsKey(block.getBlockNum())){
+            return true;
+        }
+        return false;
+    }
+
     public void addBlock(Block block){
         // Store latest 100 blocks
-        blocks.put(block.getBlockNum(), block);
-        while(blocks.size() >= 101){
-            blocks.remove(block.getBlockNum() - 100);
+        if (!isDuplicate(block)){
+            blocks.put(block.getBlockNum(), block);
+            while(blocks.size() > 100){
+                blocks.remove(blocks.entrySet().iterator().next().getKey());
+            }
         }
     }
 
