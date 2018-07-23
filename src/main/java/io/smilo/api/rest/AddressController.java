@@ -22,6 +22,7 @@ import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.rest.models.TransactionList;
+import io.smilo.api.rest.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,16 +33,15 @@ import java.util.List;
 public class AddressController {
 
     @Autowired
-    AddressStore addressStore;
-
-    @Autowired
-    TransactionAddressStore transactionAddressStore;
+    AddressService addressService;
 
     @GetMapping("/address/{address}")
     public Address listAddress(@PathVariable("address") String address) {
-        Address response = addressStore.getByAddress(address);
+        Address response = addressService.getAddress(address);
 
-        if (response == null) throw new AddressNotFoundException();
+        if (response == null)
+            throw new AddressNotFoundException();
+
         return response;
     }
 
@@ -51,11 +51,7 @@ public class AddressController {
                                            @RequestParam(value = "skip", required = false, defaultValue = "0") long skip,
                                            @RequestParam(value = "take", required = false, defaultValue = "32") long take,
                                            @RequestParam(value = "isdescending", required = false, defaultValue = "false") boolean isDescending) {
-        long count = transactionAddressStore.getTransactionCountForAddress(address);
-
-        List<Transaction> transactions = transactionAddressStore.getTransactionsForAddress(address, skip, take, isDescending);
-
-        return new TransactionList(transactions, skip, take, count);
+        return addressService.getTransactionsForAddress(address, skip, take, isDescending);
     }
 
 
