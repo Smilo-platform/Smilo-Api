@@ -47,6 +47,10 @@ public class TransactionAddressStore {
         store.addToArray(COLLECTION_NAME, address, valueBuffer);
     }
 
+    public long getTransactionCountForAddress(String address) {
+        return store.getArrayLength(COLLECTION_NAME, address);
+    }
+
     public List<Transaction> getTransactionsForAddress(String address, long skip, long take, boolean isDescending) {
         // Limit take between 0 and 32
         take = Math.min(Math.max(take, 0), 32);

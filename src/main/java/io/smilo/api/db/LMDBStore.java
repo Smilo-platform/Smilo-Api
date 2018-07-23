@@ -106,6 +106,25 @@ public class LMDBStore implements Store {
     }
 
     @Override
+    public long getArrayLength(String collection, String key) {
+        try(Txn<ByteBuffer> txn = env.txnRead()) {
+            final Dbi<ByteBuffer> db = getDatabase(collection);
+
+            // First retrieve count
+            ByteBuffer countBuffer = db.get(txn, toByteBuffer(key));
+            if (countBuffer != null) {
+                // Key exists
+                long count = countBuffer.getLong();
+
+                return count;
+            }
+            else {
+                return 0;
+            }
+        }
+    }
+
+    @Override
     public List<byte[]> getArray(String collection, String key, long skip, long take, boolean isDescending) {
         List<byte[]> result = new ArrayList<>();
 

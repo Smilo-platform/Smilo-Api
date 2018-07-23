@@ -21,6 +21,7 @@ import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
+import io.smilo.api.rest.models.TransactionList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -46,11 +47,15 @@ public class AddressController {
 
     @GetMapping("/address/tx/{address}")
     @ResponseBody
-    public List<Transaction> getTransactions(@PathVariable String address,
-                                             @RequestParam(value = "skip", required = false, defaultValue = "0") long skip,
-                                             @RequestParam(value = "take", required = false, defaultValue = "32") long take,
-                                             @RequestParam(value = "isdescending", required = false, defaultValue = "false") boolean isDescending) {
-        return this.transactionAddressStore.getTransactionsForAddress(address, skip, take, isDescending);
+    public TransactionList getTransactions(@PathVariable String address,
+                                           @RequestParam(value = "skip", required = false, defaultValue = "0") long skip,
+                                           @RequestParam(value = "take", required = false, defaultValue = "32") long take,
+                                           @RequestParam(value = "isdescending", required = false, defaultValue = "false") boolean isDescending) {
+        long count = transactionAddressStore.getTransactionCountForAddress(address);
+
+        List<Transaction> transactions = transactionAddressStore.getTransactionsForAddress(address, skip, take, isDescending);
+
+        return new TransactionList(transactions, skip, take, count);
     }
 
 

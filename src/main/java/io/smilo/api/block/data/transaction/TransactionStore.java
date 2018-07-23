@@ -54,6 +54,11 @@ public class TransactionStore {
         writeHashToSortedDatabase(transaction);
     }
 
+    /**
+     * Writes the given transaction into the non-sorted database. This database can be used
+     * to retrieve transaction objects based on the data hash property.
+     * @param transaction
+     */
     private void writeToNonSortedDatabase(Transaction transaction) {
         final ByteBuffer keyBuffer;
         final ByteBuffer valueBuffer;
@@ -78,6 +83,12 @@ public class TransactionStore {
         // Write to non-sorted database
         store.put(COLLECTION_NAME, keyBuffer, valueBuffer);
     }
+
+    /**
+     * Writes the data hash of the given transaction into the sorted database. This database can be used
+     * to retrieve a list of transactions sorted on timestamp.
+     * @param transaction
+     */
     private void writeHashToSortedDatabase(Transaction transaction) {
         final ByteBuffer sortedKeyBuffer;
         final ByteBuffer sortedValueBuffer;
@@ -101,6 +112,14 @@ public class TransactionStore {
 
         // Write to sorted database
         store.put(SORTED_COLLECTION_NAME, sortedKeyBuffer, sortedValueBuffer);
+    }
+
+    /**
+     * Returns the amount of transactions available in the database.
+     * @return
+     */
+    public long getTransactionCount() {
+        return store.getEntries(COLLECTION_NAME);
     }
 
     public List<Transaction> getTransactions(long skip, long take, boolean isDescending) {
