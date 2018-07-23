@@ -50,7 +50,7 @@ public class LMDBStore implements Store {
                 //.setMapSize(1_048_576 * 1_024L * 1_024L) // 1 TB? // TODO enable 1TB
                 .setMapSize(1_048_576 * 1_024L)
                 // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
-                .setMaxDbs(5)
+                .setMaxDbs(10)
                 .setMaxReaders(100)
                 // Now let's open the Env. The same path can be concurrently opened and
                 // used in different processes, but do not open the same path twice in
@@ -219,7 +219,7 @@ public class LMDBStore implements Store {
                     return result; // Nothing to read
                 if(endIndex < 0) {
                     // Adjust take
-                    take += endIndex;
+                    take += endIndex + 1;
                 }
             }
             else {
@@ -234,8 +234,7 @@ public class LMDBStore implements Store {
             Cursor<ByteBuffer> cursor = getDatabase(collection).openCursor(txn);
 
             // Move to back if reading in descending order
-            if (isDescending)
-                cursor.seek(SeekOp.MDB_LAST);
+            cursor.seek(isDescending ? SeekOp.MDB_LAST : SeekOp.MDB_FIRST);
 
             // Skip
             for (long i = 0; i < skip; i++) {

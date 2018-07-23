@@ -24,12 +24,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class TransactionStore {
     private static final Logger LOGGER = Logger.getLogger(TransactionStore.class);
+    private static final String SORTED_COLLECTION_NAME = "transaction-hash-sorted";
     private static final String COLLECTION_NAME = "transaction";
 
     private final Store store;
@@ -39,6 +41,7 @@ public class TransactionStore {
         this.store = store;
         this.dataMapper = dataMapper;
 
+        store.initializeCollection(SORTED_COLLECTION_NAME);
         store.initializeCollection(COLLECTION_NAME);
     }
 
@@ -47,19 +50,24 @@ public class TransactionStore {
      * @param transaction
      */
     public void writeTransactionToFile(Transaction transaction) {
+        writeToNonSortedDatabase(transaction);
+        writeHashToSortedDatabase(transaction);
+    }
+
+    private void writeToNonSortedDatabase(Transaction transaction) {
         final ByteBuffer keyBuffer;
         final ByteBuffer valueBuffer;
 
         // Try and convert the transaction to a byte key buffer and value key buffer.
         try {
             TransactionDTO dto = TransactionDTO.toDTO(transaction);
-            byte[] dataHashBytes = dto.getDataHash().getBytes();
+            byte[] keyBytes = dto.getDataHash().getBytes();
             byte[] valueBytes = dataMapper.writeValueAsBytes(dto);
 
-            keyBuffer = ByteBuffer.allocateDirect(dataHashBytes.length);
+            keyBuffer = ByteBuffer.allocateDirect(keyBytes.length);
             valueBuffer = ByteBuffer.allocateDirect(valueBytes.length);
 
-            keyBuffer.put(dataHashBytes).flip();
+            keyBuffer.put(keyBytes).flip();
             valueBuffer.put(valueBytes).flip();
         }
         catch(Exception ex) {
@@ -67,30 +75,50 @@ public class TransactionStore {
             return;
         }
 
-        // Write to LMDB
+        // Write to non-sorted database
         store.put(COLLECTION_NAME, keyBuffer, valueBuffer);
+    }
+    private void writeHashToSortedDatabase(Transaction transaction) {
+        final ByteBuffer sortedKeyBuffer;
+        final ByteBuffer sortedValueBuffer;
+
+        // Try and convert the transaction to a byte key buffer and value key buffer.
+        try {
+            TransactionDTO dto = TransactionDTO.toDTO(transaction);
+            byte[] sortedKeyBytes = (dto.getTimestamp().toString() + dto.getDataHash()).getBytes();
+            byte[] valueBytes = transaction.getDataHash().getBytes();
+
+            sortedKeyBuffer = ByteBuffer.allocateDirect(sortedKeyBytes.length);
+            sortedValueBuffer = ByteBuffer.allocateDirect(valueBytes.length);
+
+            sortedKeyBuffer.put(sortedKeyBytes).flip();
+            sortedValueBuffer.put(valueBytes).flip();
+        }
+        catch(Exception ex) {
+            LOGGER.error("Unable to convert transaction hash to byte array " + ex);
+            return;
+        }
+
+        // Write to sorted database
+        store.put(SORTED_COLLECTION_NAME, sortedKeyBuffer, sortedValueBuffer);
     }
 
     public List<Transaction> getTransactions(long skip, long take, boolean isDescending) {
         // Clamp take between 0 and 32
         take = Math.min(Math.max(take, 0), 32);
 
-        List<byte[]> values = store.getAll(COLLECTION_NAME, skip, take, isDescending);
+        List<byte[]> values = store.getAll(SORTED_COLLECTION_NAME, skip, take, isDescending);
 
-        List<Transaction> transactions = new ArrayList<>();
-
+        // Convert byte[] to strings
+        List<String> transactionHashes = new ArrayList<>();
         for(byte[] bytes : values) {
-            TransactionDTO dto;
-            try {
-                dto = dataMapper.readValue(bytes, TransactionDTO.class);
-            }
-            catch(IOException ex) {
-                LOGGER.error("Unable to convert data to TransactionDTO " + ex);
+            transactionHashes.add(new String(bytes, StandardCharsets.UTF_8));
+        }
 
-                return null;
-            }
-
-            transactions.add(TransactionDTO.toTransaction(dto));
+        // Retrieve transactions
+        List<Transaction> transactions = new ArrayList<>();
+        for(String dataHash : transactionHashes) {
+            transactions.add(getTransaction(dataHash));
         }
 
         return transactions;
