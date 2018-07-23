@@ -62,7 +62,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction get(String transactionHash) {
-        return transactionStore.getTransaction(transactionHash);
+        Transaction transaction = transactionStore.getTransaction(transactionHash);
+
+        if(transaction == null) {
+            // Transaction could not be found in the database.
+            // However it might still be in the pending block data pool.
+            transaction = pendingBlockDataPool.getPendingTransaction(transactionHash);
+        }
+
+        return transaction;
     }
 
     @Override

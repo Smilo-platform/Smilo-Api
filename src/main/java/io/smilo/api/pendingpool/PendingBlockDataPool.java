@@ -171,6 +171,22 @@ public class PendingBlockDataPool {
         return totalChange;
     }
 
+    /**
+     * Searches for and returns the Transaction with the given data hash. Null will be returned if no pending transaction was found.
+     * @param dataHash
+     * @return
+     */
+    public Transaction getPendingTransaction(String dataHash) {
+        List<Transaction> pendingTransactions = getPendingData(Transaction.class);
+
+        for(Transaction transaction : pendingTransactions) {
+            if(transaction.getDataHash().equals(dataHash))
+                return transaction;
+        }
+
+        return null;
+    }
+
     public <T extends BlockData> List<T> getPendingData(Class<T> clazz) {
         List<T> data = new ArrayList<>();
         pendingBlockData.stream().filter(b -> b.getClass().equals(clazz)).forEach(b -> data.add((T) b));
