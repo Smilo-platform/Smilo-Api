@@ -19,6 +19,7 @@ package io.smilo.api.rest;
 
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.rest.models.PostTransactionResult;
+import io.smilo.api.rest.models.TransactionList;
 import io.smilo.api.rest.service.TransactionService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,9 @@ public class TxController {
 
     @GetMapping("/tx")
     @ResponseBody
-    public List<Transaction> respondAllTxs(@RequestParam(value = "skip", required = true, defaultValue = "0") long skip,
-                                           @RequestParam(value = "take", required = true, defaultValue = "32") long take,
-                                           @RequestParam(value = "isdescending", required = true, defaultValue = "false") boolean isDescending) {
+    public TransactionList respondAllTxs(@RequestParam(value = "skip", required = true, defaultValue = "0") long skip,
+                                         @RequestParam(value = "take", required = true, defaultValue = "32") long take,
+                                         @RequestParam(value = "isdescending", required = true, defaultValue = "false") boolean isDescending) {
         return transactionService.getAll(skip, take, isDescending);
     }
 

@@ -19,6 +19,7 @@ package io.smilo.api.rest.service;
 
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.rest.models.PostTransactionResult;
+import io.smilo.api.rest.models.TransactionList;
 
 import java.util.List;
 
@@ -27,5 +28,5 @@ public interface TransactionService {
 
     Transaction get(String transactionHash);
 
-    List<Transaction> getAll(long skip, long take, boolean isDescending);
+    TransactionList getAll(long skip, long take, boolean isDescending);
 }
