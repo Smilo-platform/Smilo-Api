@@ -187,6 +187,35 @@ public class PendingBlockDataPool {
         return null;
     }
 
+    /**
+     * Returns all pending transactions for the given address. A transaction is considered pending for the given address if:
+     * - The address is equal to a transaction's input address
+     * - The address is equal to any of the transaction's output addresses.
+     * @param address
+     * @return
+     */
+    public List<Transaction> getPendingTransactionsForAddress(String address) {
+        List<Transaction> pendingTransactions = getPendingData(Transaction.class);
+
+        List<Transaction> pendingForAddress = new ArrayList<>();
+        for(Transaction transaction : pendingTransactions) {
+            if(transaction.getInputAddress().equals(address)) {
+                pendingForAddress.add(transaction);
+            }
+            else {
+                // It might be an output
+                for(TransactionOutput output : transaction.getTransactionOutputs()) {
+                    if(output.getOutputAddress().equals(address)) {
+                        pendingForAddress.add(transaction);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return pendingForAddress;
+    }
+
     public <T extends BlockData> List<T> getPendingData(Class<T> clazz) {
         List<T> data = new ArrayList<>();
         pendingBlockData.stream().filter(b -> b.getClass().equals(clazz)).forEach(b -> data.add((T) b));
