@@ -138,10 +138,10 @@ public class LMDBStore implements Store {
                 long count = countBuffer.getLong();
 
                 long startIndex = isDescending ? (count - 1) - skip : skip;
-                long endIndex = isDescending ? count - skip - take : skip + take;
+                long endIndex = isDescending ? startIndex - take : skip + take;
                 long indexIncrement = isDescending ? -1 : 1;
                 for (long i = startIndex; i != endIndex && i >= 0; i += indexIncrement) {
-                    String retrieveKey = key + i;
+                    String retrieveKey = key + i; // This not working!
 
                     ByteBuffer valueBuffer = db.get(txn, toByteBuffer(retrieveKey));
 
@@ -174,11 +174,11 @@ public class LMDBStore implements Store {
                 arrayLength = 0;
             }
 
-            long nextElementId = arrayLength + 1;
+            long nextElementId = arrayLength;
 
             // Update array count
             ByteBuffer arrayHeaderBuffer = ByteBuffer.allocateDirect(64);
-            arrayHeaderBuffer.putLong(nextElementId);
+            arrayHeaderBuffer.putLong(nextElementId + 1);
             arrayHeaderBuffer.flip();
 
             db.put(toByteBuffer(key), arrayHeaderBuffer);
