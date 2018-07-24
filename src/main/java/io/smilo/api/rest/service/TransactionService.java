@@ -18,15 +18,16 @@
 package io.smilo.api.rest.service;
 
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.rest.models.PostTransactionResult;
 import io.smilo.api.rest.models.TransactionList;
 
 import java.util.List;
 
 public interface TransactionService {
-    PostTransactionResult putTransaction(Transaction transaction);
+    PostTransactionResult putTransaction(TransactionDTO transaction);
 
-    Transaction get(String transactionHash);
+    TransactionDTO get(String transactionHash);
 
     TransactionList getAll(long skip, long take, boolean isDescending);
 }

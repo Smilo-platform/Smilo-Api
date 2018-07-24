@@ -18,6 +18,7 @@
 package io.smilo.api.block.data.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smilo.api.block.Block;
 import io.smilo.api.db.Store;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -49,8 +50,8 @@ public class TransactionStore {
      * Writes the given Transaction to LMDB.
      * @param transaction
      */
-    public void writeTransactionToFile(Transaction transaction) {
-        writeToNonSortedDatabase(transaction);
+    public void writeTransactionToFile(Transaction transaction, Block block) {
+        writeToNonSortedDatabase(transaction, block);
         writeHashToSortedDatabase(transaction);
     }
 
@@ -59,13 +60,14 @@ public class TransactionStore {
      * to retrieve transaction objects based on the data hash property.
      * @param transaction
      */
-    private void writeToNonSortedDatabase(Transaction transaction) {
+    private void writeToNonSortedDatabase(Transaction transaction, Block block) {
         final ByteBuffer keyBuffer;
         final ByteBuffer valueBuffer;
 
         // Try and convert the transaction to a byte key buffer and value key buffer.
         try {
             TransactionDTO dto = TransactionDTO.toDTO(transaction);
+            dto.setBlockIndex(block.getBlockNum());
             byte[] keyBytes = dto.getDataHash().getBytes();
             byte[] valueBytes = dataMapper.writeValueAsBytes(dto);
 
@@ -122,7 +124,7 @@ public class TransactionStore {
         return store.getEntries(COLLECTION_NAME);
     }
 
-    public List<Transaction> getTransactions(long skip, long take, boolean isDescending) {
+    public List<TransactionDTO> getTransactions(long skip, long take, boolean isDescending) {
         // Clamp take between 0 and 32
         take = Math.min(Math.max(take, 0), 32);
 
@@ -135,7 +137,7 @@ public class TransactionStore {
         }
 
         // Retrieve transactions
-        List<Transaction> transactions = new ArrayList<>();
+        List<TransactionDTO> transactions = new ArrayList<>();
         for(String dataHash : transactionHashes) {
             transactions.add(getTransaction(dataHash));
         }
@@ -148,7 +150,7 @@ public class TransactionStore {
      * @param id The id of the Transaction. This is equal to the data hash.
      * @return
      */
-    public Transaction getTransaction(String id) {
+    public TransactionDTO getTransaction(String id) {
         byte[] idBytes = id.getBytes();
         ByteBuffer keyBuffer = ByteBuffer.allocateDirect(idBytes.length);
         keyBuffer.put(idBytes).flip();
@@ -164,6 +166,6 @@ public class TransactionStore {
             return null;
         }
 
-        return TransactionDTO.toTransaction(dto);
+        return dto;
     }
 }
