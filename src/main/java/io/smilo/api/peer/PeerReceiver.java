@@ -92,12 +92,24 @@ public class PeerReceiver {
     public void broadcastNewBlockRequest() {
         if(networkState.getCachupMode()) {
             try {
-                //Sleep for a bit, wait for responses before requesting more data.
-                Thread.sleep(300);
+
                 //Broadcast request for new block(s)
-                Long blockNum =  blockStore.getLatestBlockHeight() + 1;
-                LOGGER.info("Requesting block " + blockNum + "...");
-                peerClient.broadcast("GET_BLOCK " + blockNum);
+                Long blockNum =  blockStore.getLatestBlockHeight();
+                Long blockGoal = networkState.getTopBlock();
+                int max_blocks = 25;
+
+                if (blockGoal - blockNum < 25) {
+                    max_blocks = (int) (blockGoal - blockNum);
+                }
+
+                for (int i = 1; i < max_blocks; ++i) {
+                    Long getBlock = blockStore.getLatestBlockHeight() + i;
+                    LOGGER.info("Requesting block " + getBlock + "...");
+                    peerClient.broadcast("GET_BLOCK " + getBlock);
+                }
+
+                //Sleep for a bit, wait for responses before requesting more data.
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 //If this throws an error, something's terribly off.
                 LOGGER.error("P2pNetwork has mental illness.");
