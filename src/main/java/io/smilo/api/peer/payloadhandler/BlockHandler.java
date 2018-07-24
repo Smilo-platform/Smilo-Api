@@ -117,7 +117,7 @@ public class BlockHandler implements PayloadHandler {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
             }
 
-            storeTransactions(block.getTransactions());
+            storeTransactions(block.getTransactions(), block);
 
             networkState.updateCatchupMode();
 
@@ -141,9 +141,14 @@ public class BlockHandler implements PayloadHandler {
         }
     }
 
-    private void storeTransactions(List<Transaction> transactions) {
+    private void storeTransactions(List<Transaction> transactions, Block block) {
+        // Order transactions by timestamp to ensure they are stored in the DB in the correct order
+        transactions.sort((x, y) -> {
+            return (int)(x.getTimestamp() - y.getTimestamp());
+        });
+
         for(Transaction transaction : transactions) {
-            transactionStore.writeTransactionToFile(transaction);
+            transactionStore.writeTransactionToFile(transaction, block);
 
             updateTransactionAddressBalance(transaction);
 
