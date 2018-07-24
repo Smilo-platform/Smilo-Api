@@ -18,6 +18,7 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.rest.models.PostTransactionResult;
 import io.smilo.api.rest.models.TransactionList;
 import io.smilo.api.rest.service.TransactionService;
@@ -47,15 +48,15 @@ public class TxController {
 
     @RequestMapping(path = "/tx/{tx}")
     @ResponseBody
-    public ResponseEntity<Transaction> respondTx(@PathVariable("tx") String tx) {
-        Transaction transaction = transactionService.get(tx);
+    public ResponseEntity<TransactionDTO> respondTx(@PathVariable("tx") String tx) {
+        TransactionDTO transaction = transactionService.get(tx);
 
         return new ResponseEntity<>(transaction, transaction == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
     @RequestMapping(path = "/tx", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<PostTransactionResult> respondPost(@RequestBody Transaction transaction) {
+    public ResponseEntity<PostTransactionResult> respondPost(@RequestBody TransactionDTO transaction) {
         PostTransactionResult result = this.transactionService.putTransaction(transaction);
 
         return new ResponseEntity<>(result, result.getSucceeded() ? HttpStatus.OK : HttpStatus.BAD_REQUEST);

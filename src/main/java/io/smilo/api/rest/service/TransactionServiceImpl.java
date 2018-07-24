@@ -21,6 +21,7 @@ import io.smilo.api.block.AddResultType;
 import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
+import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.block.data.transaction.TransactionStore;
 import io.smilo.api.peer.PeerClient;
 import io.smilo.api.peer.PeerSender;
@@ -48,7 +49,9 @@ public class TransactionServiceImpl implements TransactionService {
     TransactionAddressStore transactionAddressStore;
 
     @Override
-    public PostTransactionResult putTransaction(Transaction transaction) {
+    public PostTransactionResult putTransaction(TransactionDTO dto) {
+        Transaction transaction = TransactionDTO.toTransaction(dto);
+
         AddBlockDataResult result = pendingBlockDataPool.addBlockData(transaction);
         if(result.getType() == AddResultType.ADDED) {
             peerSender.broadcastContent(transaction);
@@ -61,13 +64,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction get(String transactionHash) {
-        Transaction transaction = transactionStore.getTransaction(transactionHash);
+    public TransactionDTO get(String transactionHash) {
+        TransactionDTO transaction = transactionStore.getTransaction(transactionHash);
 
         if(transaction == null) {
             // Transaction could not be found in the database.
             // However it might still be in the pending block data pool.
-            transaction = pendingBlockDataPool.getPendingTransaction(transactionHash);
+            Transaction pending = pendingBlockDataPool.getPendingTransaction(transactionHash);
+            if(pending != null)
+                transaction = TransactionDTO.toDTO(pending);
         }
 
         return transaction;
@@ -77,7 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionList getAll(long skip, long take, boolean isDescending) {
         long count = transactionStore.getTransactionCount();
 
-        List<Transaction> transactions = transactionStore.getTransactions(skip, take, isDescending);
+        List<TransactionDTO> transactions = transactionStore.getTransactions(skip, take, isDescending);
 
         return new TransactionList(transactions, skip, take, count);
     }

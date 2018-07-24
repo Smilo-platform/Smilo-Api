@@ -33,6 +33,7 @@ public class TransactionDTO {
     private String signatureData;
     private Long signatureIndex;
     private String dataHash;
+    private long blockIndex = -1;
 
     public TransactionDTO () {
         // Make sonar happy :)
@@ -40,6 +41,14 @@ public class TransactionDTO {
 
     public int getVERSION() {
         return VERSION;
+    }
+
+    public long getBlockIndex() {
+        return blockIndex;
+    }
+
+    public void setBlockIndex(long blockIndex) {
+        this.blockIndex = blockIndex;
     }
 
     public String getAssetId() {

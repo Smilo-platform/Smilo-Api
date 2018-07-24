@@ -1,23 +1,24 @@
 package io.smilo.api.rest.models;
 
 import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.api.block.data.transaction.TransactionDTO;
 
 import java.util.List;
 
 public class TransactionList {
-    private final List<Transaction> transactions;
+    private final List<TransactionDTO> transactions;
     private final long skip;
     private final long take;
     private final long totalCount;
 
-    public TransactionList(List<Transaction> transactions, long skip, long take, long count) {
+    public TransactionList(List<TransactionDTO> transactions, long skip, long take, long count) {
         this.transactions = transactions;
         this.skip = skip;
         this.take = take;
         this.totalCount = count;
     }
 
-    public List<Transaction> getTransactions() {
+    public List<TransactionDTO> getTransactions() {
         return transactions;
     }
 
