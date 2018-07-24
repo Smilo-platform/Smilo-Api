@@ -51,14 +51,11 @@ public class TransactionAddressStore {
         return store.getArrayLength(COLLECTION_NAME, address);
     }
 
-    public List<Transaction> getTransactionsForAddress(String address, long skip, long take, boolean isDescending) {
-        // Limit take between 0 and 32
-        take = Math.min(Math.max(take, 0), 32);
-
+    public List<TransactionDTO> getTransactionsForAddress(String address, long skip, long take, boolean isDescending) {
         // Get the raw transaction hash values
         List<byte[]> values = store.getArray(COLLECTION_NAME, address, skip, take, isDescending);
 
-        List<Transaction> transactions = new ArrayList<>();
+        List<TransactionDTO> transactions = new ArrayList<>();
 
         // For each raw transaction hash retrieve the transaction
         for(byte[] transactionHashBytes : values) {
