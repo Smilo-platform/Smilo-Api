@@ -96,13 +96,9 @@ public class PeerReceiver {
                 //Broadcast request for new block(s)
                 Long blockNum =  blockStore.getLatestBlockHeight();
                 Long blockGoal = networkState.getTopBlock();
-                int max_blocks = 25;
+                int max_blocks = (int)Math.min(blockGoal - blockNum, 25);
 
-                if (blockGoal - blockNum < 25) {
-                    max_blocks = (int) (blockGoal - blockNum);
-                }
-
-                for (int i = 1; i < max_blocks; ++i) {
+                for (int i = 1; i <= max_blocks; ++i) {
                     Long getBlock = blockStore.getLatestBlockHeight() + i;
                     LOGGER.info("Requesting block " + getBlock + "...");
                     peerClient.broadcast("GET_BLOCK " + getBlock);
