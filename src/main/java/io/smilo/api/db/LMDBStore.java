@@ -141,7 +141,7 @@ public class LMDBStore implements Store {
                 long endIndex = isDescending ? startIndex - take : skip + take;
                 long indexIncrement = isDescending ? -1 : 1;
                 for (long i = startIndex; i != endIndex && i >= 0; i += indexIncrement) {
-                    String retrieveKey = key + i; // This not working!
+                    String retrieveKey = key + i;
 
                     ByteBuffer valueBuffer = db.get(txn, toByteBuffer(retrieveKey));
 
