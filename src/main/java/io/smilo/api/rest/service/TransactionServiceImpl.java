@@ -27,6 +27,7 @@ import io.smilo.api.peer.PeerSender;
 import io.smilo.api.peer.payloadhandler.PayloadType;
 import io.smilo.api.pendingpool.PendingBlockDataPool;
 import io.smilo.api.rest.models.PostTransactionResult;
+import io.smilo.api.rest.models.TransactionList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,11 +62,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction get(String transactionHash) {
-        return transactionStore.getTransaction(transactionHash);
+        Transaction transaction = transactionStore.getTransaction(transactionHash);
+
+        if(transaction == null) {
+            // Transaction could not be found in the database.
+            // However it might still be in the pending block data pool.
+            transaction = pendingBlockDataPool.getPendingTransaction(transactionHash);
+        }
+
+        return transaction;
     }
 
     @Override
-    public List<Transaction> getAll(long skip, long take, boolean isDescending) {
-        return transactionStore.getTransactions(skip, take, isDescending);
+    public TransactionList getAll(long skip, long take, boolean isDescending) {
+        long count = transactionStore.getTransactionCount();
+
+        List<Transaction> transactions = transactionStore.getTransactions(skip, take, isDescending);
+
+        return new TransactionList(transactions, skip, take, count);
     }
 }

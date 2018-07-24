@@ -27,6 +27,8 @@ public interface Store {
 
     byte[] get(String collection, ByteBuffer key);
 
+    long getArrayLength(String collection, String key);
+
     List<byte[]> getArray(String collection, String key, long skip, long take, boolean isDescending);
 
     void addToArray(String collection, String key, ByteBuffer value);

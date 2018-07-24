@@ -46,4 +46,23 @@ public class TransactionOutput {
     public Long getOutputAmount() {
         return outputAmount;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransactionOutput output = (TransactionOutput) o;
+
+        if (outputAddress != null ? !outputAddress.equals(output.outputAddress) : output.outputAddress != null)
+            return false;
+        return outputAmount != null ? outputAmount.equals(output.outputAmount) : output.outputAmount == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = outputAddress != null ? outputAddress.hashCode() : 0;
+        result = 31 * result + (outputAmount != null ? outputAmount.hashCode() : 0);
+        return result;
+    }
 }
