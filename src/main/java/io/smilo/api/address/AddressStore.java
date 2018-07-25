@@ -51,7 +51,8 @@ public class AddressStore {
      * new account with 0 balance.
      */
     public Address findOrCreate(String findAddress) {
-        Address result = getByAddress(findAddress);
+        AddressDTO result = getByAddress(findAddress);
+
         if (result == null){
             Map<String, Double> balances = new HashMap<>();
             balances.put("000x00123", 0.0);
@@ -59,7 +60,8 @@ public class AddressStore {
             writeToFile(address);
             return address;
         }
-        return result;
+
+        return AddressDTO.toAddress(result);
     }
 
     /**
@@ -82,7 +84,7 @@ public class AddressStore {
         }
     }
 
-    public Address getByAddress(String address) {
+    public AddressDTO getByAddress(String address) {
         if(address == null) {
             return null;
         }
@@ -102,6 +104,7 @@ public class AddressStore {
             LOGGER.debug("Unable to convert byte array to address" + e);
             return null;
         }
-        return AddressDTO.toAddress(result);
+
+        return result;
     }
 }

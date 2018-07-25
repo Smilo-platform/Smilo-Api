@@ -1,6 +1,7 @@
 package io.smilo.api.rest.service;
 
 import io.smilo.api.address.Address;
+import io.smilo.api.address.AddressDTO;
 import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
@@ -26,7 +27,7 @@ public class AddressServiceImpl implements AddressService {
     PendingBlockDataPool pendingBlockDataPool;
 
     @Override
-    public Address getAddress(String address) {
+    public AddressDTO getAddress(String address) {
         return addressStore.getByAddress(address);
     }
 

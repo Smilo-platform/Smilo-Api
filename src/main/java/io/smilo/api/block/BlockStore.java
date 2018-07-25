@@ -62,7 +62,7 @@ public class BlockStore {
         // When there is a balance, do nothing, else set 200M Smilo on balance
         if (blockInBlockStoreAvailable()) {
             LOGGER.info("Loading block from DB...");
-            Block latestBlock = getLatestBlockFromStore();
+            BlockDTO latestBlock = getLatestBlockFromStore();
             latestBlockHeight = latestBlock.getBlockNum();
             latestBlockHash = latestBlock.getBlockHash();
         }
@@ -128,7 +128,7 @@ public class BlockStore {
      * @Integer blockNum
      * @return Block
      */
-    public Block getBlock(long blockNum) {
+    public BlockDTO getBlock(long blockNum) {
         final ByteBuffer key = allocateDirect(64);
         key.putLong(blockNum).flip();
 
@@ -140,11 +140,13 @@ public class BlockStore {
             LOGGER.debug("Unable to convert byte array to block" + e);
             return null;
         }
-        return BlockDTO.toBlock(result);
+
+        return result;
     }
 
-    public Block getLatestBlockFromStore() {
+    public BlockDTO getLatestBlockFromStore() {
         byte[] raw = store.last(COLLECTION_NAME);
+
         BlockDTO result = null;
         try {
             result = dataMapper.readValue(raw, BlockDTO.class);
@@ -153,7 +155,8 @@ public class BlockStore {
             return null;
         }
         if (result == null) return null;
-        return BlockDTO.toBlock(result);
+
+        return result;
     }
 
     public Boolean blockInBlockStoreAvailable(){
