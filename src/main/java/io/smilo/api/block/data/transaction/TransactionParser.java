@@ -122,6 +122,8 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
             LOGGER.error("Exception when validating transaction ", e);
             return false;
         }
+
+        return true;
     }
 
     @Override
