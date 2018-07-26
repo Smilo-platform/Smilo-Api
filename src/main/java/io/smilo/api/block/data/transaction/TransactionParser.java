@@ -18,6 +18,8 @@
 package io.smilo.api.block.data.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smilo.api.address.AddressDTO;
+import io.smilo.api.address.AddressStore;
 import io.smilo.api.address.AddressUtility;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
@@ -43,12 +45,15 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
     private static final Logger LOGGER = Logger.getLogger(TransactionParser.class);
     private final AddressUtility addressUtility;
     private final ObjectMapper dataMapper;
+    private final AddressStore addressStore;
 
 
     public TransactionParser(AddressUtility addressUtility,
-                             ObjectMapper dataMapper) {
+                             ObjectMapper dataMapper,
+                             AddressStore addressStore) {
         this.addressUtility = addressUtility;
         this.dataMapper = dataMapper;
+        this.addressStore = addressStore;
     }
 
     /**
@@ -66,13 +71,12 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 isValid = false;
             }
 
-            // Todo: Fix this
-//            if (!transaction.getDataHash().equals(generateDataHash(transaction.getHashableData().getBytes()))){
-//                LOGGER.error("Error validating Tx hash: " + transaction.getDataHash() + " not valid.");
-//                isValid = false;
-//            }
-
-            // Todo: Signature check
+            if (transaction.getDataHash().equals(generateDataHash(transaction.getRawTransactionData().getBytes()))){
+                LOGGER.info("Tx hash: " + transaction.getDataHash() + " is valid.");
+            } else {
+                LOGGER.error("Error validating Tx hash: " + transaction.getDataHash() + " not valid.");
+                isValid = false;
+            }
 
             if (!addressUtility.isAddressFormattedCorrectly(transaction.getInputAddress())) {
                 LOGGER.error("Error validating transaction: input address " + transaction.getInputAddress() + " is misformatted.");
@@ -99,18 +103,27 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 return false; //Where do they need to go? We don't have greedy miners.
             }
 
-            // Todo:
-            // Get inputaddress balance
-            // Get outputaddress balance
-            // Check if inputAmount <= inputAddressBalance
+            if (!addressUtility.verifyMerkleSignature(transaction.getRawTransactionDataWithHash(), transaction.getSignatureData(), transaction.getInputAddress(), transaction.getSignatureIndex())) {
+                LOGGER.error("Error validating block: Transaction signature does not match!");
+                isValid = false;
+            }
 
+            AddressDTO address = this.addressStore.getByAddress(transaction.getInputAddress());
+            if(address == null) {
+                LOGGER.error("Unknown address so it has no balance to spent");
+                isValid = false;
+            }
+
+            if(address.getBalance(transaction.getAssetId()) < transaction.getOutputTotal()) {
+                LOGGER.error("Spending too much");
+                isValid = false;
+            }
         } catch (Exception e) {
             // Likely an error parsing a Long or performing some String manipulation task. Maybe array bounds exceptions.
             LOGGER.error("Exception when validating transaction ", e);
             isValid = false;
 
         }
-        LOGGER.info("Tx hash: " + transaction.getDataHash() + " is valid.");
         return isValid;
     }
 
