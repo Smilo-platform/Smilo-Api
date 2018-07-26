@@ -18,6 +18,7 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.address.Address;
+import io.smilo.api.address.AddressDTO;
 import io.smilo.api.address.AddressStore;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
@@ -36,8 +37,8 @@ public class AddressController {
     AddressService addressService;
 
     @GetMapping("/address/{address}")
-    public Address listAddress(@PathVariable("address") String address) {
-        Address response = addressService.getAddress(address);
+    public AddressDTO listAddress(@PathVariable("address") String address) {
+        AddressDTO response = addressService.getAddress(address);
 
         if (response == null)
             throw new AddressNotFoundException();
