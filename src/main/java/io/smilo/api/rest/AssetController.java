@@ -34,6 +34,6 @@ public class AssetController {
 
     @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Asset not found")  // 404
     public class AssetNotFoundException extends RuntimeException {
-        // ...
+        // Empty on purpose
     }
 }
