@@ -1,5 +1,7 @@
 package io.smilo.api.rest.service;
 
+import io.smilo.api.AbstractWebSpringTest;
+import io.smilo.api.TestUtility;
 import io.smilo.api.block.AddResultType;
 import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.transaction.*;
@@ -16,13 +18,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransactionServiceTests {
+public class TransactionServiceTests extends AbstractWebSpringTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+    @Autowired
+    public TestUtility testUtility;
 
     @Mock
     private PeerSender peerSenderMock;
@@ -46,7 +52,7 @@ public class TransactionServiceTests {
 
     @Test
     public void shouldReturnSuccessForCorrectTransactions() throws Exception {
-        TransactionDTO transaction = createDummyTransactionDTO();
+        TransactionDTO transaction = testUtility.createDummyTransactionDTO();
 
         // Mock the addBlockData method
         Mockito.when(
@@ -65,7 +71,7 @@ public class TransactionServiceTests {
 
     @Test
     public void shouldReturnFailureForIncorrectTransactions() throws Exception {
-        TransactionDTO transaction = createDummyTransactionDTO();
+        TransactionDTO transaction = testUtility.createDummyTransactionDTO();
 
         // Mock the addBlockData method
         Mockito.when(
@@ -84,7 +90,7 @@ public class TransactionServiceTests {
 
     @Test
     public void shouldGetTransactionFromDBCorrectly() throws Exception {
-        TransactionDTO transaction = createDummyTransactionDTO();
+        TransactionDTO transaction = testUtility.createDummyTransactionDTO();
 
         Mockito.when(
                 transactionStoreMock.getTransaction("DataHash")
@@ -98,7 +104,7 @@ public class TransactionServiceTests {
 
     @Test
     public void shouldGetTransactionFromPendingPoolCorrectly() throws Exception {
-        Transaction transaction = createDummyTransaction();
+        Transaction transaction = testUtility.createDummyTransaction();
 
         // Mock store returns null, should trigger a call to the pending pool
         Mockito.when(
@@ -142,30 +148,5 @@ public class TransactionServiceTests {
         Assert.assertEquals(result.getSkip(), 0);
         Assert.assertEquals(result.getTake(), 32);
         Assert.assertEquals(result.getTotalCount(), 5L);
-    }
-
-    private Transaction createDummyTransaction() {
-        return TransactionDTO.toTransaction(createDummyTransactionDTO());
-    }
-    private TransactionDTO createDummyTransactionDTO() {
-        TransactionDTO transaction = new TransactionDTO();
-
-        transaction.setAssetId("000x00123");
-        transaction.setInputAmount(100L);
-        transaction.setTimestamp(1000L);
-        transaction.setInputAddress("InputAddress");
-        transaction.setFee(10L);
-        transaction.setSignatureData("SignatureData");
-        transaction.setSignatureIndex(1L);
-        transaction.setDataHash("DataHash");
-
-        ArrayList<TransactionOutputDTO> outputs = new ArrayList<>();
-        TransactionOutputDTO output = new TransactionOutputDTO();
-        output.setOutputAddress("OutputAddress");
-        output.setOutputAmount(100L);
-
-        transaction.setTransactionOutputs(outputs);
-
-        return transaction;
     }
 }
