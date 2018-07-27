@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class AddressTests extends AbstractWebSpringTest {
+public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Autowired
     private TestUtility testUtility;
