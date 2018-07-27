@@ -95,9 +95,16 @@ public class TestUtility {
     }
 
     public Transaction createDummyTransaction() {
-        return TransactionDTO.toTransaction(createDummyTransactionDTO());
+        return createDummyTransaction("DataHash");
     }
+    public Transaction createDummyTransaction(String dataHash) {
+        return TransactionDTO.toTransaction(createDummyTransactionDTO(dataHash));
+    }
+
     public TransactionDTO createDummyTransactionDTO() {
+        return createDummyTransactionDTO("DataHash");
+    }
+    public TransactionDTO createDummyTransactionDTO(String dataHash) {
         TransactionDTO transaction = new TransactionDTO();
 
         transaction.setAssetId("000x00123");
@@ -107,7 +114,7 @@ public class TestUtility {
         transaction.setFee(10L);
         transaction.setSignatureData("SignatureData");
         transaction.setSignatureIndex(1L);
-        transaction.setDataHash("DataHash");
+        transaction.setDataHash(dataHash);
 
         ArrayList<TransactionOutputDTO> outputs = new ArrayList<>();
         TransactionOutputDTO output = new TransactionOutputDTO();
