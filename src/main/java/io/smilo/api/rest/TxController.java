@@ -40,9 +40,9 @@ public class TxController {
 
     @GetMapping("/tx")
     @ResponseBody
-    public TransactionList respondAllTxs(@RequestParam(value = "skip", required = true, defaultValue = "0") long skip,
-                                         @RequestParam(value = "take", required = true, defaultValue = "32") long take,
-                                         @RequestParam(value = "isdescending", required = true, defaultValue = "false") boolean isDescending) {
+    public TransactionList respondAllTxs(@RequestParam(value = "skip", required = false, defaultValue = "0") long skip,
+                                         @RequestParam(value = "take", required = false, defaultValue = "32") long take,
+                                         @RequestParam(value = "isdescending", required = false, defaultValue = "false") boolean isDescending) {
         return transactionService.getAll(skip, take, isDescending);
     }
 
