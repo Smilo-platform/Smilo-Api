@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class NetworkTests extends AbstractWebSpringTest {
+public class NetworkControllerTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToNetworkController() throws Exception {

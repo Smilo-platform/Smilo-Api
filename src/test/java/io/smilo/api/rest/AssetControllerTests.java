@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class AssetTest extends AbstractWebSpringTest {
+public class AssetControllerTests extends AbstractWebSpringTest {
     @Autowired
     private TestUtility testUtility;
 
