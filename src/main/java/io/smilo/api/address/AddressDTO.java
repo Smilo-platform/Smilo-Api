@@ -46,6 +46,15 @@ public class AddressDTO {
     public Map<String, Double> getBalances() {
         return balances;
     }
+
+    public double getBalance(String assetId) {
+        if(this.balances.containsKey(assetId)) {
+            return this.balances.get(assetId);
+        }
+        else {
+            return 0.0;
+        }
+    }
     
     public void setBalances(Map<String, Double> balance) {
         this.balances = balance;

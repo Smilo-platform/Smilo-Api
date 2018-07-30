@@ -58,6 +58,6 @@ public class AddressController {
 
     @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Address not found")  // 404
     public class AddressNotFoundException extends RuntimeException {
-        // ...
+        // Empty on purpose
     }
 }
