@@ -17,16 +17,16 @@
 
 package io.smilo.api.block.data.transaction;
 
+import java.math.BigInteger;
+
 public class TransactionOutput {
 
     private String outputAddress;
-    private Long outputAmount;
+    private BigInteger outputAmount = BigInteger.ZERO;
 
-    public TransactionOutput() {
-        // Make sonar happy :)
-    }
+    public TransactionOutput() {};
 
-    public TransactionOutput(String outputAddress, Long outputAmount) {
+    public TransactionOutput(String outputAddress, BigInteger outputAmount) {
         this.outputAddress = outputAddress;
         this.outputAmount = outputAmount;
     }
@@ -35,7 +35,7 @@ public class TransactionOutput {
         this.outputAddress = outputAddress;
     }
 
-    public void setOutputAmount(Long outputAmount) {
+    public void setOutputAmount(BigInteger outputAmount) {
         this.outputAmount = outputAmount;
     }
 
@@ -43,7 +43,7 @@ public class TransactionOutput {
         return outputAddress;
     }
 
-    public Long getOutputAmount() {
+    public BigInteger getOutputAmount() {
         return outputAmount;
     }
 

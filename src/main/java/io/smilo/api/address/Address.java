@@ -17,6 +17,7 @@
 
 package io.smilo.api.address;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,13 +29,13 @@ public class Address {
      * we still use double because all other tokens could be decimal. Applications implementing this API
      * should account for this.
      */
-    private Map<String, Double> balances = new HashMap<String, Double>();
+    private Map<String, BigInteger> balances = new HashMap<String, BigInteger>();
     private long signatureCount;
 
     public Address() {
     }
 
-    public Address(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
+    public Address(String address, Map<String, BigInteger> contractBalanceMap, long signatureCount) {
         this.publickey = address;
         this.balances = contractBalanceMap;
         this.signatureCount = signatureCount;
@@ -48,15 +49,15 @@ public class Address {
         return publickey;
     }
 
-    public Map<String, Double> getBalances() {
+    public Map<String, BigInteger> getBalances() {
         return this.balances;
     }
 
-    public void setBalances(Map<String, Double> balances) {
+    public void setBalances(Map<String, BigInteger> balances) {
         this.balances = balances;
     }
     
-    public double getBalance(String contract) {
+    public BigInteger getBalance(String contract) {
         return balances.get(contract);
     }
 
@@ -65,18 +66,18 @@ public class Address {
      * @param contract
      * @param increment
      */
-    public void incrementBalance(String contract, double increment) {
+    public void incrementBalance(String contract, BigInteger increment) {
         if(this.balances.containsKey(contract))
-            this.balances.put(contract, this.balances.get(contract) + increment);
+            this.balances.put(contract, this.balances.get(contract).add(increment));
         else
             this.balances.put(contract, increment);
     }
 
-    public void decrementBalance(String contract, double decrement) {
-        incrementBalance(contract, -decrement);
+    public void decrementBalance(String contract, BigInteger decrement) {
+        incrementBalance(contract, decrement.negate());
     }
     
-    public void setBalance(String contract, double balance) {
+    public void setBalance(String contract, BigInteger balance) {
         this.balances.put(contract, balance);
     }
 

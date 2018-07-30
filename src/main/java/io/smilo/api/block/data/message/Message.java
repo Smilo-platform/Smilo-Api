@@ -19,6 +19,7 @@ package io.smilo.api.block.data.message;
 
 import io.smilo.api.block.data.BlockData;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class Message extends BlockData {
                    String inputAddress,
                    List<String> outputAddresses,
                    String content,
-                   Long fee,
+                   BigInteger fee,
                    String dataHash,
                    String signatureData,
                    Long signatureIndex) {

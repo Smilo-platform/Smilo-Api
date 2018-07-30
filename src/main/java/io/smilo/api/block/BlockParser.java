@@ -22,14 +22,19 @@ import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
 import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionParser;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * https://smilo-platform.atlassian.net/wiki/spaces/SP/pages/96305164/Blocks TODO: refactor
@@ -43,6 +48,7 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
     private static final Logger LOGGER = Logger.getLogger(BlockParser.class);
     private final ObjectMapper dataMapper;
     private final TransactionParser transactionParser;
+    private static final byte CURRENT_VERSION = (byte) 1;
 
     public BlockParser(ObjectMapper dataMapper, TransactionParser transactionParser) {
         this.dataMapper = dataMapper;
@@ -75,12 +81,21 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         }
     }
 
+    //     * @param timestamp Timestamp originally set into the block by the node
+//     * @param blockNum The block number
+//     * @param previousBlockHash The hash of the previous block
+//     * @param redeemAddress the user's public key
+//     * @param ledgerHash The hash of the ledger as it existed before this block's transactions occurred
+//     * @param transactions List<Transaction> of all the transactions included in the block
+//     * @param nodeSignature Node's signature of the block
+//     * @param nodeSignatureIndex Node's signature index used when generating nodeSignature
     @Override
     public Block deserialize(byte[] raw) {
         if (raw.length == 0) return null;
         MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(raw);
         Block block;
         try {
+            msgpack.unpackByte(); // Skip version number
             Long timestamp = msgpack.unpackLong();
             Long blockNumber = msgpack.unpackLong();
             String previousBlockHash = msgpack.unpackString();
@@ -94,6 +109,9 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
                 msgpack.readPayload(rawTransaction);
                 transactions.add(transactionParser.deserialize(rawTransaction));
             }
+            int size = msgpack.unpackBinaryHeader();
+            byte [] extraData = msgpack.readPayload(size);
+            LOGGER.info("Unsupported extra data inside: " + Hex.encodeHexString(extraData));
             String blockHash = msgpack.unpackString();
             String blockSignature = msgpack.unpackString();
             Long blockSignatureIndex = msgpack.unpackLong();
@@ -110,13 +128,32 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
 
     @Override
     public byte[] serialize(Block block) {
-        byte[] bytes = null;
-        try {
-            bytes = dataMapper.writeValueAsBytes(BlockDTO.toDTO(block));
-        } catch (IOException ex) {
-            LOGGER.error("Unable to serialize block", ex);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (MessagePacker msgpack = MessagePack.newDefaultPacker(out)) {
+            msgpack.packByte(CURRENT_VERSION);
+            msgpack.packLong(block.getTimestamp());
+            msgpack.packLong(block.getBlockNum());
+            msgpack.packString(block.getPreviousBlockHash());
+            msgpack.packString(block.getRedeemAddress());
+            msgpack.packString(block.getLedgerHash());
+            List<Transaction> transactions = block.getTransactions();
+            msgpack.packArrayHeader(transactions.size());
+            for (Transaction tx : transactions) {
+                byte[] rawTransaction = transactionParser.serialize(tx);
+                msgpack.packBinaryHeader(rawTransaction.length);
+                msgpack.addPayload(rawTransaction);
+            }
+            msgpack.packBinaryHeader(0);
+            msgpack.packString(block.getBlockHash());
+            msgpack.packString(block.getNodeSignature());
+            msgpack.packLong(block.getNodeSignatureIndex());
+            msgpack.flush();
+            return out.toByteArray();
+        } catch (IOException er) {
+            LOGGER.error("Unable to serialize block", er);
+            LOGGER.debug("Mensagem: "+ block.getRawBlock());
         }
-        return bytes;
+        return null;
     }
 
     @Override

@@ -32,6 +32,7 @@ import io.smilo.api.ws.Websocket;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -145,22 +146,25 @@ public class PendingBlockDataPool {
      *
      * @return long The pending total (net) change for the address in question
      */
-    public long getPendingBalance(String address) {
-        long totalChange = 0L;
-        List<Transaction> pendingTransactionsss = getPendingData(Transaction.class);
+    public BigInteger getPendingBalance(String address) {
+        BigInteger totalChange = BigInteger.ZERO;
+        List<Transaction> pendingTransactions = getPendingData(Transaction.class);
 
-        for (int i = 0; i < pendingTransactionsss.size(); i++) {
-            Transaction transaction =  pendingTransactionsss.get(i);
+        for (int i = 0; i < pendingTransactions.size(); i++) {
+            Transaction transaction =  pendingTransactions.get(i);
             try {
                 if (transaction.containsAddress(address)) {
+                    // If the address is the input address subtract the amount
                     String senderAddress = transaction.getInputAddress();
                     if (senderAddress.equals(address)) {
-                        totalChange -= transaction.getInputAmount();
+                        totalChange = totalChange.subtract(transaction.getInputAmount());
                     }
-                    totalChange += transaction.getTransactionOutputs().stream()
+
+                    // Next add any outputs to the total balance
+                    totalChange = transaction.getTransactionOutputs().stream()
                             .filter(txOutput -> txOutput.getOutputAddress().equals(address))
-                            .mapToLong(TransactionOutput::getOutputAmount)
-                            .sum();
+                            .map(x -> x.getOutputAmount())
+                            .reduce(totalChange, (previous, current) -> previous.add(current));
                 }
             } catch (Exception e) {
                 LOGGER.error("Major problem: Transaction in the pending transaction pool is incorrectly formatted!");

@@ -17,6 +17,7 @@
 
 package io.smilo.api.block.data.message;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class MessageDTO {
     private String inputAddress;
     private String content;
     private List<String> outputAddresses;
-    private Long fee;
+    private BigInteger fee;
     private String dataHash;
     private String signatureData;
     private Long signatureIndex;
@@ -53,11 +54,11 @@ public class MessageDTO {
         this.inputAddress = inputAddress;
     }
 
-    public Long getFee() {
+    public BigInteger getFee() {
         return fee;
     }
 
-    public void setFee(Long fee) {
+    public void setFee(BigInteger fee) {
         this.fee = fee;
     }
 

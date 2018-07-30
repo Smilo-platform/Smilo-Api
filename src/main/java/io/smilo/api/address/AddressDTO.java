@@ -17,19 +17,20 @@
 
 package io.smilo.api.address;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 public class AddressDTO {
 
     private String address;
-    private Map<String, Double> balances;
+    private Map<String, BigInteger> balances;
     private long signatureCount;
 
     public AddressDTO() {
         // Make sonar happy :)
     }
 
-    public AddressDTO(String address, Map<String, Double> contractBalanceMap, long signatureCount) {
+    public AddressDTO(String address, Map<String, BigInteger> contractBalanceMap, long signatureCount) {
         this.address = address;
         this.balances = contractBalanceMap;
         this.signatureCount = signatureCount;
@@ -43,20 +44,20 @@ public class AddressDTO {
         return address;
     }
     
-    public Map<String, Double> getBalances() {
+    public Map<String, BigInteger> getBalances() {
         return balances;
     }
 
-    public double getBalance(String assetId) {
+    public BigInteger getBalance(String assetId) {
         if(this.balances.containsKey(assetId)) {
             return this.balances.get(assetId);
         }
         else {
-            return 0.0;
+            return BigInteger.ZERO;
         }
     }
     
-    public void setBalances(Map<String, Double> balance) {
+    public void setBalances(Map<String, BigInteger> balance) {
         this.balances = balance;
     }
 

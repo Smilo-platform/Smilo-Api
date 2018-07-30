@@ -23,6 +23,7 @@ import io.smilo.api.address.AddressStore;
 import io.smilo.api.address.AddressUtility;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.msgpack.core.MessagePack;
@@ -33,8 +34,11 @@ import org.msgpack.core.buffer.MessageBufferInput;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * TransactionUtility simplifies a few basic tasks dealing with transaction parsing and verification.
@@ -46,6 +50,7 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
     private final AddressUtility addressUtility;
     private final ObjectMapper dataMapper;
     private final AddressStore addressStore;
+    private static final byte CURRENT_VERSION = (byte) 1;
 
 
     public TransactionParser(AddressUtility addressUtility,
@@ -89,14 +94,14 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 }
             }
 
-            if (transaction.getInputAmount() - transaction.getOutputTotal() < 0) {
+            if (transaction.getInputAmount().compareTo(transaction.getOutputTotal()) < 0) {
                 LOGGER.debug("Input amount: " + transaction.getInputAmount() + " & Output amount: " + transaction.getOutputTotal());
                 LOGGER.error("Input amount is smaller then output amount!");
-                return false;
                 // Coins can't be created out of thin air!
+                return false;
             }
 
-            if (transaction.getInputAmount() - transaction.getOutputTotal() > 0) {
+            if (transaction.getInputAmount().compareTo(transaction.getOutputTotal()) > 0) {
                 LOGGER.debug("Input amount: " + transaction.getInputAmount() + " & Output amount: " + transaction.getOutputTotal());
                 LOGGER.error("Input amount is bigger then output amount!");
                 return false; //Where do they need to go? We don't have greedy miners.
@@ -113,7 +118,7 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 return false;
             }
 
-            if(address.getBalance(transaction.getAssetId()) < transaction.getOutputTotal()) {
+            if(address.getBalance(transaction.getAssetId()).compareTo(transaction.getOutputTotal()) < 0) {
                 LOGGER.error("Spending too much");
                 return false;
             }
@@ -133,10 +138,11 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
         MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(data);
         Transaction transaction = null;
         try {
+            msgpack.unpackByte(); // Skip version number
             Long timestamp = msgpack.unpackLong();
             String assetId = msgpack.unpackString();
             String inputAddress = msgpack.unpackString();
-            Long inputAmount = msgpack.unpackLong();
+            BigInteger inputAmount = msgpack.unpackBigInteger();
             int items = msgpack.unpackArrayHeader();
             List<TransactionOutput> outputs = new ArrayList<>();
             for (int i = 0; i < items; i++) {
@@ -144,7 +150,10 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 byte[] temp = msgpack.readPayload(size);
                 outputs.add(parseOutput(temp));
             }
-            Long fee = msgpack.unpackLong();
+            BigInteger fee = msgpack.unpackBigInteger();
+            int size = msgpack.unpackBinaryHeader();
+            byte [] extraData = msgpack.readPayload(size);
+            LOGGER.info("Unsupported extra data inside: " + Hex.encodeHexString(extraData));
             String hash = msgpack.unpackString();
             String signature = msgpack.unpackString();
             Long signatureIndex = msgpack.unpackLong();
@@ -160,7 +169,7 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
         MessageBufferInput data = new ArrayBufferInput(raw);
         MessageUnpacker msgpack = MessagePack.newDefaultUnpacker(data);
         String outputAddress = msgpack.unpackString();
-        Long outputAmount = msgpack.unpackLong();
+        BigInteger outputAmount = msgpack.unpackBigInteger();
         return new TransactionOutput(outputAddress,outputAmount);
     }
 
@@ -168,10 +177,11 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
     public byte[] serialize(Transaction transaction) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (MessagePacker msgpack = MessagePack.newDefaultPacker(out)) {
+            msgpack.packByte(CURRENT_VERSION);
             msgpack.packLong(transaction.getTimestamp());
             msgpack.packString(transaction.getAssetId());
             msgpack.packString(transaction.getInputAddress());
-            msgpack.packLong(transaction.getInputAmount());
+            msgpack.packBigInteger(transaction.getInputAmount());
             List<TransactionOutput> outputs = transaction.getTransactionOutputs();
             msgpack.packArrayHeader(outputs.size());
             for (TransactionOutput txout : outputs) {
@@ -179,7 +189,8 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 msgpack.packBinaryHeader(rawoutput.length);
                 msgpack.addPayload(rawoutput);
             }
-            msgpack.packLong(transaction.getFee());
+            msgpack.packBigInteger(transaction.getFee());
+            msgpack.packBinaryHeader(0);
             msgpack.packString(transaction.getDataHash());
             msgpack.packString(transaction.getSignatureData());
             msgpack.packLong(transaction.getSignatureIndex());
@@ -195,7 +206,7 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (MessagePacker msgpack = MessagePack.newDefaultPacker(out)) {
             msgpack.packString(txout.getOutputAddress());
-            msgpack.packLong(txout.getOutputAmount());
+            msgpack.packBigInteger(txout.getOutputAmount());
             msgpack.flush();
         }
         return out.toByteArray();
