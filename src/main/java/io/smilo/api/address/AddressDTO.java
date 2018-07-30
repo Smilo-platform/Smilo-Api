@@ -17,12 +17,15 @@
 
 package io.smilo.api.address;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.math.BigInteger;
 import java.util.Map;
 
 public class AddressDTO {
 
     private String address;
+    @JsonSerialize(using = AddressBalancesSerializer.class)
     private Map<String, BigInteger> balances;
     private long signatureCount;
 
