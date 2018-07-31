@@ -62,6 +62,14 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
         this.addressStore = addressStore;
     }
 
+    public void hash(Transaction transaction) {
+        try {
+            transaction.setDataHash(generateDataHash(transaction.getRawTransactionData().getBytes()));
+        } catch (Exception ex) {
+            LOGGER.error("Unable to create data hash for transaction", ex);
+        }
+    }
+
     /**
      * Tests whether a transaction is valid. Doesn't test account balances, but tests formatting and signature verification.
      *

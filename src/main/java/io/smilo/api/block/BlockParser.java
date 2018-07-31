@@ -156,6 +156,14 @@ public class BlockParser extends BlockDataParser implements Parser<Block> {
         return null;
     }
 
+    public void hash(Block block) {
+        try {
+            block.setBlockHash(generateDataHash(block.getRawBlockData().getBytes(UTF_8)));
+        } catch (Exception ex) {
+            LOGGER.error("Unable to create data hash for block", ex);
+        }
+    }
+
     @Override
     public boolean supports(Class<?> clazz) {
         return Block.class.isAssignableFrom(clazz);
