@@ -23,6 +23,7 @@ import io.smilo.api.address.AddressStore;
 import io.smilo.api.address.AddressUtility;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.Parser;
+import io.smilo.api.pendingpool.PendingBlockDataPool;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
@@ -31,6 +32,7 @@ import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.core.buffer.ArrayBufferInput;
 import org.msgpack.core.buffer.MessageBufferInput;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -51,7 +53,6 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
     private final ObjectMapper dataMapper;
     private final AddressStore addressStore;
     private static final byte CURRENT_VERSION = (byte) 1;
-
 
     public TransactionParser(AddressUtility addressUtility,
                              ObjectMapper dataMapper,
@@ -118,7 +119,31 @@ public class TransactionParser extends BlockDataParser implements Parser<Transac
                 return false;
             }
 
-            if(address.getBalance(transaction.getAssetId()).compareTo(transaction.getOutputTotal()) < 0) {
+            // Get the balance including any pending transactions
+            BigInteger balance = address.getBalance(transaction.getAssetId());
+
+            // Enable below lines in the future once we figure out how to get PendingBlockDataPool in this class without creating a circular dependency!
+            // Get pending transactions for the address
+//            List<Transaction> pendingTransactions = this.pendingBlockDataPool.getPendingTransactionsForAddress(address.getAddress());
+//            for(Transaction pending : pendingTransactions) {
+//                if(pending.getAssetId().equals(transaction.getAssetId())) {
+//                    // This transaction influences the same asset as the current transaction
+//                    if(pending.getInputAddress().equals(address.getAddress())) {
+//                        // This address is already spending
+//                        balance = balance.subtract(pending.getInputAmount());
+//                    }
+//                    else {
+//                        // This address is receiving, find how much
+//                        for(TransactionOutput pendingOutput : pending.getTransactionOutputs()) {
+//                            if(pendingOutput.getOutputAddress().equals(address.getAddress())) {
+//                                balance = balance.add(pendingOutput.getOutputAmount());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+
+            if(balance.compareTo(transaction.getOutputTotal()) < 0) {
                 LOGGER.error("Spending too much");
                 return false;
             }
