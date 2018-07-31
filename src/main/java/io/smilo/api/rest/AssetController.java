@@ -18,7 +18,7 @@ public class AssetController {
 
     @GetMapping("/asset/{assetSymbol}")
     public AssetDTO getAsset(@PathVariable("assetSymbol") String assetSymbol) {
-        if(assetSymbol.equals("XSM")) {
+        if(assetSymbol.equals("000x00123")) {
             return new AssetDTO(200000000L, "Smilo", 0, "XSM");
         }
         else if(assetSymbol.equals("XSP")) {
