@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,10 +152,10 @@ public class TransactionServiceTests {
         TransactionDTO transaction = new TransactionDTO();
 
         transaction.setAssetId("000x00123");
-        transaction.setInputAmount(100L);
+        transaction.setInputAmount(BigInteger.valueOf(100L));
         transaction.setTimestamp(1000L);
         transaction.setInputAddress("InputAddress");
-        transaction.setFee(10L);
+        transaction.setFee(BigInteger.valueOf(10L));
         transaction.setSignatureData("SignatureData");
         transaction.setSignatureIndex(1L);
         transaction.setDataHash("DataHash");
@@ -162,7 +163,7 @@ public class TransactionServiceTests {
         ArrayList<TransactionOutputDTO> outputs = new ArrayList<>();
         TransactionOutputDTO output = new TransactionOutputDTO();
         output.setOutputAddress("OutputAddress");
-        output.setOutputAmount(100L);
+        output.setOutputAmount(BigInteger.valueOf(100L));
 
         transaction.setTransactionOutputs(outputs);
 

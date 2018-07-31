@@ -19,17 +19,20 @@ package io.smilo.api.block.data;
 
 import io.smilo.api.block.Content;
 
+import java.math.BigInteger;
+import java.util.Objects;
+
 public abstract class BlockData extends Content {
 
     private String inputAddress;
-    private Long fee;
+    private BigInteger fee;
     private String signatureData;
     private Long signatureIndex;
     private String dataHash;
 
     protected BlockData () {}
 
-    protected BlockData(Long timestamp, String inputAddress, Long fee, String signatureData, Long signatureIndex, String dataHash) {
+    protected BlockData(Long timestamp, String inputAddress, BigInteger fee, String signatureData, Long signatureIndex, String dataHash) {
         super(timestamp);
         this.inputAddress = inputAddress;
         this.fee = fee;
@@ -42,7 +45,7 @@ public abstract class BlockData extends Content {
         return inputAddress;
     }
 
-    public Long getFee() {
+    public BigInteger getFee() {
         return fee;
     }
 
@@ -62,7 +65,7 @@ public abstract class BlockData extends Content {
         this.inputAddress = inputAddress;
     }
 
-    public void setFee(Long fee) {
+    public void setFee(BigInteger fee) {
         this.fee = fee;
     }
 
@@ -79,6 +82,24 @@ public abstract class BlockData extends Content {
     }
 
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final BlockData other = (BlockData) obj;
+        return Objects.equals(this.dataHash, other.dataHash);
+    }
 
+    @Override
+    public int hashCode() {
+        return dataHash.hashCode();
+    }
 }
 

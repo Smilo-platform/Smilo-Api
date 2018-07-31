@@ -17,10 +17,16 @@
 
 package io.smilo.api.block.data.transaction;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.smilo.api.rest.serializers.BigIntegerSerializer;
+
+import java.math.BigInteger;
+
 public class TransactionOutputDTO {
 
     private String outputAddress;
-    private Long outputAmount;
+    @JsonSerialize(using = BigIntegerSerializer.class)
+    private BigInteger outputAmount;
 
     public TransactionOutputDTO() {
         // Make sonar happy.. :)
@@ -30,7 +36,7 @@ public class TransactionOutputDTO {
         this.outputAddress = outputAddress;
     }
 
-    public void setOutputAmount(Long outputAmount) {
+    public void setOutputAmount(BigInteger outputAmount) {
         this.outputAmount = outputAmount;
     }
 
@@ -38,7 +44,7 @@ public class TransactionOutputDTO {
         return outputAddress;
     }
 
-    public Long getOutputAmount() {
+    public BigInteger getOutputAmount() {
         return outputAmount;
     }
 
@@ -49,10 +55,10 @@ public class TransactionOutputDTO {
         return dto;
     }
 
-    public static TransactionOutput toTransactionOutput(TransactionOutputDTO transactionOuputDTO) {
+    public static TransactionOutput toTransactionOutput(TransactionOutputDTO transactionOutputDTO) {
         TransactionOutput transactionOutput = new TransactionOutput();
-        transactionOutput.setOutputAddress(transactionOuputDTO.getOutputAddress());
-        transactionOutput.setOutputAmount(transactionOuputDTO.getOutputAmount());
+        transactionOutput.setOutputAddress(transactionOutputDTO.getOutputAddress());
+        transactionOutput.setOutputAmount(transactionOutputDTO.getOutputAmount());
         return transactionOutput;
     }
 }

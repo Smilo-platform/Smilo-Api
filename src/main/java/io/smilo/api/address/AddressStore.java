@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class AddressStore {
         AddressDTO result = getByAddress(findAddress);
 
         if (result == null){
-            Map<String, Double> balances = new HashMap<>();
-            balances.put("000x00123", 0.0);
+            Map<String, BigInteger> balances = new HashMap<>();
+            balances.put("000x00123", BigInteger.ZERO);
             Address address = new Address(findAddress, balances, -1);
             writeToFile(address);
             return address;
