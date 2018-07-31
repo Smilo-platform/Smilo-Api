@@ -30,11 +30,30 @@ public abstract class BlockDataParser {
     protected String generateDataHash(byte[] blockData) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            return DatatypeConverter.printHexBinary(md.digest(blockData));
+
+            byte[] digest = md.digest(blockData);
+
+            return toHex(digest);
         } catch (Exception e) {
             LOGGER.error("Oops: " + e);
             return null;
         }
+    }
+
+    private String toHex(byte[] bytes) {
+        String wordList = "0123456789ABCDEF";
+
+        StringBuilder builder = new StringBuilder();
+
+        for(byte b : bytes) {
+            int mostSignificant = (b >> 4) & 0b00001111;
+            int leastSignificant = b & 0b00001111;
+
+            builder.append(wordList.charAt(mostSignificant));
+            builder.append(wordList.charAt(leastSignificant));
+        }
+
+        return builder.toString();
     }
 
     public static String encode(byte[] bytes) {

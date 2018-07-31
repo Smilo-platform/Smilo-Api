@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,15 +52,17 @@ public class AddressStore {
      * new account with 0 balance.
      */
     public Address findOrCreate(String findAddress) {
-        Address result = getByAddress(findAddress);
+        AddressDTO result = getByAddress(findAddress);
+
         if (result == null){
-            Map<String, Double> balances = new HashMap<>();
-            balances.put("000x00123", 0.0);
+            Map<String, BigInteger> balances = new HashMap<>();
+            balances.put("000x00123", BigInteger.ZERO);
             Address address = new Address(findAddress, balances, -1);
             writeToFile(address);
             return address;
         }
-        return result;
+
+        return AddressDTO.toAddress(result);
     }
 
     /**
@@ -82,7 +85,7 @@ public class AddressStore {
         }
     }
 
-    public Address getByAddress(String address) {
+    public AddressDTO getByAddress(String address) {
         if(address == null) {
             return null;
         }
@@ -102,6 +105,7 @@ public class AddressStore {
             LOGGER.debug("Unable to convert byte array to address" + e);
             return null;
         }
-        return AddressDTO.toAddress(result);
+
+        return result;
     }
 }

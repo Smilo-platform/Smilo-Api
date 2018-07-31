@@ -45,9 +45,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     TransactionStore transactionStore;
 
-    @Autowired
-    TransactionAddressStore transactionAddressStore;
-
     @Override
     public PostTransactionResult putTransaction(TransactionDTO dto) {
         Transaction transaction = TransactionDTO.toTransaction(dto);

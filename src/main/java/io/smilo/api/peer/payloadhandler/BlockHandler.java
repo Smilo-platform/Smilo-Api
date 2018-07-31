@@ -168,7 +168,7 @@ public class BlockHandler implements PayloadHandler {
         Address inputAddress = addressStore.findOrCreate(transaction.getInputAddress());
 
         // Update signature index
-        inputAddress.setSignatureCount(transaction.getSignatureIndex());
+        inputAddress.setSignatureCount(transaction.getSignatureIndex() + 1);
 
         // Update balance
         inputAddress.decrementBalance(transaction.getAssetId(), transaction.getInputAmount());

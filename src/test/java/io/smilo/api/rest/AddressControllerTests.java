@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class AddressTests extends AbstractWebSpringTest {
+public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Autowired
     private TestUtility testUtility;
@@ -37,7 +37,7 @@ public class AddressTests extends AbstractWebSpringTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").value(200000000))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(0));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(1));
     }
 
     @Test

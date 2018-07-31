@@ -18,6 +18,7 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.block.Block;
+import io.smilo.api.block.BlockDTO;
 import io.smilo.api.block.BlockStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,8 +34,8 @@ public class BlockController {
     BlockStore blockStore;
 
     @GetMapping("/block")
-    public Block respondAllBlocks() {
-        Block response = blockStore.getLatestBlockFromStore();
+    public BlockDTO respondAllBlocks() {
+        BlockDTO response = blockStore.getLatestBlockFromStore();
 
         if (response == null) throw new BlockNotFoundException();
 
@@ -42,8 +43,8 @@ public class BlockController {
     }
 
     @GetMapping("/block/{block}")
-    public Block respondBlock(@PathVariable("block") Long blockHeight) {
-        Block response = blockStore.getBlock(blockHeight);
+    public BlockDTO respondBlock(@PathVariable("block") Long blockHeight) {
+        BlockDTO response = blockStore.getBlock(blockHeight);
 
         if (response == null) throw new BlockNotFoundException();
 

@@ -21,6 +21,8 @@ import io.smilo.api.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
+
 @Component
 //TODO: transactional?
 public class AddressManager {
@@ -56,7 +58,7 @@ public class AddressManager {
 
             //Looks like everything is correct--transaction should be executed correctly
             Address inputAccount = addressStore.findOrCreate(transaction.getInputAddress());
-            inputAccount.decrementBalance(transaction.getAssetId(), -transaction.getInputAmount());
+            inputAccount.decrementBalance(transaction.getAssetId(), transaction.getInputAmount().negate());
 
             transaction.getTransactionOutputs().forEach(txOutput -> {
                 Address outputAccount = addressStore.findOrCreate(txOutput.getOutputAddress());
@@ -107,8 +109,11 @@ public class AddressManager {
      * @return int Last signature index used by address
      */
     public long getAddressSignatureCount(String address) {
-        Address result = addressStore.getByAddress(address);
-        if (result == null) return -1;
+        AddressDTO result = addressStore.getByAddress(address);
+
+        if (result == null)
+            return -1;
+
         return result.getSignatureCount();
     }
 
@@ -156,10 +161,13 @@ public class AddressManager {
      *
      * @return long Balance of address
      */
-    public long getAddressBalance(String address) {
-        Address result = addressStore.getByAddress(address);
-        if (result == null) return 0L;
-        return (long)result.getBalance("000x00123");
+    public BigInteger getAddressBalance(String address) {
+        Address result = AddressDTO.toAddress(addressStore.getByAddress(address));
+
+        if (result == null)
+            return BigInteger.ZERO;
+
+        return result.getBalance("000x00123");
     }
 
     /**
@@ -170,13 +178,16 @@ public class AddressManager {
      *
      * @return boolean Whether the adjustment was successful
      */
-    public boolean adjustAddressBalance(String address, long adjustment) {
-        long oldBalance = (long)addressStore.findOrCreate(address).getBalance("000x00123");
-        if (oldBalance + adjustment < 0) //Adjustment is negative with an absolute value larger than oldBalance
+    public boolean adjustAddressBalance(String address, BigInteger adjustment) {
+        BigInteger oldBalance = addressStore.findOrCreate(address).getBalance("000x00123");
+        BigInteger newBalance = oldBalance.add(adjustment);
+
+        if (newBalance.compareTo(BigInteger.ZERO) < 0) //Adjustment is negative with an absolute value larger than oldBalance
         {
             return false;
         }
-        return updateAddressBalance(address, oldBalance + adjustment);
+
+        return updateAddressBalance(address, newBalance);
     }
 
     /**
@@ -187,7 +198,7 @@ public class AddressManager {
      *
      * @return boolean Whether setting the new balance was successful
      */
-    public boolean updateAddressBalance(String address, long newAmount) {
+    public boolean updateAddressBalance(String address, BigInteger newAmount) {
         try {
             Address account = addressStore.findOrCreate(address);
             account.setBalance("000x00123", newAmount);
@@ -202,8 +213,8 @@ public class AddressManager {
     private boolean checkValidity(Transaction transaction) {
         String inputAddress = transaction.getInputAddress();
         long signatureIndex = transaction.getSignatureIndex();
-        long inputAmount = transaction.getInputAmount();
-        long outputTotal = transaction.getOutputTotal();
+        BigInteger inputAmount = transaction.getInputAmount();
+        BigInteger outputTotal = transaction.getOutputTotal();
 
         //The signature is valid, however it isn't using the expected signatureIndex. Blocked to ensure a compromised Lamport key from a previous transaction can't be used.
         if (getAddressSignatureCount(inputAddress) + 1 != signatureIndex) return false;
@@ -212,13 +223,14 @@ public class AddressManager {
         if (!addressUtility.isAddressFormattedCorrectly(inputAddress)) return false;
 
         //inputAddress has an insufficient balance
-        if (getAddressBalance(inputAddress) < inputAmount) return false; //Insufficient balance
+        if (getAddressBalance(inputAddress).compareTo(inputAmount) < 0) return false; //Insufficient balance
 
         boolean addressesAreValid = transaction.getTransactionOutputs().stream()
                 .allMatch(txOutput -> addressUtility.isAddressFormattedCorrectly(txOutput.getOutputAddress()));
         if (!addressesAreValid) return false;
 
-        if (inputAmount < outputTotal) return false;
+        if (inputAmount.compareTo(outputTotal) < 0) return false;
+
         return true;
     }
 

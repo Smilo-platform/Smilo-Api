@@ -20,6 +20,7 @@ package io.smilo.api.block.data.transaction;
 import io.smilo.api.block.data.BlockData;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ import static java.util.stream.Collectors.joining;
 public class Transaction extends BlockData {
 
     private String assetId = "";
-    private long inputAmount;
+    private BigInteger inputAmount = BigInteger.ZERO;
     private List<TransactionOutput> transactionOutputs;
 
     public Transaction() {
@@ -42,8 +43,8 @@ public class Transaction extends BlockData {
     public Transaction(Long timestamp,
                        String assetId,
                        String inputAddress,
-                       Long inputAmount,
-                       Long fee,
+                       BigInteger inputAmount,
+                       BigInteger fee,
                        List<TransactionOutput> transactionOutputs,
                        String dataHash,
                        String signatureData,
@@ -62,7 +63,7 @@ public class Transaction extends BlockData {
         return assetId;
     }
 
-    public Long getInputAmount() {
+    public BigInteger getInputAmount() {
         return inputAmount;
     }
 
@@ -74,7 +75,7 @@ public class Transaction extends BlockData {
         this.assetId = assetId;
     }
 
-    public void setInputAmount(Long inputAmount) {
+    public void setInputAmount(BigInteger inputAmount) {
         this.inputAmount = inputAmount;
     }
 
@@ -90,13 +91,17 @@ public class Transaction extends BlockData {
         return getRawTransactionDataWithHash() + ";" + getSignatureData() + ";" + getSignatureIndex();
     }
 
+    private String replaceNullByEmptyString(String input) {
+        return input == null ? "" : input;
+    }
+
     /**
      * Returns the transaction as string without signature data and index
      * @return
      */
     public String getTransactionBody() {
         String[] tx = getRawTransaction().split(";");
-        return Stream.of(tx).limit(tx.length - 2L).collect(joining(";"));
+        return Stream.of(tx).limit(tx.length - 2).collect(joining(";"));
     }
 
     /**
@@ -113,8 +118,8 @@ public class Transaction extends BlockData {
      * Sums the output amount total of all transactions
      * @return summation of the output amounts.
      */
-    public long getOutputTotal() {
-        return transactionOutputs.stream().mapToLong(TransactionOutput::getOutputAmount).sum();
+    public BigInteger getOutputTotal() {
+        return transactionOutputs.stream().map(TransactionOutput::getOutputAmount).reduce(BigInteger.ZERO,BigInteger::add);
     }
 
     public boolean containsAddress(String address) {

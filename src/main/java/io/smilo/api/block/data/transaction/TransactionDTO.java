@@ -17,6 +17,10 @@
 
 package io.smilo.api.block.data.transaction;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.smilo.api.rest.serializers.BigIntegerSerializer;
+
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,11 +29,13 @@ public class TransactionDTO {
     private static final int VERSION = 1;
 
     private String assetId;
-    private Long inputAmount;
+    @JsonSerialize(using = BigIntegerSerializer.class)
+    private BigInteger inputAmount;
     private List<TransactionOutputDTO> transactionOutputs;
     private Long timestamp;
     private String inputAddress;
-    private Long fee;
+    @JsonSerialize(using = BigIntegerSerializer.class)
+    private BigInteger fee;
     private String signatureData;
     private Long signatureIndex;
     private String dataHash;
@@ -59,11 +65,11 @@ public class TransactionDTO {
         this.assetId = assetId;
     }
 
-    public Long getInputAmount() {
+    public BigInteger getInputAmount() {
         return inputAmount;
     }
 
-    public void setInputAmount(Long inputAmount) {
+    public void setInputAmount(BigInteger inputAmount) {
         this.inputAmount = inputAmount;
     }
 
@@ -91,11 +97,11 @@ public class TransactionDTO {
         this.inputAddress = inputAddress;
     }
 
-    public Long getFee() {
+    public BigInteger getFee() {
         return fee;
     }
 
-    public void setFee(Long fee) {
+    public void setFee(BigInteger fee) {
         this.fee = fee;
     }
 
