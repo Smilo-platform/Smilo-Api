@@ -1,6 +1,7 @@
 package io.smilo.api.block.data.assets;
 
 public class AssetDTO {
+    private String address;
     private long totalSupply;
     private String name;
     private int decimals;
@@ -9,11 +10,20 @@ public class AssetDTO {
     public AssetDTO() {
 
     }
-    public AssetDTO(long totalSupply, String name, int decimals, String symbol) {
+    public AssetDTO(String address, long totalSupply, String name, int decimals, String symbol) {
+        this.address = address;
         this.totalSupply = totalSupply;
         this.name = name;
         this.decimals = decimals;
         this.symbol = symbol;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getDecimals() {

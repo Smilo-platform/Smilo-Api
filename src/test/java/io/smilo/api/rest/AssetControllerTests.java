@@ -26,6 +26,7 @@ public class AssetControllerTests extends AbstractWebSpringTest {
     @Test
     public void shouldReturnCorrectAsset() throws Exception {
         this.webClient.perform(MockMvcRequestBuilders.get("/asset/000x00123"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("000x00123"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalSupply").value(200000000))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Smilo"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.decimals").value(0))

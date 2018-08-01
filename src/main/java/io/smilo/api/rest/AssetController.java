@@ -12,19 +12,22 @@ import java.util.List;
 @RestController
 public class AssetController {
     @GetMapping("/asset")
-    public String[] listAssets() {
-        return new String[]{"XSM", "XSP"};
+    public AssetDTO[] listAssets() {
+        return new AssetDTO[]{
+            new AssetDTO("000x00123", 200000000L, "Smilo", 0, "XSM"),
+            new AssetDTO("000x00321", 200000000L, "SmiloPay", 18, "XSP")
+        };
     }
 
     @GetMapping("/asset/{assetSymbol}")
     public AssetDTO getAsset(@PathVariable("assetSymbol") String assetSymbol) {
         if(assetSymbol.equals("000x00123")) {
-            return new AssetDTO(200000000L, "Smilo", 0, "XSM");
+            return new AssetDTO("000x00123", 200000000L, "Smilo", 0, "XSM");
         }
-        else if(assetSymbol.equals("XSP")) {
+        else if(assetSymbol.equals("000x00321")) {
             // Not yet correct, total supply should be BigInt!
             // Must be updated once core uses BigInts for balance.
-            return new AssetDTO(200000000L, "SmiloPay", 18, "XSP");
+            return new AssetDTO("000x00321", 200000000L, "SmiloPay", 18, "XSP");
         }
         else {
             // This is an unknown asset
