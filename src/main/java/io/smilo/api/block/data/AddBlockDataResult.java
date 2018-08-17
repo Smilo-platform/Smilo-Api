@@ -17,7 +17,7 @@
 
 package io.smilo.api.block.data;
 
-import io.smilo.api.block.AddResultType;
+import io.smilo.commons.block.AddResultType;
 
 public class AddBlockDataResult {
     private final AddResultType type;

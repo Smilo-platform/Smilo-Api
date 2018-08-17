@@ -1,6 +1,6 @@
 package io.smilo.api.rest.service;
 
-import io.smilo.api.block.AddResultType;
+import io.smilo.commons.block.AddResultType;
 import io.smilo.api.block.data.AddBlockDataResult;
 import io.smilo.api.block.data.transaction.*;
 import io.smilo.api.peer.PeerSender;

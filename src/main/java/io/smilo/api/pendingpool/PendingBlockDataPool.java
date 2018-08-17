@@ -17,7 +17,7 @@
 
 package io.smilo.api.pendingpool;
 
-import io.smilo.api.block.AddResultType;
+import io.smilo.commons.block.AddResultType;
 import io.smilo.api.block.Block;
 import io.smilo.api.block.ParserProvider;
 import io.smilo.api.block.data.AddBlockDataResult;
