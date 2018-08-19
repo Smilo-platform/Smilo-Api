@@ -17,7 +17,11 @@
 
 package io.smilo.api.peer.payloadhandler;
 
-import io.smilo.api.peer.Peer;
+import io.smilo.commons.peer.IPeer;
+import io.smilo.commons.peer.Peer;
+import io.smilo.commons.peer.payloadhandler.BlockHandler;
+import io.smilo.commons.peer.payloadhandler.PayloadHandler;
+import io.smilo.commons.peer.payloadhandler.PayloadType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +36,7 @@ public class CommitHandler implements PayloadHandler {
     }
 
     @Override
-    public void handlePeerPayload(List<String> parts, Peer peer) {
+    public void handlePeerPayload(List<String> parts, IPeer peer) {
         blockhandler.handlePeerPayload(parts, peer);
     }
 

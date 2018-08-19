@@ -17,9 +17,9 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.block.Block;
 import io.smilo.api.block.BlockDTO;
-import io.smilo.api.block.BlockStore;
+import io.smilo.commons.block.Block;
+import io.smilo.commons.block.BlockStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +35,9 @@ public class BlockController {
 
     @GetMapping("/block")
     public BlockDTO respondAllBlocks() {
-        BlockDTO response = blockStore.getLatestBlockFromStore();
+        BlockDTO response;
+        Block b = blockStore.getLatestBlockFromStore();
+        response = BlockDTO.toDTO(b);
 
         if (response == null) throw new BlockNotFoundException();
 
@@ -44,14 +46,15 @@ public class BlockController {
 
     @GetMapping("/block/{block}")
     public BlockDTO respondBlock(@PathVariable("block") Long blockHeight) {
-        BlockDTO response = blockStore.getBlock(blockHeight);
-
+        BlockDTO response;
+        Block b = blockStore.getBlock(blockHeight);
+        response = BlockDTO.toDTO(b);
         if (response == null) throw new BlockNotFoundException();
 
         return response;
     }
 
-    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Block not found")  // 404
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Block not found")  // 404
     public class BlockNotFoundException extends RuntimeException {
         // ...
     }

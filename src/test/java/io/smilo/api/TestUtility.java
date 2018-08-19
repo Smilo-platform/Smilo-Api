@@ -17,16 +17,17 @@
 
 package io.smilo.api;
 
-import io.smilo.api.block.Block;
-import io.smilo.api.block.BlockParser;
-import io.smilo.api.block.BlockStore;
 import io.smilo.api.block.data.BlockDataParser;
-import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.block.data.transaction.TransactionOutput;
-import io.smilo.api.block.data.transaction.TransactionParser;
-import io.smilo.api.peer.Peer;
+import io.smilo.api.peer.MockPeer;
 import io.smilo.api.peer.PeerBuilder;
-import io.smilo.api.peer.payloadhandler.BlockHandler;
+import io.smilo.commons.block.Block;
+import io.smilo.commons.block.BlockParser;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.block.data.transaction.TransactionOutput;
+import io.smilo.commons.block.data.transaction.TransactionParser;
+import io.smilo.commons.peer.IPeer;
+import io.smilo.commons.peer.payloadhandler.BlockHandler;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -119,7 +120,7 @@ public class TestUtility {
 
 
 
-        Peer peer = peerBuilder.peer_ready().save();
+        MockPeer peer = peerBuilder.peer_ready().save();
         List<String> parts = new ArrayList<>();
         parts.add("BLOCK");
         parts.add(BlockDataParser.encode(blockParser.serialize(genesis)));

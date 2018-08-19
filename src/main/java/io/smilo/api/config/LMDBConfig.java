@@ -17,8 +17,8 @@
 
 package io.smilo.api.config;
 
-import io.smilo.api.db.LMDBStore;
-import io.smilo.api.db.Store;
+import io.smilo.commons.db.LMDBStore;
+import io.smilo.commons.db.Store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

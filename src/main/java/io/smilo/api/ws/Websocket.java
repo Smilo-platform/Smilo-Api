@@ -17,11 +17,11 @@
 
 package io.smilo.api.ws;
 
-import io.smilo.api.block.Block;
-import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
+import io.smilo.commons.block.Block;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.block.data.transaction.TransactionOutput;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;

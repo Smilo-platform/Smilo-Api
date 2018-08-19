@@ -18,7 +18,7 @@
 package io.smilo.api.address;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smilo.api.db.Store;
+import io.smilo.commons.db.Store;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +54,7 @@ public class AddressStore {
     public Address findOrCreate(String findAddress) {
         AddressDTO result = getByAddress(findAddress);
 
-        if (result == null){
+        if (result == null) {
             Map<String, BigInteger> balances = new HashMap<>();
             balances.put("000x00123", BigInteger.ZERO);
             Address address = new Address(findAddress, balances, -1);
@@ -67,38 +67,31 @@ public class AddressStore {
 
     /**
      * Writes Address to file.
+     *
      * @param address account to save
      */
     public void writeToFile(Address address) {
-        final ByteBuffer key = allocateDirect(64);
-        final ByteBuffer val = allocateDirect(10000);
-
         try {
             AddressDTO dto = AddressDTO.toDTO(address);
-            byte[] bytes = dataMapper.writeValueAsBytes(dto);
-
-            key.put(address.getAddress().getBytes(UTF_8)).flip();
-            val.put(bytes).flip();
-            store.put(COLLECTION_NAME, key, val);
+            store.put(COLLECTION_NAME, address.getAddress().getBytes(UTF_8), dataMapper.writeValueAsBytes(dto));
         } catch (Exception e) {
             LOGGER.error("Unable to convert address to byte array " + e);
         }
     }
 
     public AddressDTO getByAddress(String address) {
-        if(address == null) {
+        if (address == null) {
             return null;
         }
         final ByteBuffer key = allocateDirect(64);
-
+        byte[] raw;
         try {
-            key.put(address.getBytes(UTF_8)).flip();
+            raw = store.get(COLLECTION_NAME, address.getBytes(UTF_8));
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Unsupported Encoding error." + e);
+            return null;
         }
-
-        byte[] raw = store.get(COLLECTION_NAME, key);
-        AddressDTO result = null;
+        AddressDTO result;
         try {
             result = dataMapper.readValue(raw, AddressDTO.class);
         } catch (IOException e) {

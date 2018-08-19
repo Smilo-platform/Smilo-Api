@@ -18,17 +18,14 @@
 package io.smilo.api.rest.service;
 
 import io.smilo.commons.block.AddResultType;
-import io.smilo.api.block.data.AddBlockDataResult;
-import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.block.data.transaction.TransactionStore;
-import io.smilo.api.peer.PeerClient;
-import io.smilo.api.peer.PeerSender;
-import io.smilo.api.peer.payloadhandler.PayloadType;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
 import io.smilo.api.rest.models.PostTransactionResult;
 import io.smilo.api.rest.models.TransactionList;
+import io.smilo.commons.block.data.AddBlockDataResult;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.peer.PeerSender;
+import io.smilo.commons.pendingpool.PendingBlockDataPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

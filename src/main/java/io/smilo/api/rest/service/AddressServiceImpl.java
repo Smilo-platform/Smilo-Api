@@ -1,13 +1,11 @@
 package io.smilo.api.rest.service;
 
-import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressDTO;
 import io.smilo.api.address.AddressStore;
-import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.block.data.transaction.TransactionDTO;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
 import io.smilo.api.rest.models.TransactionList;
+import io.smilo.commons.pendingpool.PendingBlockDataPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -17,18 +17,12 @@
 
 package io.smilo.api.rest;
 
-import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressDTO;
-import io.smilo.api.address.AddressStore;
-import io.smilo.api.block.data.transaction.Transaction;
-import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.rest.models.TransactionList;
 import io.smilo.api.rest.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 public class AddressController {
