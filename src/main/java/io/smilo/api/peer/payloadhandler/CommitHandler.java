@@ -18,7 +18,6 @@
 package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.commons.peer.IPeer;
-import io.smilo.commons.peer.Peer;
 import io.smilo.commons.peer.payloadhandler.BlockHandler;
 import io.smilo.commons.peer.payloadhandler.PayloadHandler;
 import io.smilo.commons.peer.payloadhandler.PayloadType;
