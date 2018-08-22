@@ -59,7 +59,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDTO get(String transactionHash) {
-        TransactionDTO transaction = transactionStore.getTransaction(transactionHash);
+        TransactionDTO transaction = transactionStore.getTransactionByID(transactionHash);
 
         if(transaction == null) {
             // Transaction could not be found in the database.

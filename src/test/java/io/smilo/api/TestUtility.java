@@ -19,6 +19,7 @@ package io.smilo.api;
 import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.peer.MockPeer;
 import io.smilo.api.peer.PeerBuilder;
+import io.smilo.api.peer.payloadhandler.sport.NetworkState;
 import io.smilo.commons.block.Block;
 import io.smilo.commons.block.BlockParser;
 import io.smilo.commons.block.BlockStore;
@@ -28,11 +29,7 @@ import io.smilo.commons.block.data.transaction.TransactionParser;
 import io.smilo.commons.block.genesis.GenesisLoader;
 import io.smilo.commons.peer.PeerClient;
 import io.smilo.commons.peer.PeerStore;
-import io.smilo.commons.peer.network.NetworkConsensus;
-import io.smilo.commons.peer.network.link.NetworkLinker;
 import io.smilo.commons.peer.payloadhandler.BlockHandler;
-import io.smilo.commons.peer.sport.NetworkState;
-import io.smilo.commons.peer.sport.SportState;
 import io.smilo.commons.pendingpool.PendingBlockDataPool;
 import io.smilo.commons.db.Store;
 import io.smilo.commons.ledger.AddressManager;
@@ -48,13 +45,14 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
 
+
 @Component
 public class TestUtility {
 
     @Value("${WALLET_FILE:wallet_test.keys}")
     private String walletFileName;
 
-    @Value("${DB_FOLDER:database}")
+    @Value("${DB_FOLDER:database_test}")
     private String databaseDirName;
 
     @Autowired
@@ -69,8 +67,8 @@ public class TestUtility {
     @Autowired
     private GenesisLoader genesis;
 
-    @Autowired
-    private SportState sportState;
+//    @Autowired
+//    private SportState sportState;
 
     @Autowired
     private PendingBlockDataPool pendingBlockDataPool;
@@ -90,11 +88,11 @@ public class TestUtility {
     @Autowired
     private NetworkState networkState;
 
-    @Autowired
-    private NetworkLinker networkLinker;
+//    @Autowired
+//    private NetworkLinker networkLinker;
 
-    @Autowired
-    private NetworkConsensus networkConsensus;
+//    @Autowired
+//    private NetworkConsensus networkConsensus;
 
     @Autowired
     private BlockHandler blockHandler;
@@ -145,7 +143,7 @@ public class TestUtility {
 
         genesis.loadGenesis();
 
-        sportState.initialize(addressManager.getDefaultAddress());
+//        sportState.initialize(addressManager.getDefaultAddress());
     }
 
     /**
@@ -157,7 +155,7 @@ public class TestUtility {
         pendingBlockDataPool.getPendingBlockData().clear();
         ReflectionTestUtils.setField(blockStore, "chains", new ArrayList<>());
         peerStore.clear();
-        sportState.reset();
+//        sportState.reset();
         ledgerManager.getPendingTransactions().clear();
         ledgerStore.clearAccounts();
         ReflectionTestUtils.setField(peerClient, "pendingPeers", new HashSet<>());
@@ -165,8 +163,8 @@ public class TestUtility {
         store.initializeCollection("block");
         store.initializeCollection("account");
         ReflectionTestUtils.setField(networkState, "networks", new HashSet<>());
-        ReflectionTestUtils.setField(networkLinker, "networks", new ArrayList<>());
-        ReflectionTestUtils.setField(networkConsensus, "approvedNodes", new HashMap<>());
+//        ReflectionTestUtils.setField(networkLinker, "networks", new ArrayList<>());
+//        ReflectionTestUtils.setField(networkConsensus, "approvedNodes", new HashMap<>());
     }
 
     private void createFolders() {

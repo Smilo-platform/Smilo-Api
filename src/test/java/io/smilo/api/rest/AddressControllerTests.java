@@ -31,7 +31,7 @@ public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToAddressController() throws Exception {
-        testUtility.addBlockZero();
+//        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/address/S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
@@ -42,7 +42,7 @@ public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn404WhenSendingRequestToAddressControllerIfNotExist() throws Exception {
-        testUtility.addBlockZero();
+//        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/address/ETm9QUJLVdJkTqRojTNqswmeAQGaofojJJ"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

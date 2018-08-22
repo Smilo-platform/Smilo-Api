@@ -34,7 +34,7 @@ import java.util.List;
 public class TransactionStore {
     private static final Logger LOGGER = Logger.getLogger(TransactionStore.class);
     private static final String SORTED_COLLECTION_NAME = "transaction-hash-sorted";
-    private static final String COLLECTION_NAME = "transaction";
+    private static final String TRANSACTION_TABLE = "transaction";
 
     private final Store store;
     private final ObjectMapper dataMapper;
@@ -44,7 +44,7 @@ public class TransactionStore {
         this.dataMapper = dataMapper;
 
         store.initializeCollection(SORTED_COLLECTION_NAME);
-        store.initializeCollection(COLLECTION_NAME);
+        store.initializeCollection(TRANSACTION_TABLE);
     }
 
     /**
@@ -73,7 +73,7 @@ public class TransactionStore {
             byte[] valueBytes = dataMapper.writeValueAsBytes(dto);
 
             // Write to non-sorted database
-            store.put(COLLECTION_NAME, keyBytes, valueBytes);
+            store.put(TRANSACTION_TABLE, keyBytes, valueBytes);
         } catch (Exception ex) {
             LOGGER.error("Unable to convert transaction to byte array " + ex);
             return;
@@ -112,7 +112,7 @@ public class TransactionStore {
      * @return
      */
     public long getTransactionCount() {
-        return store.getEntries(COLLECTION_NAME);
+        return store.getEntries(TRANSACTION_TABLE);
     }
 
     public List<TransactionDTO> getTransactions(long skip, long take, boolean isDescending) {
@@ -130,7 +130,7 @@ public class TransactionStore {
         // Retrieve transactions
         List<TransactionDTO> transactions = new ArrayList<>();
         for (String dataHash : transactionHashes) {
-            transactions.add(getTransaction(dataHash));
+            transactions.add(getTransactionByID(dataHash));
         }
 
         return transactions;
@@ -142,17 +142,17 @@ public class TransactionStore {
      * @param id The id of the Transaction. This is equal to the data hash.
      * @return
      */
-    public TransactionDTO getTransaction(String id) {
+    public TransactionDTO getTransactionByID(String id) {
         byte[] idBytes = id.getBytes();
-        ByteBuffer keyBuffer = ByteBuffer.allocateDirect(idBytes.length);
-        keyBuffer.put(idBytes).flip();
-
-        byte[] rawTransaction = store.getAPI(COLLECTION_NAME, keyBuffer);
+        byte[] rawTransaction = store.get(TRANSACTION_TABLE, idBytes);
+        if (rawTransaction == null) {
+            return null;
+        }
         TransactionDTO dto;
         try {
             dto = dataMapper.readValue(rawTransaction, TransactionDTO.class);
         } catch (IOException ex) {
-            LOGGER.error("Unable to convert data to TransactionDTO " + ex);
+            LOGGER.error("Unable getTransactionByID " + id, ex);
 
             return null;
         }

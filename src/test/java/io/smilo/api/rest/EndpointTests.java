@@ -49,7 +49,7 @@ public class EndpointTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenRequestTxToTxController() throws Exception {
-        testUtility.addBlockZero();
+//        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/tx/7E6F401FFFD55A1AF05E666D7CF1CD5B38628D3E6FC0CFB9935E82D9BA5329B3"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

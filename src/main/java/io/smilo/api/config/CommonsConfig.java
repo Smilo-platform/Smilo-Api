@@ -7,7 +7,7 @@ import io.smilo.commons.db.Store;
 import io.smilo.commons.ledger.AddressManager;
 import io.smilo.commons.peer.PeerEncoder;
 import io.smilo.commons.peer.payloadhandler.*;
-import io.smilo.commons.peer.sport.NetworkState;
+import io.smilo.commons.peer.sport.INetworkState;
 import io.smilo.commons.pendingpool.PendingBlockDataPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,12 +34,12 @@ public class CommonsConfig {
 
 
     @Bean
-    public BlockHandler blockHandler(SmiloChainService smiloChainService, BlockParser blockParser, NetworkState networkState) {
+    public BlockHandler blockHandler(SmiloChainService smiloChainService, BlockParser blockParser, INetworkState networkState) {
         return new BlockHandler(smiloChainService, blockParser, networkState);
     }
 
     @Bean
-    public NetworkStateHandler networkStateHandler(NetworkState networkState) {
+    public NetworkStateHandler networkStateHandler(INetworkState networkState) {
         return new NetworkStateHandler(networkState);
     }
 

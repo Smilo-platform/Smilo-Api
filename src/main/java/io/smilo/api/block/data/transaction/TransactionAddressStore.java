@@ -60,7 +60,7 @@ public class TransactionAddressStore {
 
         // For each raw transaction hash retrieve the transaction
         for(byte[] transactionHashBytes : values) {
-            transactions.add(transactionStore.getTransaction(new String(transactionHashBytes, StandardCharsets.UTF_8)));
+            transactions.add(transactionStore.getTransactionByID(new String(transactionHashBytes, StandardCharsets.UTF_8)));
         }
 
         return transactions;

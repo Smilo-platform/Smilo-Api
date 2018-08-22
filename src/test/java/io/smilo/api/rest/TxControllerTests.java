@@ -15,7 +15,7 @@ public class TxControllerTests extends AbstractWebSpringTest {
 
     @Before
     public void initialize() {
-        testUtility.addBlockZero();
+//        testUtility.addBlockZero();
     }
 
     @Test

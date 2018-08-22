@@ -33,7 +33,7 @@ public class BlockControllerTests extends AbstractWebSpringTest {
 
     @Before
     public void prepareBlock(){
-        testUtility.addBlockZero();
+//        testUtility.addBlockZero();
     }
 
     @Test

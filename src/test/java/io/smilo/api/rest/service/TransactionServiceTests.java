@@ -88,7 +88,7 @@ public class TransactionServiceTests {
         TransactionDTO transaction = createDummyTransactionDTO();
 
         Mockito.when(
-                transactionStoreMock.getTransaction("DataHash")
+                transactionStoreMock.getTransactionByID("DataHash")
         ).thenReturn(transaction);
 
         Assert.assertEquals(
@@ -103,7 +103,7 @@ public class TransactionServiceTests {
 
         // Mock store returns null, should trigger a call to the pending pool
         Mockito.when(
-                transactionStoreMock.getTransaction("DataHash")
+                transactionStoreMock.getTransactionByID("DataHash")
         ).thenReturn(null);
 
         Mockito.when(

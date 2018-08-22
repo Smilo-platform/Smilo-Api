@@ -1,6 +1,6 @@
 COMPANY=smilo
 AUTHOR=Elkan Roelen
-NAME=api
+NAME=smilo-api
 PORT=8888
 VERSION=latest
 FULLDOCKERNAME=$(COMPANY)/$(NAME):$(VERSION)
@@ -32,3 +32,6 @@ all: build clean start logs
 
 logs:
 	docker logs -f $(NAME)
+
+run:
+	mvn spring-boot:run
