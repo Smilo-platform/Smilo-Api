@@ -16,6 +16,8 @@ build-skip:
 
 mvn:
 	mvn clean install
+test:
+	mvn test
 
 stop:
 	docker stop -t 0 $(NAME)

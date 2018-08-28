@@ -19,30 +19,36 @@ package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
 import io.smilo.api.TestUtility;
+import io.smilo.api.address.AddressStore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.math.BigInteger;
 
 public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Autowired
     private TestUtility testUtility;
 
+    @Autowired
+    private AddressStore addressStore;
+
     @Test
     public void shouldReturn200WhenSendingRequestToAddressController() throws Exception {
-//        testUtility.addBlockZero();
+        addressStore.findOrCreate("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR");
+
         this.webClient.perform(MockMvcRequestBuilders.get("/address/S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").value(200000000))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(1));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").value(BigInteger.ZERO))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(-1));
     }
 
     @Test
     public void shouldReturn404WhenSendingRequestToAddressControllerIfNotExist() throws Exception {
-//        testUtility.addBlockZero();
         this.webClient.perform(MockMvcRequestBuilders.get("/address/ETm9QUJLVdJkTqRojTNqswmeAQGaofojJJ"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

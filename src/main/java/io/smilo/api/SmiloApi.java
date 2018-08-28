@@ -60,7 +60,7 @@ public class SmiloApi {
          * - Create Peer connection (as a client) to the Smilo nodes
          * - Receive blockHeight of nodes
          * - Retrieve missing blocks
-         *     - All recieved blocks are valid blocks (APPROVED by the chain), no check is currently needed.
+         *     - All received blocks are valid blocks (APPROVED by the chain), no check is currently needed.
          * - Parse blocks into NoSQL DB (LMDB)
          *
          */

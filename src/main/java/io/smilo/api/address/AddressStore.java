@@ -83,20 +83,21 @@ public class AddressStore {
         if (address == null) {
             return null;
         }
-        final ByteBuffer key = allocateDirect(64);
         byte[] raw;
         try {
             raw = store.get(COLLECTION_NAME, address.getBytes(UTF_8));
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Unsupported Encoding error." + e);
+            LOGGER.error("Unsupported Encoding error.", e);
             return null;
         }
-        AddressDTO result;
+        if (raw == null){
+            return null;
+        }
+        AddressDTO result = null;
         try {
             result = dataMapper.readValue(raw, AddressDTO.class);
         } catch (IOException e) {
-            LOGGER.debug("Unable to convert byte array to address" + e);
-            return null;
+            LOGGER.debug("getByAddress, Unable to convert byte[] to AddressDTO ", e);
         }
 
         return result;
