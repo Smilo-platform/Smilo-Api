@@ -28,15 +28,15 @@ import java.util.List;
 @Component
 public class CommitHandler implements PayloadHandler {
 
-    private final BlockHandler blockhandler;
+    private final BlockHandlerAPI blockHandlerAPI;
 
-    public CommitHandler(BlockHandler blockhandler) {
-        this.blockhandler = blockhandler;
+    public CommitHandler(BlockHandlerAPI blockHandlerAPI) {
+        this.blockHandlerAPI = blockHandlerAPI;
     }
 
     @Override
     public void handlePeerPayload(List<String> parts, IPeer peer) {
-        blockhandler.handlePeerPayload(parts, peer);
+        blockHandlerAPI.handlePeerPayload(parts, peer);
     }
 
     @Override

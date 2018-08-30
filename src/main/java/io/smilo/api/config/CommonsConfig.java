@@ -1,8 +1,16 @@
 package io.smilo.api.config;
 
+import io.smilo.api.address.AddressStore;
+import io.smilo.api.block.BlockStoreAPI;
+import io.smilo.api.block.data.transaction.TransactionAddressStore;
+import io.smilo.api.block.data.transaction.TransactionStore;
+import io.smilo.api.cache.BlockCache;
+import io.smilo.api.cache.BlockDataCache;
+import io.smilo.api.peer.payloadhandler.BlockHandlerAPI;
+import io.smilo.api.peer.payloadhandler.sport.NetworkState;
+import io.smilo.api.ws.Websocket;
 import io.smilo.commons.block.BlockParser;
 import io.smilo.commons.block.BlockStore;
-import io.smilo.commons.block.SmiloChainService;
 import io.smilo.commons.db.Store;
 import io.smilo.commons.ledger.AddressManager;
 import io.smilo.commons.peer.PeerEncoder;
@@ -31,11 +39,28 @@ public class CommonsConfig {
     }
 
 
-
-
     @Bean
-    public BlockHandler blockHandler(SmiloChainService smiloChainService, BlockParser blockParser, INetworkState networkState) {
-        return new BlockHandler(smiloChainService, blockParser, networkState);
+    public BlockHandlerAPI blockHandlerAPI(PendingBlockDataPool pendingBlockDataPool,
+                                        BlockParser blockParser,
+                                        BlockStoreAPI blockStore,
+                                        NetworkState networkState,
+                                        Websocket websocket,
+                                        BlockCache blockCache,
+                                        BlockDataCache blockDataCache,
+                                        TransactionStore transactionStore,
+                                        AddressStore addressStore,
+                                        TransactionAddressStore transactionAddressStore) {
+        return new BlockHandlerAPI(
+                pendingBlockDataPool,
+                blockParser,
+                blockStore,
+                networkState,
+                websocket,
+                blockCache,
+                blockDataCache,
+                transactionStore,
+                addressStore,
+                transactionAddressStore);
     }
 
     @Bean

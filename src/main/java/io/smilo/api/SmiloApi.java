@@ -17,7 +17,7 @@
 
 package io.smilo.api;
 
-import io.smilo.api.block.APIBlockStore;
+import io.smilo.api.block.BlockStoreAPI;
 import io.smilo.commons.peer.PeerClient;
 import io.smilo.commons.peer.PeerReceiver;
 import org.apache.log4j.Logger;
@@ -32,13 +32,13 @@ public class SmiloApi {
     private static final Logger LOGGER = Logger.getLogger(SmiloApi.class);
     private final PeerReceiver peerReceiver;
     private final PeerClient peerClient;
-    private final APIBlockStore blockStore;
+    private final BlockStoreAPI blockStore;
     private final String version;
 
     public SmiloApi(@Value("${VERSION:prototype}") String version,
                     PeerReceiver peerReceiver,
                     PeerClient peerClient,
-                    APIBlockStore blockStore) {
+                    BlockStoreAPI blockStore) {
         this.version = version;
         this.peerReceiver = peerReceiver;
         this.peerClient = peerClient;

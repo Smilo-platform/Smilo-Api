@@ -9,8 +9,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class TxControllerTests extends AbstractWebSpringTest {
-    @Autowired
-    private TestUtility testUtility;
 
     @Before
     public void initialize() {

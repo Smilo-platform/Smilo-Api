@@ -42,13 +42,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public abstract class AbstractSpringTest {
 
     @Autowired
-    private TestUtility testUtility;
+    public TestUtility testUtility;
 
     @Value("${local.server.port}")
     public int port;
 
     @Before
-    public void cleanUpFiles() {
+    public void regenerateFiles() {
         testUtility.initialize();
     }
 }
