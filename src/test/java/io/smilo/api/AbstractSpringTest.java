@@ -42,7 +42,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public abstract class AbstractSpringTest {
 
     @Autowired
-    public TestUtility testUtility;
+    private TestUtility testUtility;
 
     @Value("${local.server.port}")
     public int port;
