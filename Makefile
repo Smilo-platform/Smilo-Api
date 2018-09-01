@@ -36,6 +36,10 @@ cleanrestart: clean start
 start:
 	docker run -d --name=$(NAME) -h $(NAME) -p $(PORT):8080 $(FULLDOCKERNAME)
 
+startlog:
+	docker run -it --name=$(NAME) -h $(NAME) -p $(PORT):8080 --net $(COMPANY) $(FULLDOCKERNAME)
+
+
 all: build clean start logs
 
 logs:
