@@ -40,6 +40,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
@@ -90,7 +91,13 @@ public class WsConnectionTest {
     public void test2ShouldReceiveGenesisBlockBroadcast(){
         testUtility.initialize();
 
+        LOGGER.info("Loading genesis block...");
+
         Block blockgenesis = genesis.loadGenesis();
+
+        assertNotNull("Genesis block not loaded", blockgenesis);
+
+        LOGGER.info("Genesis block loaded: " + blockgenesis);
 
         JSONObject jsonObject = new Websocket().generateBlockObject(blockgenesis);
 
