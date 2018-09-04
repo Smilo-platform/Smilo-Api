@@ -17,37 +17,89 @@
 
 package io.smilo.api.websocket;
 
-import io.smilo.api.AbstractSpringTest;
+import io.smilo.api.Application;
+import io.smilo.api.StableTests;
+import io.smilo.api.TestConfig;
+import io.smilo.api.TestUtility;
+import io.smilo.api.ws.Websocket;
+import io.smilo.commons.block.Block;
+import io.smilo.commons.block.genesis.GenesisLoader;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
-public class WsConnectionTest extends AbstractSpringTest {
+@FixMethodOrder(NAME_ASCENDING)
+@SpringBootTest(classes = {Application.class, TestConfig.class}, webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"test", "local"})
+@Category(StableTests.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+public class WsConnectionTest {
 
     private static final Logger LOGGER = Logger.getLogger(WsConnectionTest.class);
 
-    @Test
-    public void testConnectToWs() {
+    @Autowired
+    private TestUtility testUtility;
+
+    private WebsocketClientEndpoint clientEndPoint;
+
+    @Autowired
+    private GenesisLoader genesis;
+
+    @Value("${local.server.port}")
+    public int port;
+
+    @Before
+    public void initWsConnectionTest() {
+
+        LOGGER.info("Connecting to: ws://localhost:" + port + "/websocket");
         try {
             // open websocket
-            LOGGER.info("Connecting to: ws://localhost:" + port + "/websocket");
-            final WebsocketClientEndpoint clientEndPoint = new WebsocketClientEndpoint(new URI("ws://localhost:"+port+"/websocket"));
+            clientEndPoint = new WebsocketClientEndpoint(new URI("ws://localhost:"+port+"/websocket"));
 
             // wait 0.1 seconds for messages from websocket
             Thread.sleep(100);
 
-            assertEquals("Welcome to the Smilo Api!", clientEndPoint.lastMessage());
-
-        } catch (InterruptedException ex) {
-            LOGGER.error("InterruptedException exception: " + ex.getMessage());
         } catch (URISyntaxException ex) {
             LOGGER.error("URISyntaxException exception: " + ex.getMessage());
+        } catch (InterruptedException ex) {
+            LOGGER.error("InterruptedException exception: " + ex.getMessage());
         }
-
     }
 
+    @Test()
+    public void test1ConnectToWs() {
+        assertEquals("Welcome to the Smilo Api!", clientEndPoint.lastMessage());
+    }
+
+    @Test()
+    public void test2ShouldReceiveGenesisBlockBroadcast(){
+        testUtility.initialize();
+
+        Block blockgenesis = genesis.loadGenesis();
+
+        JSONObject jsonObject = new Websocket().generateBlockObject(blockgenesis);
+
+        JSONObject obj = new JSONObject();
+        obj.remove("type");
+        obj.remove("data");
+        obj.put("data", jsonObject);
+        obj.put("type", "BLOCK");
+
+        assertEquals(obj.toJSONString(), clientEndPoint.lastMessage());
+    }
 }
