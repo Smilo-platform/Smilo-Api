@@ -95,9 +95,11 @@ public class WsConnectionTest {
 
         Block blockgenesis = genesis.loadGenesis();
 
-        assertNotNull("Genesis block not loaded", blockgenesis);
+        assertNotNull("Block not loaded", blockgenesis);
+        LOGGER.info("Block loaded: " + blockgenesis);
 
-        LOGGER.info("Genesis block loaded: " + blockgenesis);
+        assertNotNull(blockgenesis.getTransactions());
+        LOGGER.info("Transactions loaded: " + blockgenesis.getTransactions().size());
 
         JSONObject jsonObject = new Websocket().generateBlockObject(blockgenesis);
 
