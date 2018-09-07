@@ -18,7 +18,7 @@
 package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.api.ws.Websocket;
-import io.smilo.commons.block.data.BlockDataParser;
+import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.commons.block.data.transaction.Transaction;
 import io.smilo.commons.block.data.transaction.TransactionParser;
 import io.smilo.commons.peer.IPeer;
