@@ -21,9 +21,14 @@ import io.smilo.api.Application;
 import io.smilo.api.StableTests;
 import io.smilo.api.TestConfig;
 import io.smilo.api.TestUtility;
+import io.smilo.api.block.data.transaction.TransactionBuilder;
+import io.smilo.api.peer.MockPeer;
+import io.smilo.api.peer.PeerBuilder;
+import io.smilo.api.peer.payloadhandler.TransactionHandlerAPI;
 import io.smilo.api.ws.Websocket;
-import io.smilo.commons.block.Block;
-import io.smilo.commons.block.genesis.GenesisLoader;
+import io.smilo.commons.block.data.BlockDataParser;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.block.data.transaction.TransactionParser;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -39,8 +44,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
@@ -59,13 +65,23 @@ public class WsConnectionTest {
     private WebsocketClientEndpoint clientEndPoint;
 
     @Autowired
-    private GenesisLoader genesis;
+    private PeerBuilder peerBuilder;
+
+    @Autowired
+    private TransactionBuilder transactionBuilder;
+
+    @Autowired
+    private TransactionHandlerAPI transactionHandlerAPI;
+
+    @Autowired
+    private TransactionParser transactionParser;
 
     @Value("${local.server.port}")
     public int port;
 
     @Before
     public void initWsConnectionTest() {
+        testUtility.cleanUp();
 
         LOGGER.info("Connecting to: ws://localhost:" + port + "/websocket");
         try {
@@ -87,27 +103,23 @@ public class WsConnectionTest {
         assertEquals("Welcome to the Smilo Api!", clientEndPoint.lastMessage());
     }
 
-    @Test()
-    public void test2ShouldReceiveGenesisBlockBroadcast(){
-        testUtility.initialize();
+    @Test
+    public void test2BroadcastTransactionOverWebSocket() {
+        Transaction transaction = transactionBuilder.empty().construct();
 
-        LOGGER.info("Loading genesis block...");
+        MockPeer peer = peerBuilder.peer_ready().save();
+        List<String> parts = new ArrayList<>();
+        parts.add("TRANSACTION");
+        parts.add(BlockDataParser.encode(transactionParser.serialize(transaction)));
+        transactionHandlerAPI.handlePeerPayload(parts, peer);
 
-        Block blockgenesis = genesis.loadGenesis();
-
-        assertNotNull("Block not loaded", blockgenesis);
-        LOGGER.info("Block loaded: " + blockgenesis);
-
-        assertNotNull(blockgenesis.getTransactions());
-        LOGGER.info("Transactions loaded: " + blockgenesis.getTransactions().size());
-
-        JSONObject jsonObject = new Websocket().generateBlockObject(blockgenesis);
+        JSONObject jsonObject = new Websocket().generateTxObject(transaction);
 
         JSONObject obj = new JSONObject();
         obj.remove("type");
         obj.remove("data");
         obj.put("data", jsonObject);
-        obj.put("type", "BLOCK");
+        obj.put("type", "BLOCK_DATA");
 
         assertEquals(obj.toJSONString(), clientEndPoint.lastMessage());
     }
