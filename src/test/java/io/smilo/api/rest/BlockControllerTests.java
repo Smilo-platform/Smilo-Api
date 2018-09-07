@@ -18,23 +18,12 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
-import io.smilo.api.TestUtility;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class BlockControllerTests extends AbstractWebSpringTest {
-
-    @Autowired
-    private TestUtility testUtility;
-
-    @Before
-    public void prepareBlock(){
-        testUtility.addBlockZero();
-    }
 
     @Test
     public void shouldReturn200WhenSendingRequestToRootBlockController() throws Exception {

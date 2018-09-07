@@ -17,7 +17,7 @@
 
 package io.smilo.api.cache;
 
-import io.smilo.api.block.Block;
+import io.smilo.commons.block.Block;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;

@@ -17,12 +17,9 @@
 
 package io.smilo.api.rest.service;
 
-import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionDTO;
 import io.smilo.api.rest.models.PostTransactionResult;
 import io.smilo.api.rest.models.TransactionList;
-
-import java.util.List;
 
 public interface TransactionService {
     PostTransactionResult putTransaction(TransactionDTO transaction);

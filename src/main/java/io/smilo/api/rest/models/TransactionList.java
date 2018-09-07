@@ -1,6 +1,5 @@
 package io.smilo.api.rest.models;
 
-import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionDTO;
 
 import java.util.List;

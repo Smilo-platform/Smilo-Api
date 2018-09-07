@@ -1,39 +1,25 @@
-/*
- * Copyright (c) 2018 Smilo Platform B.V.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 package io.smilo.api.peer;
 
+import io.smilo.commons.peer.Capability;
+import io.smilo.commons.peer.PeerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Component
 public class PeerBuilder {
 
     @Autowired
-    private PeerStore peerStore;
-    @Autowired
     private PeerClient peerClient;
 
     public PeerBuildCommand blank() {
-        return new PeerBuildCommand().blank("localhost", 80);
+        return new PeerBuildCommand().blank("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR","localhost", 80);
     }
 
     public PeerBuildCommand blank(String hostname, int port) {
-        return new PeerBuildCommand().blank(hostname, port);
+        return new PeerBuildCommand().blank("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", hostname, port);
     }
 
     public PeerBuildCommand peer_ready() {
@@ -48,9 +34,15 @@ public class PeerBuilder {
 
         private MockPeer peer;
 
-        public PeerBuildCommand blank(String hostname, int port) {
-            this.peer = new MockPeer(hostname, port);
-            return this;
+        public PeerBuildCommand blank(String identifier, String hostname, int port) {
+            try {
+                InetAddress inetAddress = InetAddress.getByName(hostname);
+                this.peer = new MockPeer(identifier, inetAddress, port);
+                this.peer.setLastSeen(System.currentTimeMillis());
+                return this;
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public PeerBuildCommand withInitialized(boolean initialized) {
@@ -59,7 +51,11 @@ public class PeerBuilder {
         }
 
         public PeerBuildCommand withRemoteHost(String remoteHost) {
-            peer.setRemoteHost(remoteHost);
+            try {
+                peer.setAddress(InetAddress.getByName(remoteHost));
+            } catch (UnknownHostException e) {
+                throw new RuntimeException((e));
+            }
             return this;
         }
 
@@ -68,9 +64,28 @@ public class PeerBuilder {
             return this;
         }
 
+        public PeerBuildCommand withIdentifier(String identifier) {
+            peer.setIdentifier(identifier);
+            return this;
+        }
+
+        public PeerBuildCommand withLastSeen(Long timestamp) {
+            peer.setLastSeen(timestamp);
+            return this;
+        }
+
+        public PeerBuildCommand withCapability(String capability, byte version) {
+            Capability c = new Capability(capability, version);
+            return withCapability(c);
+        }
+
+        public PeerBuildCommand withCapability(Capability capability) {
+            peer.getCapabilities().add(capability);
+            return this;
+        }
+
         public MockPeer save() {
             peerClient.connectToPeer(peer);
-            peerStore.save(peer);
             return peer;
         }
 

@@ -19,6 +19,7 @@ package io.smilo.api.block.data.transaction;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.smilo.api.rest.serializers.BigIntegerSerializer;
+import io.smilo.commons.block.data.transaction.TransactionOutput;
 
 import java.math.BigInteger;
 

@@ -1,42 +1,124 @@
-/*
- * Copyright (c) 2018 Smilo Platform B.V.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 package io.smilo.api.peer;
 
+import io.smilo.commons.peer.Capability;
+import io.smilo.commons.peer.IPeer;
+
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MockPeer extends Peer {
+import static org.springframework.util.StringUtils.isEmpty;
+
+public class MockPeer implements IPeer {
 
     private List<String> writtenData;
-    private List<String> receivedData;
+    private Boolean initialized = false;
+    private List<Capability> capabilities;
 
-    public MockPeer(String host, int port)  {
+    private String identifier;
+
+    private InetAddress address;
+    private int remotePort;
+    private Long lastSeen;
+    private Long lastPing;
+    private int connectionAttempts;
+
+    public MockPeer(String identifier, InetAddress address, int port)  {
         this.writtenData = new ArrayList<>();
-        this.receivedData = new ArrayList<>();
         this.setInitialized(true);
-        super.setRemoteHost(host);
-        super.setRemotePort(port);
+        this.identifier = identifier;
+        this.address = address;
+        this.remotePort = port;
+        this.capabilities = new ArrayList<>();
     }
-
 
     @Override
     public void run() {
         setInitialized(true);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    @Override
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    @Override
+    public int getRemotePort() {
+        return remotePort;
+    }
+
+    @Override
+    public void setRemotePort(int remotePort) {
+        this.remotePort = remotePort;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    @Override
+    public Long getLastSeen() {
+        return lastSeen;
+    }
+
+    @Override
+    public void setLastSeen(Long lastSeen) {
+        this.lastSeen = lastSeen;
+        this.connectionAttempts = 0;
+    }
+
+    @Override
+    public Long getLastPing() {
+        return lastPing;
+    }
+
+    @Override
+    public void setLastPing(Long lastPing) {
+        this.lastPing = lastPing;
+    }
+
+    @Override
+    public int getConnectionAttempts() {
+        return connectionAttempts;
+    }
+
+    public void setAddress(InetAddress inetAddress) {
+        this.address = inetAddress;
+    }
+
+    @Override
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    @Override
+    public void addConnectionAttempt() {
+        this.connectionAttempts++;
+    }
+
+    @Override
+    public void closePeer() {
+    }
+
+    @Override
+    public List<Capability> getCapabilities() {
+        return capabilities;
+    }
+
+    @Override
+    public void setCapabilities(List<Capability> capabilities) {
+        this.capabilities = capabilities;
     }
 
     @Override
@@ -46,8 +128,8 @@ public class MockPeer extends Peer {
 
     @Override
     public List<String> readData() {
-        List<String> receivedData = new ArrayList<>(this.receivedData);
-        this.receivedData.clear();
+        List<String> receivedData = new ArrayList<>(this.writtenData);
+        this.writtenData.clear();
         return receivedData;
     }
 
@@ -55,11 +137,25 @@ public class MockPeer extends Peer {
         return writtenData;
     }
 
-    public void mockReceiveData(String data) {
-        this.receivedData.add(data);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        MockPeer peer = (MockPeer) o;
+        return !isEmpty(identifier) && identifier.equals(peer.identifier) || isEmpty(identifier) && !isEmpty(address) && address.equals(peer.address) && remotePort == peer.remotePort;
     }
 
-    public List<String> getReceivedData() {
-        return receivedData;
+    @Override
+    public int hashCode() {
+        int result = isEmpty(identifier) ? identifier.hashCode() : 0;
+        result = 31 * result + address.hashCode();
+        result = 31 * result + remotePort;
+        return result;
     }
+
 }

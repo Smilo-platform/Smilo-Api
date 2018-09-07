@@ -1,24 +1,31 @@
 package io.smilo.api.rest.service;
 
-import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressDTO;
 import io.smilo.api.address.AddressStore;
-import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
 import io.smilo.api.block.data.transaction.TransactionDTO;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
 import io.smilo.api.rest.models.TransactionList;
+import io.smilo.commons.ledger.Account;
+import io.smilo.commons.ledger.LedgerStore;
+import io.smilo.commons.pendingpool.PendingBlockDataPool;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("addressService")
 public class AddressServiceImpl implements AddressService {
+    private static final Logger LOGGER = Logger.getLogger(AddressServiceImpl.class);
+
     @Autowired
     AddressStore addressStore;
+
+    @Autowired
+    LedgerStore ledgerStore;
 
     @Autowired
     TransactionAddressStore transactionAddressStore;
@@ -28,7 +35,16 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDTO getAddress(String address) {
-        return addressStore.getByAddress(address);
+        Optional<Account> acc = ledgerStore.getByAddress(address);
+        try {
+            if (acc == null || acc.isPresent() || acc.get().getBalance() == null) {
+                LOGGER.debug("Account is empty ??? " + address);
+            }
+            return addressStore.getByAddress(address);
+        }catch (Exception e){
+            LOGGER.error(e);
+        }
+        return null;
     }
 
     @Override
@@ -53,9 +69,9 @@ public class AddressServiceImpl implements AddressService {
 
         // Pending transactions can only influence a call to the database if the order is set to descending.
         List<TransactionDTO> transactions = new ArrayList<>();
-        if(isDescending) {
+        if (isDescending) {
             // Do we need to make a database call?
-            if(skip + take > pendingCount) {
+            if (skip + take > pendingCount) {
                 // Database call needed, adjust skip and take based on amount of pending transactions.
                 transactions = transactionAddressStore.getTransactionsForAddress(
                         address,
@@ -63,33 +79,31 @@ public class AddressServiceImpl implements AddressService {
                         isDescending
                 );
             }
-        }
-        else {
+        } else {
             // If the order is ascending not all pending transactions might be added.
             transactions = transactionAddressStore.getTransactionsForAddress(address, skip, take, isDescending);
 
             long pendingTransactionsToTake = Math.max(take - transactions.size(), 0);
-            pendingTransactions = pendingTransactions.subList(0, (int)Math.min(pendingTransactionsToTake, pendingCount));
+            pendingTransactions = pendingTransactions.subList(0, (int) Math.min(pendingTransactionsToTake, pendingCount));
         }
 
         // Sort pending transactions so they are in the correct order (based on timestamp).
         pendingTransactions.sort((x, y) -> {
-            if(isDescending)
-                return (int)(y.getTimestamp() - x.getTimestamp());
+            if (isDescending)
+                return (int) (y.getTimestamp() - x.getTimestamp());
             else
-                return (int)(x.getTimestamp() - y.getTimestamp());
+                return (int) (x.getTimestamp() - y.getTimestamp());
         });
 
         // Merge database and pending together. If the order is descending the pending transactions will be added first.
         // If the order is ascending the pending transactions will be added last.
-        if(isDescending) {
+        if (isDescending) {
             pendingTransactions.addAll(transactions);
 
             // We assign pending transactions back to transactions
             // to make it easier in the return statement.
             transactions = pendingTransactions;
-        }
-        else
+        } else
             transactions.addAll(pendingTransactions);
 
         return new TransactionList(transactions, skip, take, count + pendingCount);

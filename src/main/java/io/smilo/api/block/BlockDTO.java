@@ -18,6 +18,7 @@
 package io.smilo.api.block;
 
 import io.smilo.api.block.data.transaction.TransactionDTO;
+import io.smilo.commons.block.Block;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,6 +119,9 @@ public class BlockDTO {
 
     public static BlockDTO toDTO(Block block) {
         BlockDTO dto = new BlockDTO();
+        if (block == null) {
+            return dto;
+        }
         dto.setTimestamp(block.getTimestamp());
         dto.setBlockNum(block.getBlockNum());
         dto.setPreviousBlockHash(block.getPreviousBlockHash());
@@ -132,6 +136,9 @@ public class BlockDTO {
 
     public static Block toBlock(BlockDTO blockDTO) {
         Block block = new Block();
+        if(blockDTO == null) {
+            return block;
+        }
         block.setTimestamp(blockDTO.getTimestamp());
         block.setBlockNum(blockDTO.getBlockNum());
         block.setPreviousBlockHash(blockDTO.getPreviousBlockHash());

@@ -1,7 +1,8 @@
 package io.smilo.api.block.data.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smilo.api.db.Store;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.db.Store;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +60,7 @@ public class TransactionAddressStore {
 
         // For each raw transaction hash retrieve the transaction
         for(byte[] transactionHashBytes : values) {
-            transactions.add(transactionStore.getTransaction(new String(transactionHashBytes, StandardCharsets.UTF_8)));
+            transactions.add(transactionStore.getTransactionByID(new String(transactionHashBytes, StandardCharsets.UTF_8)));
         }
 
         return transactions;

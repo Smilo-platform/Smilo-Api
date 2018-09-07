@@ -17,9 +17,9 @@
 
 package io.smilo.api;
 
-import io.smilo.api.block.BlockStore;
-import io.smilo.api.peer.PeerClient;
-import io.smilo.api.peer.PeerReceiver;
+import io.smilo.api.block.BlockStoreAPI;
+import io.smilo.commons.peer.PeerClient;
+import io.smilo.commons.peer.PeerReceiver;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,13 +32,13 @@ public class SmiloApi {
     private static final Logger LOGGER = Logger.getLogger(SmiloApi.class);
     private final PeerReceiver peerReceiver;
     private final PeerClient peerClient;
-    private final BlockStore blockStore;
+    private final BlockStoreAPI blockStore;
     private final String version;
 
     public SmiloApi(@Value("${VERSION:prototype}") String version,
                     PeerReceiver peerReceiver,
                     PeerClient peerClient,
-                    BlockStore blockStore) {
+                    BlockStoreAPI blockStore) {
         this.version = version;
         this.peerReceiver = peerReceiver;
         this.peerClient = peerClient;
@@ -60,7 +60,7 @@ public class SmiloApi {
          * - Create Peer connection (as a client) to the Smilo nodes
          * - Receive blockHeight of nodes
          * - Retrieve missing blocks
-         *     - All recieved blocks are valid blocks (APPROVED by the chain), no check is currently needed.
+         *     - All received blocks are valid blocks (APPROVED by the chain), no check is currently needed.
          * - Parse blocks into NoSQL DB (LMDB)
          *
          */

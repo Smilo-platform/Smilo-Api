@@ -19,31 +19,34 @@ package io.smilo.api.peer.payloadhandler;
 
 import io.smilo.api.address.Address;
 import io.smilo.api.address.AddressStore;
-import io.smilo.api.block.Block;
-import io.smilo.api.block.BlockParser;
-import io.smilo.api.block.BlockStore;
+import io.smilo.api.block.BlockStoreAPI;
 import io.smilo.api.block.data.BlockDataParser;
-import io.smilo.api.block.data.transaction.Transaction;
 import io.smilo.api.block.data.transaction.TransactionAddressStore;
-import io.smilo.api.block.data.transaction.TransactionOutput;
 import io.smilo.api.cache.BlockCache;
 import io.smilo.api.cache.BlockDataCache;
 import io.smilo.api.block.data.transaction.TransactionStore;
-import io.smilo.api.peer.NetworkState;
-import io.smilo.api.peer.Peer;
-import io.smilo.api.pendingpool.PendingBlockDataPool;
+import io.smilo.api.peer.payloadhandler.sport.NetworkState;
 import io.smilo.api.ws.Websocket;
+import io.smilo.commons.block.Block;
+import io.smilo.commons.block.BlockParser;
+import io.smilo.commons.block.BlockStore;
+import io.smilo.commons.block.data.transaction.Transaction;
+import io.smilo.commons.block.data.transaction.TransactionOutput;
+import io.smilo.commons.peer.IPeer;
+import io.smilo.commons.peer.payloadhandler.PayloadHandler;
+import io.smilo.commons.peer.payloadhandler.PayloadType;
+import io.smilo.commons.pendingpool.PendingBlockDataPool;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class BlockHandler implements PayloadHandler {
+public class BlockHandlerAPI implements PayloadHandler {
 
     private PendingBlockDataPool pendingBlockDataPool;
     private BlockParser blockParser;
-    private BlockStore blockStore;
+    private BlockStoreAPI blockStore;
     private TransactionStore transactionStore;
     private AddressStore addressStore;
     private NetworkState networkState;
@@ -52,19 +55,19 @@ public class BlockHandler implements PayloadHandler {
     private BlockDataCache blockDataCache;
     private TransactionAddressStore transactionAddressStore;
 
-    private static final Logger LOGGER = Logger.getLogger(BlockHandler.class);
+    private static final Logger LOGGER = Logger.getLogger(BlockHandlerAPI.class);
 
 
-    public BlockHandler(PendingBlockDataPool pendingBlockDataPool, 
-                        BlockParser blockParser, 
-                        BlockStore blockStore, 
-                        NetworkState networkState, 
-                        Websocket websocket, 
-                        BlockCache blockCache, 
-                        BlockDataCache blockDataCache,
-                        TransactionStore transactionStore,
-                        AddressStore addressStore,
-                        TransactionAddressStore transactionAddressStore) {
+    public BlockHandlerAPI(PendingBlockDataPool pendingBlockDataPool,
+                           BlockParser blockParser,
+                           BlockStoreAPI blockStore,
+                           NetworkState networkState,
+                           Websocket websocket,
+                           BlockCache blockCache,
+                           BlockDataCache blockDataCache,
+                           TransactionStore transactionStore,
+                           AddressStore addressStore,
+                           TransactionAddressStore transactionAddressStore) {
         this.pendingBlockDataPool = pendingBlockDataPool;
         this.blockParser = blockParser;
         this.blockStore = blockStore;
@@ -78,7 +81,7 @@ public class BlockHandler implements PayloadHandler {
     }
 
     @Override
-    public void handlePeerPayload(List<String> parts, Peer peer) {
+    public void handlePeerPayload(List<String> parts, IPeer peer) {
         byte[] byteArray = BlockDataParser.decode(parts.get(1));
         Block block = blockParser.deserialize(byteArray);
 
@@ -87,8 +90,8 @@ public class BlockHandler implements PayloadHandler {
         // Topblock = 1 (From network)
         // Last block = 1
         // Blockchain length equals new blocks BlockNum when this is the first next block
-        if ((blockStore.getLatestBlockHeight() +1) == block.getBlockNum() &&
-                blockStore.getLatestBlockHash().equals(block.getPreviousBlockHash())){
+        if ((blockStore.getLatestBlockHeight() + 1) == block.getBlockNum() &&
+                blockStore.getLatestBlockHash().equals(block.getPreviousBlockHash())) {
             // Add Block
             LOGGER.info("Previous Block Height: " + blockStore.getLatestBlockHeight());
             LOGGER.info("Add Block " + block.getBlockNum() + " to the database.");
@@ -102,7 +105,7 @@ public class BlockHandler implements PayloadHandler {
                 blockCache.addBlock(block);
                 websocket.sendBlock(block);
 
-                for (Transaction transaction : block.getTransactions()){
+                for (Transaction transaction : block.getTransactions()) {
                     blockDataCache.addTransaction(transaction);
                 }
 
@@ -113,7 +116,7 @@ public class BlockHandler implements PayloadHandler {
                 //Remove all transactions from the pendingTransactionPool that appear in the block
                 pendingBlockDataPool.removeTransactionsInBlock(block);
 
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("Writing block " + block.getBlockNum() + " to database failed!");
             }
 
@@ -121,15 +124,15 @@ public class BlockHandler implements PayloadHandler {
 
             networkState.updateCatchupMode();
 
-        } else if ((blockStore.getLatestBlockHeight() +1) < block.getBlockNum()){
+        } else if ((blockStore.getLatestBlockHeight() + 1) < block.getBlockNum()) {
             // Todo: put in a BlockQueue and parse later.
             LOGGER.info("This is a block from the future.. REQUEST_NET_STATE Needed.");
-            if(block.getBlockNum() > networkState.getTopBlock()){
-                networkState.setTopBlock(block.getBlockNum()+1);
+            if (block.getBlockNum() > networkState.getTopBlock()) {
+                networkState.setTopBlock(new Long(block.getBlockNum()).intValue() + 1);
             }
         } else if (blockStore.getLatestBlockHeight() == block.getBlockNum()) {
             LOGGER.debug("Just parsed block " + block.getBlockNum() + ". Dropping.");
-        } else if ((blockStore.getLatestBlockHeight()+1) > block.getBlockNum()) {
+        } else if ((blockStore.getLatestBlockHeight() + 1) > block.getBlockNum()) {
             LOGGER.info("Dr. Emmett Brown: You’ve got to come back with me!\n" +
                     "Marty McFly: Where?\n" +
                     "Dr. Emmett Brown: Back to the future!");
@@ -144,19 +147,19 @@ public class BlockHandler implements PayloadHandler {
     private void storeTransactions(List<Transaction> transactions, Block block) {
         // Order transactions by timestamp to ensure they are stored in the DB in the correct order
         transactions.sort((x, y) -> {
-            return (int)(x.getTimestamp() - y.getTimestamp());
+            return (int) (x.getTimestamp() - y.getTimestamp());
         });
 
-        for(Transaction transaction : transactions) {
+        for (Transaction transaction : transactions) {
             transactionStore.writeTransactionToFile(transaction, block);
 
             updateTransactionAddressBalance(transaction);
 
             // Link transaction to addresses
             this.transactionAddressStore.writeTransactionForAddress(transaction, transaction.getInputAddress());
-            for(TransactionOutput output : transaction.getTransactionOutputs()) {
+            for (TransactionOutput output : transaction.getTransactionOutputs()) {
                 // Make sure input address does not equal output address
-                if(!output.getOutputAddress().equals(transaction.getInputAddress())) {
+                if (!output.getOutputAddress().equals(transaction.getInputAddress())) {
                     this.transactionAddressStore.writeTransactionForAddress(transaction, output.getOutputAddress());
                 }
             }
@@ -177,7 +180,7 @@ public class BlockHandler implements PayloadHandler {
         addressStore.writeToFile(inputAddress);
 
         // Now update the outputs
-        for(TransactionOutput output : transaction.getTransactionOutputs()) {
+        for (TransactionOutput output : transaction.getTransactionOutputs()) {
             Address outputAddress = addressStore.findOrCreate(output.getOutputAddress());
 
             outputAddress.incrementBalance(transaction.getAssetId(), output.getOutputAmount());

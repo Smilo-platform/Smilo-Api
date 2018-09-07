@@ -19,7 +19,6 @@ package io.smilo.api.block.data;
 
 import org.apache.log4j.Logger;
 
-import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.util.Base64;
 

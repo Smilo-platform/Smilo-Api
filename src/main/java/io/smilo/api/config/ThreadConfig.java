@@ -20,7 +20,6 @@ package io.smilo.api.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.PreDestroy;
@@ -31,7 +30,7 @@ public class ThreadConfig {
     private ThreadPoolTaskExecutor taskExecutor;
     
     @Bean
-    public TaskExecutor threadPoolTaskExecutor(@Value("${THREADPOOL.CORESIZE:4}") int coreSize,
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor(@Value("${THREADPOOL.CORESIZE:4}") int coreSize,
                                                @Value("${THREADPOOL.MAXSIZE:4}") int maxSize) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(coreSize);

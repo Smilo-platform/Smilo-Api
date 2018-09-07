@@ -17,7 +17,7 @@
 
 package io.smilo.api.cache;
 
-import io.smilo.api.block.data.transaction.Transaction;
+import io.smilo.commons.block.data.transaction.Transaction;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 

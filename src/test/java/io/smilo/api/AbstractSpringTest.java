@@ -48,7 +48,7 @@ public abstract class AbstractSpringTest {
     public int port;
 
     @Before
-    public void cleanUpFiles() {
+    public void regenerateFiles() {
         testUtility.initialize();
     }
 }

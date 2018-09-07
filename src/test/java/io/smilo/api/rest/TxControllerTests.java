@@ -1,22 +1,11 @@
 package io.smilo.api.rest;
 
 import io.smilo.api.AbstractWebSpringTest;
-import io.smilo.api.TestUtility;
-import org.apache.commons.lang3.NotImplementedException;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class TxControllerTests extends AbstractWebSpringTest {
-    @Autowired
-    private TestUtility testUtility;
-
-    @Before
-    public void initialize() {
-        testUtility.addBlockZero();
-    }
 
     @Test
     public void shouldReturn404WhenRequestingUnknownTransaction() throws Exception {
