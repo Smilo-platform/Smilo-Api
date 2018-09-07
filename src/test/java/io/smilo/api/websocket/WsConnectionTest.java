@@ -26,7 +26,7 @@ import io.smilo.api.peer.MockPeer;
 import io.smilo.api.peer.PeerBuilder;
 import io.smilo.api.peer.payloadhandler.TransactionHandlerAPI;
 import io.smilo.api.ws.Websocket;
-import io.smilo.commons.block.data.BlockDataParser;
+import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.commons.block.data.transaction.Transaction;
 import io.smilo.commons.block.data.transaction.TransactionParser;
 import org.apache.log4j.Logger;

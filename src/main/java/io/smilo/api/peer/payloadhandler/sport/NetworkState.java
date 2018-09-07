@@ -88,7 +88,7 @@ public class NetworkState implements INetworkState {
         return topBlock;
     }
 
-    public void setTopBlock(long topBlock) {
+    public void setTopBlock(int topBlock) {
         this.topBlock = topBlock;
         updateCatchupMode();
     }
