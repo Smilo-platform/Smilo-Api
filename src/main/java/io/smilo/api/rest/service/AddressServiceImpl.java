@@ -37,7 +37,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressDTO getAddress(String address) {
         Optional<Account> acc = ledgerStore.getByAddress(address);
         try {
-            if (acc == null || acc.isPresent() || acc.get().getBalance() == null) {
+            if (acc == null || !acc.isPresent() || acc.get().getBalance() == null) {
                 LOGGER.debug("Account is empty ??? " + address);
             }
             return addressStore.getByAddress(address);
