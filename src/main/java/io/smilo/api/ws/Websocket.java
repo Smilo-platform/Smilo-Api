@@ -113,7 +113,7 @@ public class Websocket {
 
             return blockObject;
         }catch (Exception ex){
-            LOGGER.error("Failed generating block object", ex);
+            LOGGER.error("Failed generating block object");
             return null;
         }
     }

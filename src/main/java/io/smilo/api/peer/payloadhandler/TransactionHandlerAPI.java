@@ -17,14 +17,14 @@
 
 package io.smilo.api.peer.payloadhandler;
 
-import io.smilo.api.ws.Websocket;
 import io.smilo.api.block.data.BlockDataParser;
+import io.smilo.api.ws.Websocket;
 import io.smilo.commons.block.data.transaction.Transaction;
 import io.smilo.commons.block.data.transaction.TransactionParser;
 import io.smilo.commons.peer.IPeer;
 import io.smilo.commons.peer.payloadhandler.PayloadHandler;
 import io.smilo.commons.peer.payloadhandler.PayloadType;
-import org.apache.log4j.Logger;
+import io.smilo.commons.peer.payloadhandler.TransactionHandler;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,22 +32,23 @@ import java.util.List;
 @Component
 public class TransactionHandlerAPI implements PayloadHandler {
 
-    private TransactionParser transactionParser;
-    private Websocket websocket;
+    private final TransactionHandler transactionHandler;
+    private final TransactionParser transactionParser;
+    private final Websocket websocket;
 
-    private static final Logger LOGGER = Logger.getLogger(TransactionHandlerAPI.class);
-
-    public TransactionHandlerAPI(Websocket websocket, TransactionParser transactionParser) {
+    public TransactionHandlerAPI(Websocket websocket, TransactionParser transactionParser,
+                                 TransactionHandler transactionHandler) {
         this.websocket = websocket;
         this.transactionParser = transactionParser;
+        this.transactionHandler = transactionHandler;
     }
 
     @Override
     public void handlePeerPayload(List<String> parts, IPeer peer) {
+        transactionHandler.handlePeerPayload(parts, peer);
         byte[] byteArray = BlockDataParser.decode(parts.get(1));
         Transaction transaction = transactionParser.deserialize(byteArray);
-        LOGGER.info("Broadcasting to websocket: " + parts.get(1));
-        websocket.sendBlockData(transaction);
+        websocket.sendPendingBlockData(transaction);
     }
 
     @Override

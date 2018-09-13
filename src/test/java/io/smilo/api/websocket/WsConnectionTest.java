@@ -21,12 +21,12 @@ import io.smilo.api.Application;
 import io.smilo.api.StableTests;
 import io.smilo.api.TestConfig;
 import io.smilo.api.TestUtility;
+import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.api.block.data.transaction.TransactionBuilder;
 import io.smilo.api.peer.MockPeer;
 import io.smilo.api.peer.PeerBuilder;
 import io.smilo.api.peer.payloadhandler.TransactionHandlerAPI;
 import io.smilo.api.ws.Websocket;
-import io.smilo.api.block.data.BlockDataParser;
 import io.smilo.commons.block.data.transaction.Transaction;
 import io.smilo.commons.block.data.transaction.TransactionParser;
 import org.apache.log4j.Logger;
@@ -104,7 +104,7 @@ public class WsConnectionTest {
     }
 
     @Test
-    public void test2BroadcastTransactionOverWebSocket() {
+    public void test2BroadcastPendingTransactionOverWebSocket() {
         Transaction transaction = transactionBuilder.empty().construct();
 
         MockPeer peer = peerBuilder.peer_ready().save();
@@ -119,7 +119,7 @@ public class WsConnectionTest {
         obj.remove("type");
         obj.remove("data");
         obj.put("data", jsonObject);
-        obj.put("type", "BLOCK_DATA");
+        obj.put("type", "PENDING_BLOCK_DATA");
 
         assertEquals(obj.toJSONString(), clientEndPoint.lastMessage());
     }
