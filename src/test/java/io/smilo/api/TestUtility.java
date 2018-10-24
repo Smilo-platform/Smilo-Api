@@ -130,7 +130,7 @@ public class TestUtility {
         // This is a huge performance boost for the unit test suite
         privateKeys.clear();
         privateKeys.add(new AbstractMap.SimpleEntry<>(address, privateKey));
-        privateKeys.add(new AbstractMap.SimpleEntry<>("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR","BOdbzfoE9Za9a4cGQTpExBYw7mQNFo2B"));
+        privateKeys.add(new AbstractMap.SimpleEntry<>("1A6E14f1d34c1E1A4EF6C3226c05C10889E55732","Xxwhky8zbMdogAmecExz6M1WaAr9abAJ"));
 
         Block blockgenesis = genesis.loadGenesis();
 

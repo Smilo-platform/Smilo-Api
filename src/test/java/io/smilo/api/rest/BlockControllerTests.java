@@ -45,8 +45,8 @@ public class BlockControllerTests extends AbstractWebSpringTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").value(1530261926))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.blockNum").value(0))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.previousBlockHash").value("0000000000000000000000000000000000000000000000000000000000000000"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.blockHash").value("550CCC58D66FB748B59CEA8314E396545A2BCD7DCCD2CEA6FAAE29F64FBD356D"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.redeemAddress").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.blockHash").value("F96BD2EE2770B4CBD8BE49056DD1F88DC8F1CF462FAB142144214156EA0266AA"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.redeemAddress").value("18C379AC61A573459Dc6E6C2a5aDfFB86fe93a06"));
     }
 
     @Test
@@ -56,8 +56,8 @@ public class BlockControllerTests extends AbstractWebSpringTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").value(1530261926))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.blockNum").value(0))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.previousBlockHash").value("0000000000000000000000000000000000000000000000000000000000000000"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.blockHash").value("550CCC58D66FB748B59CEA8314E396545A2BCD7DCCD2CEA6FAAE29F64FBD356D"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.redeemAddress").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.blockHash").value("F96BD2EE2770B4CBD8BE49056DD1F88DC8F1CF462FAB142144214156EA0266AA"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.redeemAddress").value("18C379AC61A573459Dc6E6C2a5aDfFB86fe93a06"));
     }
 
     @Test

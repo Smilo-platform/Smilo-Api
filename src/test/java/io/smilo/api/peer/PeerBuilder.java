@@ -15,11 +15,11 @@ public class PeerBuilder {
     private PeerClient peerClient;
 
     public PeerBuildCommand blank() {
-        return new PeerBuildCommand().blank("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR","localhost", 80);
+        return new PeerBuildCommand().blank("1A6E14f1d34c1E1A4EF6C3226c05C10889E55732","localhost", 80);
     }
 
     public PeerBuildCommand blank(String hostname, int port) {
-        return new PeerBuildCommand().blank("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR", hostname, port);
+        return new PeerBuildCommand().blank("1A6E14f1d34c1E1A4EF6C3226c05C10889E55732", hostname, port);
     }
 
     public PeerBuildCommand peer_ready() {

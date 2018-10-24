@@ -28,3 +28,5 @@ database/
 smilo-api.iml
 target/
 writebuffer
+logs
+wallet.keys

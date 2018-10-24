@@ -31,9 +31,9 @@ public class AddressControllerTests extends AbstractWebSpringTest {
 
     @Test
     public void shouldReturn200WhenSendingRequestToAddressController() throws Exception {
-        this.webClient.perform(MockMvcRequestBuilders.get("/address/S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
+        this.webClient.perform(MockMvcRequestBuilders.get("/address/18C379AC61A573459Dc6E6C2a5aDfFB86fe93a06"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("S1RQ3ZVRQ2K42FTXDONQVFVX73Q37JHIDCSFAR"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("18C379AC61A573459Dc6E6C2a5aDfFB86fe93a06"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.balances.000x00123").value(200000000))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.signatureCount").value(1));

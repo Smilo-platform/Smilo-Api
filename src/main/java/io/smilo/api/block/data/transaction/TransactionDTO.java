@@ -37,6 +37,7 @@ public class TransactionDTO {
     private String inputAddress;
     @JsonSerialize(using = BigIntegerSerializer.class)
     private BigInteger fee;
+    private String extraData;
     private String signatureData;
     private Long signatureIndex;
     private String dataHash;
@@ -106,6 +107,14 @@ public class TransactionDTO {
         this.fee = fee;
     }
 
+    public String getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(String extraData) {
+        this.extraData = extraData;
+    }
+
     public String getSignatureData() {
         return signatureData;
     }
@@ -138,6 +147,7 @@ public class TransactionDTO {
         dto.setTimestamp(transaction.getTimestamp());
         dto.setInputAddress(transaction.getInputAddress());
         dto.setFee(transaction.getFee());
+        dto.setExtraData(transaction.getExtraData());
         dto.setSignatureData(transaction.getSignatureData());
         dto.setSignatureIndex(transaction.getSignatureIndex());
         dto.setDataHash(transaction.getDataHash());
@@ -152,6 +162,7 @@ public class TransactionDTO {
         transaction.setTimestamp(transactionDTO.getTimestamp());
         transaction.setInputAddress(transactionDTO.getInputAddress());
         transaction.setFee(transactionDTO.getFee());
+        transaction.setExtraData(transactionDTO.getExtraData());
         transaction.setSignatureData(transactionDTO.getSignatureData());
         transaction.setSignatureIndex(transactionDTO.getSignatureIndex());
         transaction.setDataHash(transactionDTO.getDataHash());
